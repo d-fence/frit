@@ -1,0 +1,17 @@
+#!/usr/bin/python
+import sys
+import fritutils.termout
+import fritcommands.init
+
+def mainFrit():
+    if len(sys.argv) < 2:
+        fritutils.termout.printWarning('No command was given')
+        sys.exit(1)
+    fritutils.noBadPath()
+    (command,args) = fritutils.getCommand(sys.argv[1:])
+    if command == 'init':
+        if not fritutils.isCwdFrit():
+            fritcommands.init.initCommand()
+
+if __name__ == '__main__':
+    mainFrit()
