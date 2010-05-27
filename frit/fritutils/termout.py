@@ -21,9 +21,9 @@ def hasColor():
 def smartprint(s,color):
     if hasColor():
         toPrint = "\033[95m" + COLORS[color] + s + "\033[0m"
-        print toPrint
+        print >> sys.stderr, toPrint
     else:
-        print s
+        print >> sys.stderr, s
 
 def printWarning(s):
     smartprint(s,'red')
