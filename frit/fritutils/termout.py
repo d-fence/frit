@@ -6,7 +6,7 @@ Various utilities for FRIT.
 
 import sys
 
-COLORS = { 'red' : "\033[91m" , 'green' : "\033[92m" }
+COLORS = { 'red' : "\033[31m" , 'green' : "\033[32m", 'yellow' : "\033[33m" }
 
 def hasColor():
     """
@@ -30,3 +30,9 @@ def printWarning(s):
 
 def printSuccess(s):
     smartprint(s,'green')
+    
+def printMessage(s):
+    smartprint(s,'yellow')
+    
+def printNormal(s):
+    print s

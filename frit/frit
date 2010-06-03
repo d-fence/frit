@@ -4,6 +4,9 @@ import os.path
 import configobj
 import fritutils.termout
 import fritcommands.init
+import fritcommands.mount
+import fritcommands.status
+from fritutils import fritobjects
 
 def mainFrit():
     # Check to see if a command was given.
@@ -16,9 +19,13 @@ def mainFrit():
     (command,args) = fritutils.getCommand(sys.argv[1:])
     # If the command is init, just do it
     if command == 'init':
+        # check to see if .frit already exists
         if not fritutils.isCwdFrit():
             fritcommands.init.initCommand()
             sys.exit(0)
+        else:
+            fritutils.termout.printWarning("A .frit directory already exists.")
+            sys.exit(1)
     # The command is not init, so we should find a config file
     if os.path.exists('.frit/config'):
         try:
@@ -27,7 +34,21 @@ def mainFrit():
             fritutils.termout.printWarning('The config file contains errors.')
             sys.exit(1)
     # Here we try to map evidences from config file to Evidence objects
+    Evidences = fritobjects.evidencesFromConfig(fritConfig)
 
+    # user isued a mount command
+    if command == 'mount':
+        fritcommands.mount.fullMount(Evidences)
+        sys.exit(0)
+    
+    if command == 'umount':
+        fritcommands.mount.fullUmount(Evidences)
+        sys.exit(0)
+        
+    if command == 'status':
+        fritcommands.status.status(Evidences)
+        sys.exit(0)
+    
     # Obviously, the given command was not found
     fritutils.termout.printWarning('The "%s" command was not found.' % command)
 if __name__ == '__main__':
