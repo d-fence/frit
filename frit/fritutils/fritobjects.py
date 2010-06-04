@@ -219,8 +219,6 @@ class AffEvidence(Evidence):
         locker is the intermediate extension given to the lockfile.
         reason is the comment that will be inserted in the lock file.
         """
-        # we populate the rawImage path to the filesystems
-        self.populateRawImage()
         # We create needed dirs
         if not os.path.exists(self.containerMountPoint):
             os.makedirs(self.containerMountPoint)
@@ -234,8 +232,6 @@ class AffEvidence(Evidence):
         """
         A function to unmount the container
         """
-        self.populateRawImage()
-        #  first we check if the mount is locked by another instance
         lockList = self.lockList()
         if locker in lockList:
             lockList.remove(locker)
@@ -250,6 +246,9 @@ class AffEvidence(Evidence):
                     if len(fs.lockList()) != 0:
                         print fs.lockList()
                         safeToUnmount = False
+                elif fs.isOtherLocked(locker):
+                    # Not safe to unmount container because locked by another thing
+                    safeToUnmount = False
             if safeToUnmount:   
                 fritutils.fritmount.fuserUnmount(self.containerMountPoint)
             else:
@@ -294,9 +293,11 @@ def evidencesFromConfig(fritConf,verbose):
                         fs = NtfsFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
                         # TO CHANGE WHEN WE WILL ADD FILESYSTEMS
                         ev.fileSystems.append(fs)
+                        ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t NTFS filesystem Found at offset %d." % fs.offset)
             Evidences.append(ev)
+            
     
     if len(Evidences) ==0:
         fritutils.termout.printWarning("No evidences found in config file.")

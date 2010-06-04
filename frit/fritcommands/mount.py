@@ -34,3 +34,8 @@ def fullUmount(Evidences):
             evi.umount("user")
         else:
             fritutils.termout.printMessage('\tEvidence "%s" is not locked by the user. Not unmounting.' % evi.fileName)
+            # we have to verify if filesystems are locked by the user and umount them as requested
+            for fs in evi.fileSystems:
+                if fs.isLocked("user"):
+                    fritutils.termout.printMessage("\tUnmounting " + fs.configName + ". please wait.")
+                    fs.umount("user")

@@ -35,7 +35,7 @@ def status(Evidences,args):
                 fritutils.termout.printWarning('\t\tInconsistency: %s is mounted with no lockfile. Use the "status clean" command to unmount.' % evi.configName)
                 if clean:
                     fritutils.termout.printWarning('\t\tUnmounting')
-                    evi.writeLock("clean")
+                    evi.writeLock("clean","Cleaining inconsistencies")
                     evi.umount("clean")
         if len(evi.fileSystems) > 0:
             for fs in evi.fileSystems:
@@ -44,7 +44,7 @@ def status(Evidences,args):
                     fritutils.termout.printNormal('\t\tMounted on : %s' % fs.fsMountPoint)
                 fsLockList = fs.lockList()
                 if len(fsLockList) > 0:
-                    fsll = ' '.join(locklist)
+                    fsll = ' '.join(fsLockList)
                     fritutils.termout.printNormal('\t\t\tLocked by: %s' % fsll)
                     if not fs.isMounted():
                         #if the filesystem is not mounted and at least a lockfile, we have an inconsistency
@@ -58,8 +58,8 @@ def status(Evidences,args):
                     if fs.isMounted():
                         fritutils.termout.printWarning('\t\t\tInconsistency: %s is mounted without lockfile. Use the "status clean" command to unmount.' % fs.configName)
                         if clean:
-                            fritutils.termount.printNormal("\t\t\tUmounting")
-                            fs.writeLock("clean")
+                            fritutils.termout.printNormal("\t\t\tUmounting")
+                            fs.writeLock("clean","Cleaning inconsistencies")
                             fs.umount("clean")
 
         
