@@ -72,4 +72,11 @@ def getOffset(offString):
     else:
         fritutils.termout.printWarning("Bad offset option !")
         sys.exit(1)
-    
+
+def unicodify(x):
+    try:
+        y = unicode(x.decode('utf-8'))
+    except:
+        print >> sys.stderr, "ERROR TRANSCODING %s TO UNICODE" % x
+        y = x
+    return y

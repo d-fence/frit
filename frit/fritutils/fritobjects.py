@@ -49,6 +49,13 @@ class FileSystem(object):
         lf.write(pidReason)
         lf.close()
  
+    def removeLock(self,locker):
+        lockFile = self.getLockFile(locker)
+        try:
+            os.remove(lockFile)
+        except:
+            fritutils.termout.printWarning("Cannot remove lockfile: %s" % lockFile)
+ 
     def isLocked(self,locker):
         """
         Check if the filesystem mount is locked by the same action
@@ -74,6 +81,21 @@ class FileSystem(object):
     def makeDirs(self):
         if not os.path.exists(self.fsMountPoint):
             os.makedirs(self.fsMountPoint)
+    
+    def isMounted(self):
+        """
+        Retrun true if this filesystem is mounted
+        """
+        return os.path.ismount(self.fsMountPoint)
+        
+    def listFiles(self):
+        if self.isMounted():
+            for dirpath, dirs, files in os.walk(self.fsMountPoint):
+                for f in files:
+                    yield(os.path.join(dirpath,f))
+        else:
+            firutils.termout.printWarning('%s is not mounted. Cannot list files.' % self.configName)
+            sys.exit(1)
 
 class NtfsFileSystem(FileSystem):
     """
@@ -97,7 +119,7 @@ class NtfsFileSystem(FileSystem):
         fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
         loopDevice = self.getLoopDevice()
         # if the file is not already mounted, we mount it
-        if not os.path.ismount(self.fsMountPoint) and loopDevice != '':
+        if not self.isMounted() and loopDevice != '':
             fritutils.fritmount.ntfs3gMount(loopDevice,self.fsMountPoint)
         # we create the lock to prevent other instances to unmount
         self.writeLock(locker,reason)
@@ -107,17 +129,13 @@ class NtfsFileSystem(FileSystem):
         A function to unmount the filesystem
         """
         #  first we check if the mount is locked by another instance
-        if not self.isOtherLocked():
+        if not self.isOtherLocked(locker):
             fritutils.fritmount.fuserUnmount(self.fsMountPoint)
             loopDevice = self.getLoopDevice()
             if loopDevice != '':
                 fritutils.fritmount.detachLoopDevice(loopDevice)
         # we remove our lock file
-        lockFile = self.getLockFile(locker)
-        try:
-            os.remove(lockFile)
-        except:
-            fritutils.termout.printWarning("Cannot remove lockfile: %s" % lockFile)
+        self.removeLock(locker)
 
 class Evidence(object):
     """
@@ -159,6 +177,13 @@ class Evidence(object):
         lf.write(reason)
         lf.close()
 
+    def removeLock(self,locker):
+        lockFile = self.getLockFile(locker)
+        try:
+            os.remove(lockFile)
+        except:
+            fritutils.termout.printWarning("Cannot remove lockfile: %s" % lockFile)
+
     def isLocked(self,locker):
         llist = self.lockList()
         if locker in llist:
@@ -166,10 +191,20 @@ class Evidence(object):
         else:
             return False
 
+    def isMounted(self):
+        """
+        Retrun true if this  is mounted
+        have to be overriden by the different filesystems
+        """
+        pass
+
 class DdEvidence(Evidence):
     pass
 
 class AffEvidence(Evidence):
+    def isMounted(self):
+        return os.path.ismount(self.containerMountPoint)
+            
     def populateRawImage(self):
         """
         This function populate the raw image filename to all filesystems of the Evidence.
@@ -207,9 +242,9 @@ class AffEvidence(Evidence):
         if len(lockList) == 0:
             # as it is a container, we have to try to unmount filesystems first
             safeToUnmount = True
-            if len(self.fileSystems) > 0:
-                fritutils.termout.printMessage('\tUnmounting %d filesystems first' % len(self.fileSystems))
-                for fs in self.fileSystems:
+            for fs in self.fileSystems:
+                if fs.isLocked(locker):
+                    fritutils.termout.printMessage('\tUnmounting filesystems "%s" first' % fs.configName)
                     fs.umount(locker)
                     # if at least one fs is still in use, we cannot unmount
                     if len(fs.lockList()) != 0:
@@ -220,22 +255,19 @@ class AffEvidence(Evidence):
             else:
                 fritutils.termout.printWarning('\tSome filsystems are still in use, not unmounting %s' % self.fileName)
         else:
-            fritutils.termount.printWarning('Evidence "%s" is still locked by other instances of frit. Not unmounting' % self.fileName)
+            fritutils.termout.printWarning('Evidence "%s" is still locked by other instances of frit. Not unmounting' % self.fileName)
         # we remove our lock file
-        lockFile = self.getLockFile(locker)
-        try:
-            os.remove(lockFile)
-        except:
-            fritutils.termout.printWarning("\tCannot remove lockfile: %s" % lockFile)
+        self.removeLock(locker)
 
 class EwfEvidence(Evidence):
     pass
     
-def evidencesFromConfig(fritConf):
+def evidencesFromConfig(fritConf,verbose):
     """
     A function that parse a configObj and map the Evidences to Evidence object.
     """
-    fritutils.termout.printMessage("Parsing config file.")
+    if verbose:
+        fritutils.termout.printMessage("Parsing config file.")
     Evidences = []
     EviRegex = re.compile("^Evidence\d+")
     FsRegex = re.compile("^Filesystem\d+")
@@ -252,7 +284,8 @@ def evidencesFromConfig(fritConf):
             else:
                 fritutils.termout.printWarning('No valid format found.')
                 sys.exit(1)
-            fritutils.termout.printSuccess("\t" + ev.fileName + " Found.")
+            if verbose:
+                fritutils.termout.printSuccess("\t" + ev.fileName + " Found.")
             fs = ''
             for subkey in fritConf[key].keys():
                 if FsRegex.search(subkey):
@@ -261,7 +294,8 @@ def evidencesFromConfig(fritConf):
                         fs = NtfsFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
                         # TO CHANGE WHEN WE WILL ADD FILESYSTEMS
                         ev.fileSystems.append(fs)
-                        fritutils.termout.printSuccess("\t\t NTFS filesystem Found at offset %d." % fs.offset)
+                        if verbose:
+                            fritutils.termout.printSuccess("\t\t NTFS filesystem Found at offset %d." % fs.offset)
             Evidences.append(ev)
     
     if len(Evidences) ==0:

@@ -6,9 +6,11 @@ import fritutils.termout
 import fritcommands.init
 import fritcommands.mount
 import fritcommands.status
+import fritcommands.store
 from fritutils import fritobjects
 
 def mainFrit():
+    verbose = False
     # Check to see if a command was given.
     if len(sys.argv) < 2:
         fritutils.termout.printWarning('No command was given')
@@ -17,6 +19,12 @@ def mainFrit():
     fritutils.noBadPath()
     # Separate command and the command arguemnts
     (command,args) = fritutils.getCommand(sys.argv[1:])
+    # here we get the options from the args
+    # we have to work on this :-)
+    if args:
+        if '-v' in args:
+            args = args.pop('-v')
+            verbose = True
     # If the command is init, just do it
     if command == 'init':
         # check to see if .frit already exists
@@ -34,7 +42,7 @@ def mainFrit():
             fritutils.termout.printWarning('The config file contains errors.')
             sys.exit(1)
     # Here we try to map evidences from config file to Evidence objects
-    Evidences = fritobjects.evidencesFromConfig(fritConfig)
+    Evidences = fritobjects.evidencesFromConfig(fritConfig, verbose=verbose)
 
     # user isued a mount command
     if command == 'mount':
@@ -46,7 +54,11 @@ def mainFrit():
         sys.exit(0)
         
     if command == 'status':
-        fritcommands.status.status(Evidences)
+        fritcommands.status.status(Evidences,args)
+        sys.exit(0)
+    
+    if command == 'store':
+        fritcommands.store.store(Evidences,args)
         sys.exit(0)
     
     # Obviously, the given command was not found
