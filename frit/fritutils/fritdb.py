@@ -12,6 +12,13 @@ DBFILE = ".frit/frit.sqlite"
 elixir.metadata.bind = "sqlite:///" + DBFILE
 elixir.metadata.bind.echo = False
 
+class Evidence(elixir.Entity):
+    name = elixir.Field(elixir.Unicode(300))
+    configName = elixir.Field(elixir.Unicode(300))
+
+class Filesystem(elixir.Entity):
+    configName = elixir.Field(elixir.Unicode(300))
+
 class File(elixir.Entity):
     filename = elixir.Field(elixir.Unicode(300))
     filesize = elixir.Field(elixir.Integer)

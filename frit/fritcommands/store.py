@@ -38,7 +38,7 @@ def store(Evidences, args):
                                 fs.mount("store","Mounted to create initial database")
                                 spos = len(fs.fsMountPoint)
                                 nbFiles = 0
-                                fritutils.termout.printNormal('Start inserting files metada in database for "%s"\n' % fs.configName)
+                                fritutils.termout.printNormal('Start inserting files metadata in database for "%s"\n' % fs.configName)
                                 for f in fs.listFiles():                                    
                                     rfile = f[spos:]
                                     fsize = 0
