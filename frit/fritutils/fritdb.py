@@ -17,9 +17,16 @@ class Evidence(elixir.Entity):
     configName = elixir.Field(elixir.Unicode(300))
 
 class Filesystem(elixir.Entity):
+    evidence = elixir.ManyToOne('Evidence')
     configName = elixir.Field(elixir.Unicode(300))
 
+class FileState(elixir.Entity):
+    state = elixir.Field(elixir.Unicode(20))
+
 class File(elixir.Entity):
+    evidence = elixir.ManyToOne('Evidence')
+    filesystem = elixir.ManyToOne('Filesystem')
+    state = elixir.ManyToOne('FileState')
     filename = elixir.Field(elixir.Unicode(300))
     filesize = elixir.Field(elixir.Integer)
     fullpath = elixir.ManyToOne('FullPath')
@@ -28,7 +35,7 @@ class File(elixir.Entity):
     md5 = elixir.ManyToOne('Md5')
     sha1 = elixir.ManyToOne('Sha1')
     ssdeep = elixir.ManyToOne('Ssdeep')
-
+    
 class Extension(elixir.Entity):
     extension = elixir.Field(elixir.Unicode(50))
     files = elixir.OneToMany('File')
@@ -56,5 +63,12 @@ class Ssdeep(elixir.Entity):
 elixir.setup_all()
     
 def createDb():
+    """
+    A function to create the database and fill some tables
+    """
     if not os.path.exists(DBFILE):
         elixir.create_all()
+        normal = FileState(state=u'Normal')
+        undeleted = FileState(state=u'Undeleted')
+        carved = FileState(state=u'Carved')
+        elixir.session.commit()

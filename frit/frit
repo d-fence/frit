@@ -7,6 +7,7 @@ import fritcommands.init
 import fritcommands.mount
 import fritcommands.status
 import fritcommands.store
+import fritcommands.extensions
 from fritutils import fritobjects
 
 def mainFrit():
@@ -59,6 +60,10 @@ def mainFrit():
     
     if command == 'store':
         fritcommands.store.store(Evidences,args)
+        sys.exit(0)
+    
+    if command == 'extensions':
+        fritcommands.extensions.factory(Evidences,args)
         sys.exit(0)
     
     # Obviously, the given command was not found
