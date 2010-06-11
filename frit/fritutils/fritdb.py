@@ -8,6 +8,7 @@ from sqlalchemy import select, func
 import os.path
 
 DBFILE = ".frit/frit.sqlite"
+FILESTATES = (u'Normal', u'Undeleted', u'Carved')
 
 elixir.metadata.bind = "sqlite:///" + DBFILE
 elixir.metadata.bind.echo = False
@@ -68,7 +69,6 @@ def createDb():
     """
     if not os.path.exists(DBFILE):
         elixir.create_all()
-        normal = FileState(state=u'Normal')
-        undeleted = FileState(state=u'Undeleted')
-        carved = FileState(state=u'Carved')
-        elixir.session.commit()
+        for fstate in FILESTATES:
+            fis = FileState(state=fstate)
+            elixir.session.commit()

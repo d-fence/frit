@@ -3,6 +3,7 @@
 status command
 """
 
+import os.path
 import fritutils.termout
 
 def status(Evidences,args):
@@ -62,4 +63,15 @@ def status(Evidences,args):
                             fs.writeLock("clean","Cleaning inconsistencies")
                             fs.umount("clean")
 
-        
+
+    # Now we check the database status
+    fritutils.termout.printMessage("Frit Database Status:")
+    if os.path.exists('.frit/frit.sqlite'):
+        for evi in Evidences:
+            fritutils.termout.printMessage('\t' + evi.configName + ':')
+            for fs in evi.fileSystems:
+                counts = fs.dbCountFiles()
+                for t,c in counts.iteritems():
+                    fritutils.termout.printMessage('\t\t%s files: %d' % (t,c))
+    else:
+        fritutils.termout.printMessage('No Database found, use the "store create" command to create one')

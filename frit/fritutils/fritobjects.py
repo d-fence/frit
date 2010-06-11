@@ -14,6 +14,7 @@ import os
 import glob
 import fritutils.termout
 import fritutils.fritmount
+import fritutils.fritdb as fritModel
 
 class FileSystem(object):
     """
@@ -96,6 +97,17 @@ class FileSystem(object):
         else:
             firutils.termout.printWarning('%s is not mounted. Cannot list files.' % self.configName)
             sys.exit(1)
+            
+    def dbCountFiles(self):
+        toReturn = {}
+        for fstate in fritModel.FILESTATES:
+            stateDb = fritModel.elixir.session.query(fritModel.FileState).filter_by(state=fstate).first()
+            eviDb = fritModel.elixir.session.query(fritModel.Evidence).filter_by(configName=fritutils.unicodify(self.evidenceConfigName)).first()
+            fsDb = fritModel.elixir.session.query(fritModel.Filesystem).filter_by(configName=fritutils.unicodify(self.configName),
+                evidence=eviDb).first()
+            nbFiles = fritModel.elixir.session.query(fritModel.File).filter_by(filesystem=fsDb,state=stateDb).count()
+            toReturn[fstate] = nbFiles
+        return toReturn
 
 class NtfsFileSystem(FileSystem):
     """
@@ -120,7 +132,11 @@ class NtfsFileSystem(FileSystem):
         loopDevice = self.getLoopDevice()
         # if the file is not already mounted, we mount it
         if not self.isMounted() and loopDevice != '':
-            fritutils.fritmount.ntfs3gMount(loopDevice,self.fsMountPoint)
+            try:
+                fritutils.fritmount.ntfs3gMount(loopDevice,self.fsMountPoint)
+            except fritutils.fritmount.fritMountError:
+                fritutils.fritmount.detachLoopDevice(loopDevice)
+                raise
         # we create the lock to prevent other instances to unmount
         self.writeLock(locker,reason)
 

@@ -20,7 +20,10 @@ def fullMount(Evidences):
             evi.mount("user","Mounted by the user\n")
             fritutils.termout.printSuccess("\t" + evi.fileName + " mounted")
             for fs in evi.fileSystems:
-                fs.mount("user","Mounted by the user\n")
+                try:
+                    fs.mount("user","Mounted by the user\n")
+                except fritutils.fritmount.fritMountError:
+                    fritutils.termout.printWarning('\tUnable to mount filsystem %s' % fs.configName) 
         
 def fullUmount(Evidences):
     """
