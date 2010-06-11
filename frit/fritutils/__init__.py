@@ -49,13 +49,16 @@ def humanize(x):
     """
     Function to convert a number of bytes in something more human readable
     """
-    units = { 'KiB': 1024, 'MiB': 1024*1024, 'GiB': 1024*1024*1024, 'TiB': 1024*1024*1024*1024 }
-    r = "%d bytes" % x
-    for u,v in units.items():
-        if x < v:
-            break
-        r = "%d %s" % (x/v,u)
-    return r
+    if x:
+        units = { 'KiB': 1024, 'MiB': 1024*1024, 'GiB': 1024*1024*1024, 'TiB': 1024*1024*1024*1024 }
+        r = "%d bytes" % x
+        for u,v in units.items():
+            if x < v:
+                break
+            r = "%d %s" % (x/v,u)
+        return r
+    else:
+        return 0
 
 def getOffset(offString):
     """

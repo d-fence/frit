@@ -2,6 +2,8 @@
 """
 extensions command.
 Used to manipulate file based on their extensions.
+count is used to count extensions by filesystem
+extract is used to extract the specified extensions
 """
 import sys
 import os.path
@@ -9,7 +11,6 @@ import shutil
 import fritutils
 import fritutils.termout
 import fritutils.fritdb as fritModel
-from sqlalchemy import func
 
 def extractFile(toExtract,destination):
     if not os.path.exists(destination):
@@ -19,7 +20,7 @@ def extractFile(toExtract,destination):
 
 
 def factory(Evidences, args):
-    validArgs = ('list', 'extract')
+    validArgs = ('count', 'extract')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('extensions command need at least an argument')
         sys.exit(1)
@@ -27,10 +28,10 @@ def factory(Evidences, args):
         fritutils.termout.printWarning('extensions command need a valid argument (%s)' % ', '.join(validArgs))
         sys.exit(1)
     else:
-        if args[0] == 'list':
+        if args[0] == 'count':
             # the remaining args should be the extensions that we want to list
             # if there is no more args, we list all extensions
-            args.remove('list')
+            args.remove('count')
             if not args or len(args) == 0:
                 extList = []
                 for ex in fritModel.elixir.session.query(fritModel.Extension.extension).all():
@@ -44,16 +45,8 @@ def factory(Evidences, args):
                 for fs in evi.fileSystems:
                     fritutils.termout.printMessage("\t%s" % fs.configName)
                     for ext in sorted(extList):
-                        e = fritModel.Extension.query.filter_by(extension=ext).first()
-                        fso =  fritModel.Filesystem.query.filter_by(configName=fritutils.unicodify(fs.configName)).first()
-                        fstate = fritModel.FileState.query.filter_by(state=u'Normal').first()
-                        if e and fso :
-                            fq = fritModel.File.query.filter_by(extension=e,filesystem=fso,state=fstate)
-                            sizeSum = 0
-                            sizeSum = fq.value(func.sum(fritModel.File.filesize))
-                            fritutils.termout.printSuccess("\t\t%s : %d (%s)" % (ext, fq.count(), fritutils.humanize(sizeSum)))
-                        else:
-                            fritutils.termout.printSuccess("\t\t%s : 0 (0)" % (ext))
+                        nbe = fs.dbCountExtension(ext)
+                        fritutils.termout.printSuccess("\t\t%s : %d (%s)" % (ext, nbe['count'], fritutils.humanize(nbe['size'])))
         elif args[0] == 'extract':
             args.remove('extract')
             if not args or len(args) == 0:

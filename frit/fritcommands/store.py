@@ -18,51 +18,57 @@ def update(Evidences):
         if evi.isLocked("store"):
             fritutils.termout.printWarning('%s is already locked by a "store" instance.' % evi.configName)
         else:
+            # we start to insert filesystems normal files metadata in the database
             evi.mount("store","Mounted to create initial database")
             for fs in evi.fileSystems:
-                # filesystem creation in the database
-                FsDb = fritModel.Filesystem.query.filter_by(evidence=EviDb,configName=fritutils.unicodify(fs.configName)).first()
-                if not FsDb:
-                    FsDb = fritModel.Filesystem(evidence=EviDb,configName=fritutils.unicodify(fs.configName))
-                if fs.isLocked("store"):
-                    fritutils.termout.printWarning('Filesystem "%s" is already locked by a "store" instance.' % fs.configName)
+                # first, we count the files that are already in the DB
+                fcount = fs.dbCountFiles()
+                if fcount[u'Normal'] > 0:
+                    fritutils.termout.printMessage('%d files are already in the database, not inserting.' % fcount[u'Normal'])
                 else:
-                    fs.mount("store","Mounted to create initial database")
-                    spos = len(fs.fsMountPoint)
-                    nbFiles = 0
-                    fritutils.termout.printNormal('Start inserting files metadata in database for "%s"\n' % fs.configName)
-                    for f in fs.listFiles():                                    
-                        rfile = f[spos:]
-                        fsize = 0
-                        try:
-                            fsize = os.path.getsize(f)
-                        except:
-                            print >> sys.stderr, "ERROR GETTING SIZE OF: %s\n" % f
-                        fname,ext = os.path.splitext(rfile)
-                        ext = fritutils.unicodify(ext.lower())
-                        if ext == '':
-                            ext = u'No Extension'
-                        nbFiles += 1
-                        dname = fritutils.unicodify(os.path.dirname(rfile))
-                        bname = fritutils.unicodify(os.path.basename(rfile))
-                        Ext = fritModel.Extension.query.filter_by(extension=ext).first()
-                        if not Ext:
-                            Ext = fritModel.Extension(extension=ext)
-                        Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
-                        if not Fpath:
-                            Fpath = fritModel.FullPath(fullpath=dname)
-                        
-                        nFile = fritModel.File.query.filter_by(evidence=EviDb,filesystem=FsDb,filename=bname,fullpath=Fpath).first()
-                        if not nFile:
-                            nFile = fritModel.File(evidence=EviDb,filesystem=FsDb)
-                        nFile.state = fritModel.FileState.query.filter_by(state=u'Normal').first()
-                        nFile.filename = bname
-                        nFile.filesize = fsize
-                        nFile.fullpath = Fpath
-                        nFile.extension = Ext
-                                               
-                        fritModel.elixir.session.commit()
-                        print "\t%s : %d\r" % (fs.configName,nbFiles),           
+                    # filesystem creation in the database
+                    FsDb = fritModel.Filesystem.query.filter_by(evidence=EviDb,configName=fritutils.unicodify(fs.configName)).first()
+                    if not FsDb:
+                        FsDb = fritModel.Filesystem(evidence=EviDb,configName=fritutils.unicodify(fs.configName))
+                    if fs.isLocked("store"):
+                        fritutils.termout.printWarning('Filesystem "%s" is already locked by a "store" instance.' % fs.configName)
+                    else:
+                        fs.mount("store","Mounted to create initial database")
+                        spos = len(fs.fsMountPoint)
+                        nbFiles = 0
+                        fritutils.termout.printNormal('Start inserting files metadata in database for "%s"\n' % fs.configName)
+                        for f in fs.listFiles():                                    
+                            rfile = f[spos:]
+                            fsize = 0
+                            try:
+                                fsize = os.path.getsize(f)
+                            except:
+                                print >> sys.stderr, "ERROR GETTING SIZE OF: %s\n" % f
+                            fname,ext = os.path.splitext(rfile)
+                            ext = fritutils.unicodify(ext.lower())
+                            if ext == '':
+                                ext = u'No Extension'
+                            nbFiles += 1
+                            dname = fritutils.unicodify(os.path.dirname(rfile))
+                            bname = fritutils.unicodify(os.path.basename(rfile))
+                            Ext = fritModel.Extension.query.filter_by(extension=ext).first()
+                            if not Ext:
+                                Ext = fritModel.Extension(extension=ext)
+                            Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
+                            if not Fpath:
+                                Fpath = fritModel.FullPath(fullpath=dname)
+                            
+                            nFile = fritModel.File.query.filter_by(evidence=EviDb,filesystem=FsDb,filename=bname,fullpath=Fpath).first()
+                            if not nFile:
+                                nFile = fritModel.File(evidence=EviDb,filesystem=FsDb)
+                            nFile.state = fritModel.FileState.query.filter_by(state=u'Normal').first()
+                            nFile.filename = bname
+                            nFile.filesize = fsize
+                            nFile.fullpath = Fpath
+                            nFile.extension = Ext
+                                                   
+                            fritModel.elixir.session.commit()
+                            print "\t%s : %d\r" % (fs.configName,nbFiles),           
                     print "\n"
                     fs.umount("store")
             evi.umount("store")
