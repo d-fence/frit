@@ -47,11 +47,11 @@ def mainFrit():
 
     # user isued a mount command
     if command == 'mount':
-        fritcommands.mount.fullMount(Evidences)
+        fritcommands.mount.mountCommand(Evidences,args)
         sys.exit(0)
     
     if command == 'umount':
-        fritcommands.mount.fullUmount(Evidences)
+        fritcommands.mount.Umount(Evidences)
         sys.exit(0)
         
     if command == 'status':

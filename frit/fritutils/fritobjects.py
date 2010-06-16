@@ -141,6 +141,30 @@ class FileSystem(object):
             toReturn[fstate] = nbFiles
         return toReturn
 
+    def ExtensionsFritFiles(self,ext):
+        """
+        A function that yield a list of files with the specified extension.
+        The yielded path is the frit file path.
+        """
+        e = fritModel.Extension.query.filter_by(extension=ext).first()
+        fso =  self.getFsDb()
+        fstate = fritModel.FileState.query.filter_by(state=u'Normal').first()
+        for fob in fritModel.File.query.filter_by(extension=e,filesystem=fso,state=fstate).all():
+            toYield = os.path.join(self.fsMountPoint,fob.fullpath.fullpath[1:],fob.filename)
+            yield toYield
+
+    def ExtensionsOriginalFiles(self,ext):
+        """
+        A function that yield a list of files with the specified extension.
+        The yielded path is the original file path on the target system.
+        """
+        e = fritModel.Extension.query.filter_by(extension=ext).first()
+        fso =  self.getFsDb()
+        fstate = fritModel.FileState.query.filter_by(state=u'Normal').first()
+        for fob in fritModel.File.query.filter_by(extension=e,filesystem=fso,state=fstate).all():
+            toYield = os.path.join(fob.fullpath.fullpath[1:],fob.filename)
+            yield toYield
+
 class NtfsFileSystem(FileSystem):
     """
     Class for the NTFS file system.
