@@ -24,12 +24,54 @@ sqlaclhemy (python-sqlalchemy)
 
 to be written
 
-4. Usage
+4. prerequisite
+
+The following prerequisite and advises have to be carrefully read.
+You must understand what you do because they could be a security risk
+in untrusted environement.
+They are to be used when you are the only user of the machine or when
+you absolutely trust all the users of the frit program AND the users of
+the machine where it's installed.
+
+4.1 Loop devices
+
+Make sure there are enough free loop devices on the system, for example,
+modify /etc/modules and insert this line:
+loop max_loop=64
+This will make 64 loop devices available.
+
+4.2 Block devices
+
+Make sure that the user can use the block devices.
+On Debian it have to belong to the 'disk' group.
+
+4.3 NTFS-3G
+
+Make sure that your user can use ntfs-3g, for example: 
+ - add an ntfsuser group
+ - make your user belonging to this group
+ - change the group of the ntfs-3g binary:
+   sudo chown root.ntfsuser $(which ntfs-3g)
+ - make the ntfs-3g binary suid root and only executable by the group:
+    sudo chmod 4750 $(which ntfs-3g)
+
+4.4 sudo
+
+Frit sometimes needs root privileges, for example when it need to mount a
+filesystem like FAT.
+For this, it uses the "sudo" command. Sudo will ask for password when needed
+but most of the time, the user will not be in front of the console when it
+happens.
+That's why you may want to allow your user to gain root privileges when using
+frit without the need of a password.
+Be aware of the security risk.
+
+5. Usage
 
 Frit is a command line tool. The synospis is:
 frit COMMAND ARGS
 
-4.1 Init
+5.1 Init
 
 First of all, forensic evidences have to be placed in a same directory tree.
 At the root of this tree :
@@ -69,7 +111,7 @@ The "Filesystem#number" subsection must contain the format of this filesystem
 NTFS and vfat) and the offset in bytes where to find this filesystem on the
 image.
 
-4.2 mount
+5.2 mount
 
 The "mount" command will mount each filesystem from each evidence.
 It's useful to test that your configuration file is working.
@@ -82,7 +124,7 @@ If you are only intersted in mounting containers to access a raw image,
 for example to use a carving tool on the raw image, you can use the "mount
 containers" command.
 
-4.3 store
+5.3 store
 
 Frit use a sqlite3 database to store various elements about the files.
 The database itself is a simple slite file stored in ".frit/frit.sqlite".
@@ -104,12 +146,12 @@ Use the "store update" command for this purpose.
 Once you added the new evidence in your config file, use:
 $ frit store update
 
-4.4 extensions
+5.4 extensions
 
 The extension command is used to manipulate files based on their extensions.
 This command has to be used after the "store init" command is finished.
 
-4.4.1 Counting extensions
+5.5.1 Counting extensions
 
 $ frit extensions count
 This command will list all extensions found on the filesystems along with their
@@ -120,7 +162,7 @@ extensions only.
 For example, if you want to count "xls" and "doc" files, use this command:
 $ frit extensions count .xls .doc
 
-4.4.2 List files matching an extension criteria
+5.5.2 List files matching an extension criteria
 
 If you want to list all files with an "xls" extension, you can try this command:
 $ frit extensions list .xls
@@ -129,7 +171,7 @@ It will list the full pathname (including the "./frit/..." part) of the ".xls"
 files. You can use more than one criteria. If you omit an extension criteria, it
 will list all files, sorted by their extension.
 
-4.4.3 Extract files based on their extensions
+5.5.3 Extract files based on their extensions
 
 Let's imagine that we want to extract all "pdf" and "xls" from all evidences.
 You can use this command:
@@ -139,11 +181,11 @@ This will extract the corresponding files in the directory
 ".frit/extractions/by_extensions/Evidence#number/filesystem#number/..."
 The fullpath will be reconstructed behind this path.
 
-4.5 status
+5.5 status
 
 to be written
 
-5 Future
+6. Future
 
 What is palnned in the future releases:
 - undelete
