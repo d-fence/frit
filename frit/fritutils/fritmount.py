@@ -27,6 +27,9 @@ AFFMOUNT = '/usr/bin/affuse'
 FUSERMOUNT = '/usr/bin/fusermount'
 NTFS3G = '/usr/bin/ntfs-3g'
 LOSETUP = '/sbin/losetup'
+SUDO = '/usr/bin/sudo'
+MOUNT = '/bin/mount'
+UMOUNT = '/bin/umount'
 
 class fritMountError(Exception):
     def __init__(self,errorString):
@@ -57,12 +60,21 @@ def fuserUnmount(mountpoint):
         if fuserunmount.returncode > 0:
             raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,fuserunmount.returncode))
 
+def fatUnmount(mountpoint):
+    fritutils.termout.printMessage('\tUnmounting "%s"' % mountpoint)
+    # we check if it's really mounted first
+    if os.path.ismount(mountpoint):
+        fatunmount = subprocess.Popen([SUDO,UMOUNT,mountpoint])
+        fatunmount.wait()
+        if fatunmount.returncode > 0:
+            raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,fatunmount.returncode))
+
 def attachLoopDevice(rawfile, offset):
     fritutils.termout.printMessage('\tAttaching "%s" to a loop device.' % rawfile)    
     losetup = subprocess.Popen([LOSETUP, '-f', '-r', '-o', str(offset),rawfile], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     losetup.wait()
     if losetup.returncode > 0:
-        raise fritMountError('Enable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
+        raise fritMountError('Unable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
         
 def detachLoopDevice(loopdev):
     fritutils.termout.printMessage('\tDetaching loop device "%s"' % loopdev)
@@ -91,3 +103,13 @@ def ntfs3gMount(loopDevice,mountpoint):
     ntfsmount.wait()
     if ntfsmount.returncode > 0:
         raise fritMountError('Unable to mount the ntfs partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ntfsmount.returncode)))
+
+def fatMount(loopDevice,mountpoint):
+    fritutils.termout.printMessage('\tMounting "%s" with FAT on "%s"' % (loopDevice,mountpoint))
+    uid = str(os.getuid())
+    gid = str(os.getgid())
+    options = 'ro,noatime,uid=' + uid + ',gid=' + gid
+    fatmount = subprocess.Popen([SUDO, MOUNT, '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    fatmount.wait()
+    if fatmount.returncode > 0:
+        raise fritMountError('Unable to mount the FAT partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ntfsmount.returncode)))

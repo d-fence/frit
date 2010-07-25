@@ -30,6 +30,10 @@ class FileSystem(object):
         self.evidenceConfigName = evidenceConfigName
         self.fsMountPoint = os.path.join('.frit','filesystems',self.evidenceConfigName,self.configName)
 
+    def getLoopDevice(self):
+        lodev = fritutils.fritmount.getLoopDevice(self.rawImage)
+        return lodev
+
     def getLockFile(self,locker):
         """
         A function to construct the lockfile
@@ -171,11 +175,7 @@ class NtfsFileSystem(FileSystem):
     """
     def getFormat(self):
         return "NTFS"
-    
-    def getLoopDevice(self):
-        lodev = fritutils.fritmount.getLoopDevice(self.rawImage)
-        return lodev
-    
+
     def mount(self,locker,reason):
         """
         locker is the intermediate extension given to the lockfile.
@@ -209,6 +209,46 @@ class NtfsFileSystem(FileSystem):
         # we remove our lock file
         self.removeLock(locker)
 
+class FatFileSystem(FileSystem):
+    """
+    Class for the FAT file system.
+    """
+    def getFormat(self):
+        return "FAT"
+
+    def mount(self,locker,reason):
+        """
+        locker is the intermediate extension given to the lockfile.
+        reason is the comment that will be inserted in the lock file.
+        """
+        # We create needed dirs
+        self.makeDirs()
+        # if there is no loop device attached, we atach one
+        fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
+        loopDevice = self.getLoopDevice()
+        # if the file is not already mounted, we mount it
+        if not self.isMounted() and loopDevice != '':
+            try:
+                fritutils.fritmount.fatMount(loopDevice,self.fsMountPoint)
+            except fritutils.fritmount.fritMountError:
+                fritutils.fritmount.detachLoopDevice(loopDevice)
+                raise
+        # we create the lock to prevent other instances to unmount
+        self.writeLock(locker,reason)
+
+    def umount(self,locker):
+        """
+        A function to unmount the filesystem
+        """
+        #  first we check if the mount is locked by another instance
+        if not self.isOtherLocked(locker):
+            fritutils.fritmount.fatUnmount(self.fsMountPoint)
+            loopDevice = self.getLoopDevice()
+            if loopDevice != '':
+                fritutils.fritmount.detachLoopDevice(loopDevice)
+        # we remove our lock file
+        self.removeLock(locker)
+
 class Evidence(object):
     """
     This is the basic class for evidence files.
@@ -222,7 +262,7 @@ class Evidence(object):
         self.rawImage = ''
         self.containerMountPoint = os.path.join('.frit','containers',self.configName)
 
-    def mount(self):
+    def mount(self,*args):
         """
         A function to mount the evidence.
         If not needed, just leave it empty.
@@ -271,7 +311,14 @@ class Evidence(object):
         pass
 
 class DdEvidence(Evidence):
-    pass
+    def populateRawImage(self):
+        """
+        This function populate the raw image filename to all filesystems of the Evidence.
+        Even if this file does not exists yet.
+        """
+        self.rawImage = self.fileName
+        for fs in self.fileSystems:
+            fs.rawImage = self.rawImage   
 
 class AffEvidence(Evidence):
     def isMounted(self):
@@ -363,11 +410,17 @@ def evidencesFromConfig(fritConf,verbose):
                     if fritConf[key][subkey]['Format'] == 'NTFS':
                         off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
                         fs = NtfsFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
-                        # TO CHANGE WHEN WE WILL ADD FILESYSTEMS
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t NTFS filesystem Found at offset %d." % fs.offset)
+                    elif fritConf[key][subkey]['Format'] == 'FAT':
+                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
+                        fs = FatFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
+                        ev.fileSystems.append(fs)
+                        ev.populateRawImage()
+                        if verbose:
+                            fritutils.termout.printSuccess("\t\t FAT filesystem Found at offset %d." % fs.offset)
             Evidences.append(ev)
             
     

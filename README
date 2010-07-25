@@ -17,7 +17,8 @@ Frit is written in Python.
 
 2. Dependencies
 
-to be written
+elixir (python-elixir)
+sqlaclhemy (python-sqlalchemy)
 
 3. Installation
 
