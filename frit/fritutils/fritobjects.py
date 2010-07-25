@@ -269,6 +269,13 @@ class Evidence(object):
         """
         pass
 
+    def umount(self,*args):
+        """
+        A function to umount the evidence.
+        If not needed, just leave it empty.
+        """
+        pass
+
     def getLockFile(self,locker):
         """
         A function to construct the lockfile
