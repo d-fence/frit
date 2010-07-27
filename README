@@ -20,6 +20,7 @@ Frit is written in Python.
 elixir (python-elixir)
 sqlaclhemy (python-sqlalchemy)
 configobj (python-configobj)
+fuse iso (fuse-iso)
 
 3. Installation
 

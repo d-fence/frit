@@ -272,6 +272,44 @@ class FatFileSystem(FileSystem):
         # we remove our lock file
         self.removeLock(locker)
 
+class ISO9660FileSystem(FileSystem):
+    """
+    Class for the ISO 9660 file system (CDROM/DVD).
+    """
+    def getFormat(self):
+        return "ISO9660"
+
+    def mount(self,locker,reason):
+        """
+        locker is the intermediate extension given to the lockfile.
+        reason is the comment that will be inserted in the lock file.
+        """
+        # We create needed dirs
+        self.makeDirs()
+        # if there is no loop device attached, we atach one
+        self.acquireLoop()
+        # if the file is not already mounted, we mount it
+        if not self.isMounted() and self.loopDevice != '':
+            try:
+                fritutils.fritmount.isoMount(self.loopDevice,self.fsMountPoint)
+            except fritutils.fritmount.fritMountError:
+                self.freeLoop()
+                raise
+        # we create the lock to prevent other instances to unmount
+        self.writeLock(locker,reason)
+
+    def umount(self,locker):
+        """
+        A function to unmount the filesystem
+        """
+        #  first we check if the mount is locked by another instance
+        if not self.isOtherLocked(locker):
+            fritutils.fritmount.fuserUnmount(self.fsMountPoint)
+            if self.loopDevice != '':
+                self.freeLoop()
+        # we remove our lock file
+        self.removeLock(locker)
+
 class Evidence(object):
     """
     This is the basic class for evidence files.
@@ -419,7 +457,7 @@ def evidencesFromConfig(fritConf,verbose):
     Evidences = []
     EviRegex = re.compile("^Evidence\d+")
     FsRegex = re.compile("^Filesystem\d+")
-    ValidFileSystems = ('FAT','NTFS')
+    ValidFileSystems = ('FAT','NTFS','ISO9660')
     ev = ''
     for key in fritConf.keys():
         if EviRegex.search(key):
@@ -452,6 +490,13 @@ def evidencesFromConfig(fritConf,verbose):
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t FAT filesystem Found at offset %d." % fs.offset)
+                    elif fritConf[key][subkey]['Format'] == 'ISO9660':
+                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
+                        fs = ISO9660FileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
+                        ev.fileSystems.append(fs)
+                        ev.populateRawImage()
+                        if verbose:
+                            fritutils.termout.printSuccess("\t\t ISO 9660 filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] not in ValidFileSystems:
                         fritutils.termout.printWarning("%s This filesystem type (%s) is unknow by frit." % (ev.configName,fritConf[key][subkey]['Format']))
 

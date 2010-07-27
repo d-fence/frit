@@ -26,6 +26,7 @@ import fritutils.termout
 AFFMOUNT = '/usr/bin/affuse'
 FUSERMOUNT = '/usr/bin/fusermount'
 NTFS3G = '/usr/bin/ntfs-3g'
+FUSEISO = '/usr/bin/fuseiso'
 LOSETUP = '/sbin/losetup'
 SUDO = '/usr/bin/sudo'
 MOUNT = '/bin/mount'
@@ -115,3 +116,13 @@ def fatMount(loopDevice,mountpoint):
     fatmount.wait()
     if fatmount.returncode > 0:
         raise fritMountError('Unable to mount the FAT partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(fatmount.returncode)))
+        
+def isoMount(loopDevice,mountpoint):
+    fritutils.termout.printMessage('\tMounting "%s" with fuseiso on "%s"' % (loopDevice,mountpoint))
+    uid = str(os.getuid())
+    gid = str(os.getgid())
+    options = '-n'
+    isomount = subprocess.Popen([FUSEISO, options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    isomount.wait()
+    if isomount.returncode > 0:
+        raise fritMountError('Unable to mount the ISO 9660 filesystem "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(isomount.returncode)))
