@@ -112,4 +112,4 @@ def fatMount(loopDevice,mountpoint):
     fatmount = subprocess.Popen([SUDO, MOUNT, '-t','vfat', '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     fatmount.wait()
     if fatmount.returncode > 0:
-        raise fritMountError('Unable to mount the FAT partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ntfsmount.returncode)))
+        raise fritMountError('Unable to mount the FAT partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(fatmount.returncode)))

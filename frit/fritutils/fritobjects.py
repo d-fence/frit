@@ -396,6 +396,7 @@ def evidencesFromConfig(fritConf,verbose):
     Evidences = []
     EviRegex = re.compile("^Evidence\d+")
     FsRegex = re.compile("^Filesystem\d+")
+    ValidFileSystems = ('FAT','NTFS')
     ev = ''
     for key in fritConf.keys():
         if EviRegex.search(key):
@@ -428,9 +429,11 @@ def evidencesFromConfig(fritConf,verbose):
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t FAT filesystem Found at offset %d." % fs.offset)
+                    elif fritConf[key][subkey]['Format'] not in ValidFileSystems:
+                        fritutils.termout.printWarning("%s This filesystem type (%s) is unknow by frit." % (ev.configName,fritConf[key][subkey]['Format']))
+
             Evidences.append(ev)
-            
-    
+
     if len(Evidences) ==0:
         fritutils.termout.printWarning("No evidences found in config file.")
         sys.exit(1)
