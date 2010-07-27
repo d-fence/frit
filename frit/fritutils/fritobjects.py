@@ -52,9 +52,10 @@ class FileSystem(object):
             os.remove(self.loopLockFile)
 
     def acquireLoop(self):
-        self.loopDevice = fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
-        self.writeLoopLock()
-        
+        if self.loopDevice == '':
+            self.loopDevice = fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
+            self.writeLoopLock()
+
     def freeLoop(self):
         fritutils.fritmount.detachLoopDevice(self.loopDevice)
         self.loopDevice = ''
