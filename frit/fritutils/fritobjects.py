@@ -336,7 +336,7 @@ class AffEvidence(Evidence):
         This function populate the raw image filename to all filesystems of the Evidence.
         Even if this file does not exists yet.
         """
-        self.rawImage = os.path.join(self.containerMountPoint, self.fileName + '.raw')
+        self.rawImage = os.path.join(self.containerMountPoint, os.path.basename(self.fileName) + '.raw')
         for fs in self.fileSystems:
             fs.rawImage = self.rawImage    
 
