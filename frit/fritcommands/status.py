@@ -41,6 +41,9 @@ def status(Evidences,args):
         if len(evi.fileSystems) > 0:
             for fs in evi.fileSystems:
                 fritutils.termout.printMessage('\t\t%s (format: %s , offset: %d)' % (fs.configName, fs.getFormat(),fs.offset))
+                ld = fs.getLoopDevice()
+                if ld != '':
+                    fritutils.termout.printNormal('\t\tAssociated with loop device: %s' % ld)
                 if fs.isMounted():
                     fritutils.termout.printNormal('\t\tMounted on : %s' % fs.fsMountPoint)
                 fsLockList = fs.lockList()

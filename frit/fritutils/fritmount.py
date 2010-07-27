@@ -70,11 +70,24 @@ def fatUnmount(mountpoint):
             raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,fatunmount.returncode))
 
 def attachLoopDevice(rawfile, offset):
+    """
+    Function to attach a loop device to a rawfile.
+    Here, we count on the "verbose" mode of the losetup command to return a
+    string that begin with 'Loop device is' and contains the loop device.
+    Not very ellegant.
+    """
     fritutils.termout.printMessage('\tAttaching "%s" to a loop device.' % rawfile)    
-    losetup = subprocess.Popen([LOSETUP, '-f', '-r', '-o', str(offset),rawfile], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    losetup = subprocess.Popen([LOSETUP, '-v', '-f', '-r', '-o', str(offset),rawfile], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     losetup.wait()
     if losetup.returncode > 0:
         raise fritMountError('Unable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
+    else:
+        lodevice,stderr = losetup.communicate()
+        for line in lodevice.split('\n'):
+            if 'Loop device is' in lodevice:
+                return line[15:]
+            else:
+                raise fritMountError('Unable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
         
 def detachLoopDevice(loopdev):
     fritutils.termout.printMessage('\tDetaching loop device "%s"' % loopdev)
@@ -82,17 +95,6 @@ def detachLoopDevice(loopdev):
     losetup.wait()
     if losetup.returncode > 0:
         raise fritMountError('Unable to detach loop device "%s" (return code: %d)' % (loopdev, losetup.returncode))
-
-def getLoopDevice(rawfile):
-    logetdevice = subprocess.Popen([LOSETUP, '-j', rawfile],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    logetdevice.wait()
-    if logetdevice.returncode > 0:
-        raise fritMountError('Unable to get loop informations about : %s' % rawfile)
-    lodevice,stderr = logetdevice.communicate()
-    if '/dev/loop' in lodevice:
-        return lodevice.split()[0][0:-1]
-    else:
-        return ''
 
 def ntfs3gMount(loopDevice,mountpoint):
     fritutils.termout.printMessage('\tMounting "%s" with NTFS-3G on "%s"' % (loopDevice,mountpoint))

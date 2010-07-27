@@ -29,10 +29,36 @@ class FileSystem(object):
         self.configName = fsConfigName
         self.evidenceConfigName = evidenceConfigName
         self.fsMountPoint = os.path.join('.frit','filesystems',self.evidenceConfigName,self.configName)
+        self.loopLockFile = self.fsMountPoint + 'looplock'
+        self.loopDevice = self.getLoopDevice()
 
     def getLoopDevice(self):
-        lodev = fritutils.fritmount.getLoopDevice(self.rawImage)
-        return lodev
+        if os.path.exists(self.loopLockFile):
+            lf = open(self.loopLockFile,'r')
+            lnum = lf.readline()
+            lf.close()
+            return lnum
+        else:
+            return ''
+
+    def writeLoopLock(self):
+        if self.loopDevice != '':
+            lf = open(self.loopLockFile,'w')
+            lf.write(self.loopDevice)
+            lf.close()
+
+    def delLoopLock(self):
+        if os.path.exists(self.loopLockFile):
+            os.remove(self.loopLockFile)
+
+    def acquireLoop(self):
+        self.loopDevice = fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
+        self.writeLoopLock()
+        
+    def freeLoop(self):
+        fritutils.fritmount.detachLoopDevice(self.loopDevice)
+        self.loopDevice = ''
+        self.delLoopLock()
 
     def getLockFile(self,locker):
         """
@@ -47,21 +73,21 @@ class FileSystem(object):
         for flock in glob.glob(self.fsMountPoint + "*.lock"):
            llist.append(flock[lstart:-5])
         return llist
-        
+
     def writeLock(self,locker,reason):
         pidReason = "PID: %d -- %s" % (os.getpid(),reason)
         lockFile = self.getLockFile(locker)
         lf = open(lockFile,'a')
         lf.write(pidReason)
         lf.close()
- 
+
     def removeLock(self,locker):
         lockFile = self.getLockFile(locker)
         try:
             os.remove(lockFile)
         except:
             fritutils.termout.printWarning("Cannot remove lockfile: %s" % lockFile)
- 
+
     def isLocked(self,locker):
         """
         Check if the filesystem mount is locked by the same action
@@ -87,13 +113,13 @@ class FileSystem(object):
     def makeDirs(self):
         if not os.path.exists(self.fsMountPoint):
             os.makedirs(self.fsMountPoint)
-    
+
     def isMounted(self):
         """
         Retrun true if this filesystem is mounted
         """
         return os.path.ismount(self.fsMountPoint)
-        
+
     def listFiles(self):
         if self.isMounted():
             for dirpath, dirs, files in os.walk(self.fsMountPoint):
@@ -132,7 +158,7 @@ class FileSystem(object):
         toReturn['count'] = c
         toReturn['size'] = sizeSum
         return toReturn
-    
+
     def dbCountFiles(self):
         """
         A function to get a count of files belonging to the filesystem
@@ -184,14 +210,13 @@ class NtfsFileSystem(FileSystem):
         # We create needed dirs
         self.makeDirs()
         # if there is no loop device attached, we atatch one
-        fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
-        loopDevice = self.getLoopDevice()
+        self.acquireLoop()
         # if the file is not already mounted, we mount it
-        if not self.isMounted() and loopDevice != '':
+        if not self.isMounted() and self.loopDevice != '':
             try:
-                fritutils.fritmount.ntfs3gMount(loopDevice,self.fsMountPoint)
+                fritutils.fritmount.ntfs3gMount(self.loopDevice,self.fsMountPoint)
             except fritutils.fritmount.fritMountError:
-                fritutils.fritmount.detachLoopDevice(loopDevice)
+                self.freeLoop()
                 raise
         # we create the lock to prevent other instances to unmount
         self.writeLock(locker,reason)
@@ -203,9 +228,8 @@ class NtfsFileSystem(FileSystem):
         #  first we check if the mount is locked by another instance
         if not self.isOtherLocked(locker):
             fritutils.fritmount.fuserUnmount(self.fsMountPoint)
-            loopDevice = self.getLoopDevice()
-            if loopDevice != '':
-                fritutils.fritmount.detachLoopDevice(loopDevice)
+            if self.loopDevice != '':
+                self.freeLoop()
         # we remove our lock file
         self.removeLock(locker)
 
@@ -224,14 +248,13 @@ class FatFileSystem(FileSystem):
         # We create needed dirs
         self.makeDirs()
         # if there is no loop device attached, we atach one
-        fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
-        loopDevice = self.getLoopDevice()
+        self.acquireLoop()
         # if the file is not already mounted, we mount it
-        if not self.isMounted() and loopDevice != '':
+        if not self.isMounted() and self.loopDevice != '':
             try:
-                fritutils.fritmount.fatMount(loopDevice,self.fsMountPoint)
+                fritutils.fritmount.fatMount(self.loopDevice,self.fsMountPoint)
             except fritutils.fritmount.fritMountError:
-                fritutils.fritmount.detachLoopDevice(loopDevice)
+                self.freeLoop()
                 raise
         # we create the lock to prevent other instances to unmount
         self.writeLock(locker,reason)
@@ -243,9 +266,8 @@ class FatFileSystem(FileSystem):
         #  first we check if the mount is locked by another instance
         if not self.isOtherLocked(locker):
             fritutils.fritmount.fatUnmount(self.fsMountPoint)
-            loopDevice = self.getLoopDevice()
-            if loopDevice != '':
-                fritutils.fritmount.detachLoopDevice(loopDevice)
+            if self.loopDevice != '':
+                self.freeLoop()
         # we remove our lock file
         self.removeLock(locker)
 

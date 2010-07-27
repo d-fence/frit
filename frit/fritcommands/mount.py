@@ -25,7 +25,7 @@ def Mount(Evidences,fullMount=False):
                         fs.mount("user","Mounted by the user\n")
                     except fritutils.fritmount.fritMountError:
                         fritutils.termout.printWarning('\tUnable to mount filsystem %s' % fs.configName) 
-        
+
 def Umount(Evidences):
     """
     Unmount all evidences filesystems and then containers
