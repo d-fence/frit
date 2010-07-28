@@ -495,7 +495,7 @@ def evidencesFromConfig(fritConf,verbose):
     Evidences = []
     EviRegex = re.compile("^Evidence\d+")
     FsRegex = re.compile("^Filesystem\d+")
-    ValidFileSystems = ('FAT','NTFS','ISO9660')
+    ValidFileSystems = ('FAT','NTFS','ISO9660','HFSPLUS')
     ev = ''
     for key in fritConf.keys():
         if EviRegex.search(key):
