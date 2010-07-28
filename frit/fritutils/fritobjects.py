@@ -272,6 +272,44 @@ class FatFileSystem(FileSystem):
         # we remove our lock file
         self.removeLock(locker)
 
+class HfsPlusFileSystem(FileSystem):
+    """
+    Class for the HFS+ file system.
+    """
+    def getFormat(self):
+        return "HFSPLUS"
+
+    def mount(self,locker,reason):
+        """
+        locker is the intermediate extension given to the lockfile.
+        reason is the comment that will be inserted in the lock file.
+        """
+        # We create needed dirs
+        self.makeDirs()
+        # if there is no loop device attached, we atach one
+        self.acquireLoop()
+        # if the file is not already mounted, we mount it
+        if not self.isMounted() and self.loopDevice != '':
+            try:
+                fritutils.fritmount.hfsplusMount(self.loopDevice,self.fsMountPoint)
+            except fritutils.fritmount.fritMountError:
+                self.freeLoop()
+                raise
+        # we create the lock to prevent other instances to unmount
+        self.writeLock(locker,reason)
+
+    def umount(self,locker):
+        """
+        A function to unmount the filesystem
+        """
+        #  first we check if the mount is locked by another instance
+        if not self.isOtherLocked(locker):
+            fritutils.fritmount.hfsplusUnmount(self.fsMountPoint)
+            if self.loopDevice != '':
+                self.freeLoop()
+        # we remove our lock file
+        self.removeLock(locker)
+
 class ISO9660FileSystem(FileSystem):
     """
     Class for the ISO 9660 file system (CDROM/DVD).

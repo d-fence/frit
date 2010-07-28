@@ -70,6 +70,15 @@ def fatUnmount(mountpoint):
         if fatunmount.returncode > 0:
             raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,fatunmount.returncode))
 
+def hfsplusUnmount(mountpoint):
+    fritutils.termout.printMessage('\tUnmounting "%s"' % mountpoint)
+    # we check if it's really mounted first
+    if os.path.ismount(mountpoint):
+        hfsplusunmount = subprocess.Popen([SUDO,UMOUNT,mountpoint])
+        hfsplusunmount.wait()
+        if hfsplusunmount.returncode > 0:
+            raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,hfsplusunmount.returncode))
+
 def attachLoopDevice(rawfile, offset):
     """
     Function to attach a loop device to a rawfile.
@@ -116,7 +125,17 @@ def fatMount(loopDevice,mountpoint):
     fatmount.wait()
     if fatmount.returncode > 0:
         raise fritMountError('Unable to mount the FAT partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(fatmount.returncode)))
-        
+
+def hfsplusMount(loopDevice,mountpoint):
+    fritutils.termout.printMessage('\tMounting "%s" with HFS+ on "%s"' % (loopDevice,mountpoint))
+    uid = str(os.getuid())
+    gid = str(os.getgid())
+    options = 'ro,noatime,uid=' + uid + ',gid=' + gid
+    hfsplusmount = subprocess.Popen([SUDO, MOUNT, '-t','hfsplus', '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    hfsplusmount.wait()
+    if hfsplusmount.returncode > 0:
+        raise fritMountError('Unable to mount the HFS+ partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(hfsplusmount.returncode)))
+
 def isoMount(loopDevice,mountpoint):
     fritutils.termout.printMessage('\tMounting "%s" with fuseiso on "%s"' % (loopDevice,mountpoint))
     uid = str(os.getuid())
