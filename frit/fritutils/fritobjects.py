@@ -528,6 +528,13 @@ def evidencesFromConfig(fritConf,verbose):
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t FAT filesystem Found at offset %d." % fs.offset)
+                    elif fritConf[key][subkey]['Format'] == 'HFSPLUS':
+                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
+                        fs = HfsPLusFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
+                        ev.fileSystems.append(fs)
+                        ev.populateRawImage()
+                        if verbose:
+                            fritutils.termout.printSuccess("\t\t HFS+ filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'ISO9660':
                         off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
                         fs = ISO9660FileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
