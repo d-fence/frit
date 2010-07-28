@@ -385,7 +385,7 @@ class Evidence(object):
     def lockList(self):
         llist = []
         lstart = len(self.containerMountPoint) + 1
-        for flock in glob.glob(self.containerMountPoint + "*.lock"):
+        for flock in glob.glob(self.containerMountPoint + "_*.lock"):
            llist.append(flock[lstart:-5])
         return llist
         
