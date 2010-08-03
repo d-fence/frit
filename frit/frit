@@ -39,6 +39,9 @@ def mainFrit():
     if os.path.exists('.frit/config'):
         try:
             fritConfig = configobj.ConfigObj('.frit/config')
+        except configobj.ParseError,e:
+            fritutils.termout.printWarning('The config file contains error: %s' % e)
+            sys.exit(1)
         except configobj.ConfigObjError:
             fritutils.termout.printWarning('The config file contains errors.')
             sys.exit(1)
