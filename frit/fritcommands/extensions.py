@@ -19,7 +19,10 @@ def extractFile(toExtract,destination):
         os.makedirs(destination)
     if not os.path.exists(destination+extractBasename):
         print 'Extracting "%s" to "%s"' % (toExtract,destination)
-        shutil.copy2(toExtract,destination)
+        try:
+            shutil.copy2(toExtract,destination)
+        except IOError:
+            fritutils.termout.printWarning('Could not copy "%s" due to IO Error.' % toExtract)
 
 
 def factory(Evidences, args):
