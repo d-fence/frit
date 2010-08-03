@@ -95,7 +95,7 @@ def factory(Evidences, args):
                             else:
                                 extPath = ext[1:]
                             basePath = os.path.dirname(filepath)
-                            Destination = os.path.join('.frit/extractions/by_extensions/',evi.configName,fs.configName,extPath,basePath)
+                            Destination = unicode(os.path.join('.frit/extractions/by_extensions/',evi.configName,fs.configName,extPath,basePath))
                             mountedPath = os.path.join(fs.fsMountPoint,filepath)
                             extractFile(mountedPath,Destination)
                     fs.umount('extensions')
