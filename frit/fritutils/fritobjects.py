@@ -168,8 +168,8 @@ class FileSystem(object):
         toReturn = {}
         fsDb = self.getFsDb()
         for fstate in fritModel.FILESTATES:
-            nbFiles = fritModel.elixir.session.query(fritModel.File).filter.(fritModel.File.filesystem==fsDb)
-            nbFiles = nbFiles.filter(fritModel.File.state.has(state=fstate).count()
+            nbFiles = fritModel.elixir.session.query(fritModel.File).filter(fritModel.File.filesystem==fsDb)
+            nbFiles = nbFiles.filter(fritModel.File.state.has(state=fstate)).count()
             toReturn[fstate] = nbFiles
         return toReturn
 
