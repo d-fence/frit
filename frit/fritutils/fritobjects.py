@@ -166,10 +166,10 @@ class FileSystem(object):
         A function to get a count of files belonging to the filesystem
         """
         toReturn = {}
+        fsDb = self.getFsDb()
         for fstate in fritModel.FILESTATES:
-            stateDb = fritModel.elixir.session.query(fritModel.FileState).filter_by(state=fstate).first()
-            fsDb = self.getFsDb()
-            nbFiles = fritModel.elixir.session.query(fritModel.File).filter_by(filesystem=fsDb,state=stateDb).count()
+            nbFiles = fritModel.elixir.session.query(fritModel.File).filter.(fritModel.File.filesystem==fsDb)
+            nbFiles = nbFiles.filter(fritModel.File.state.has(state=fstate).count()
             toReturn[fstate] = nbFiles
         return toReturn
 
