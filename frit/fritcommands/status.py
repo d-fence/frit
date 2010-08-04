@@ -71,10 +71,11 @@ def status(Evidences,args):
     fritutils.termout.printMessage("Frit Database Status:")
     if os.path.exists('.frit/frit.sqlite'):
         for evi in Evidences:
-            fritutils.termout.printMessage('\t' + evi.configName + ':')
+            fritutils.termout.printMessage('\t%s (%s):'% (evi.configName, evi.fileName))
             for fs in evi.fileSystems:
+                fritutils.termout.printMessage('\t\t%s:' % fs.configName)
                 counts = fs.dbCountFiles()
                 for t,c in counts.iteritems():
-                    fritutils.termout.printMessage('\t\t%s files: %d' % (t,c))
+                    fritutils.termout.printMessage('\t\t\t%s files: %d' % (t,c))
     else:
         fritutils.termout.printMessage('No Database found, use the "store create" command to create one')
