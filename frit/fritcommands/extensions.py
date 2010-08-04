@@ -46,13 +46,8 @@ def factory(Evidences, args):
                 extList = []
                 for ex in args:
                     extList.append(fritutils.unicodify(ex))
-            for evi in Evidences:
-                fritutils.termout.printMessage(evi.configName)
-                for fs in evi.fileSystems:
-                    fritutils.termout.printMessage("\t%s" % fs.configName)
-                    for ext in sorted(extList):
-                        nbe = fs.dbCountExtension(ext)
-                        fritutils.termout.printSuccess("\t\t%s : %d (%s)" % (ext, nbe['count'], fritutils.humanize(nbe['size'])))
+            fritModel.listExtensions(Evidences,extList)
+                    
         elif args[0] == 'list':
             args.remove('list')
             if not args or len(args) == 0:
