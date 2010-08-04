@@ -144,6 +144,23 @@ class FileSystem(object):
         cfn = fritutils.unicodify(self.configName)
         return fritModel.elixir.session.query(fritModel.Filesystem).filter_by(configName=cfn, evidence=eviDb).first()
 
+    def dbCountExtension(self, ext):
+        """
+        A function to count a specified extension found on the filesystem
+        """
+        toReturn = {}
+        fso =  self.getFsDb()
+        fq = fritModel.File.query.filter(fritModel.File.filesystem==fso)
+        fq = fq.filter(fritModel.File.state.has(state=u'Normal'))
+        fq = fq.filter(fritModel.File.extension.has(extension=ext))
+        nb = fq.count()
+        size = 0
+        if nb > 0:
+            size=fq.value(func.sum(fritModel.File.filesize))
+        toReturn['count'] = nb
+        toReturn['size'] = size
+        return toReturn
+
     def dbCountFiles(self):
         """
         A function to get a count of files belonging to the filesystem
