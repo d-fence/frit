@@ -80,6 +80,8 @@ def listExtensions(Evidences,extlist):
         for all filsystems of specified Evidences list.
         """
         totalExt = {}
+        for ext in extlist:
+            totalExt[ext] = [0,0]
         grandTotalNb = 0
         grandTotalSize = 0
         for evi in Evidences:
