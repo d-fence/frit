@@ -6,13 +6,29 @@ status command
 import os.path
 import fritutils.termout
 
+def dbStatus(Evidences):
+    fritutils.termout.printMessage("Frit Database Status:")
+    if os.path.exists('.frit/frit.sqlite'):
+        for evi in Evidences:
+            fritutils.termout.printMessage('\t%s (%s):'% (evi.configName, evi.fileName))
+            for fs in evi.fileSystems:
+                fritutils.termout.printMessage('\t\t%s:' % fs.configName)
+                counts = fs.dbCountFiles()
+                for t,c in counts.iteritems():
+                    fritutils.termout.printMessage('\t\t\t%s files: %d' % (t,c))
+    else:
+        fritutils.termout.printMessage('No Database found, use the "store create" command to create one')
+
 def status(Evidences,args):
     """
     Print a status report for all evidences
     """
     clean = False
     if args:
-        if 'clean' in args:
+        if 'database' in args:
+            dbStatus(Evidences)
+            return
+        elif 'clean' in args:
             clean = True
     fritutils.termout.printMessage("Frit Status:")
     for evi in Evidences:
@@ -67,15 +83,4 @@ def status(Evidences,args):
                             fs.umount("clean")
 
 
-    # Now we check the database status
-    fritutils.termout.printMessage("Frit Database Status:")
-    if os.path.exists('.frit/frit.sqlite'):
-        for evi in Evidences:
-            fritutils.termout.printMessage('\t%s (%s):'% (evi.configName, evi.fileName))
-            for fs in evi.fileSystems:
-                fritutils.termout.printMessage('\t\t%s:' % fs.configName)
-                counts = fs.dbCountFiles()
-                for t,c in counts.iteritems():
-                    fritutils.termout.printMessage('\t\t\t%s files: %d' % (t,c))
-    else:
-        fritutils.termout.printMessage('No Database found, use the "store create" command to create one')
+
