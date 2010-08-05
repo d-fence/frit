@@ -23,11 +23,12 @@ class FileSystem(object):
     It have to be overriden for different file systems:
     NTFS, extx, xfs, ...
     """
-    def __init__(self,offset,fsConfigName,evidenceConfigName):
+    def __init__(self,offset,fsConfigName,evidence):
         self.rawImage = ''
         self.offset = offset
+        self.evidenceConfigName = evidence.configName
+        self.evidence = evidence
         self.configName = fsConfigName
-        self.evidenceConfigName = evidenceConfigName
         self.fsMountPoint = os.path.join('.frit','filesystems',self.evidenceConfigName,self.configName)
         self.loopLockFile = self.fsMountPoint + 'looplock'
         self.loopDevice = self.getLoopDevice()
@@ -121,6 +122,58 @@ class FileSystem(object):
         """
         return os.path.ismount(self.fsMountPoint)
 
+    def mountCommand(self):
+        """
+        A function to be overriden by specific mount commands
+        """
+        pass
+    
+    def umountCommand(self):
+        """
+        A function to be overriden by specific umount commands
+        """
+        pass
+
+    def mount(self,locker,reason):
+        """
+        locker is the intermediate extension given to the lockfile.
+        reason is the comment that will be inserted in the lock file.
+        """
+        # We check if the Evidence is mounted
+        # if not, we mount it for the same reason
+        # if yes, we check if we need to lock it
+        if not self.evidence.isMounted():
+            self.evidence.mount(locker,reason)
+        else:
+            if not self.evidence.isLocked(locker):
+                self.evidence.mount(locker,reason)
+            
+        # We create needed dirs
+        self.makeDirs()
+        # if there is no loop device attached, we atatch one
+        self.acquireLoop()
+        # if the file is not already mounted, we mount it
+        if not self.isMounted() and self.loopDevice != '':
+            try:
+                self.mountCommand()
+            except fritutils.fritmount.fritMountError:
+                self.freeLoop()
+                raise
+        # we create the lock to prevent other instances to unmount
+        self.writeLock(locker,reason)
+
+    def umount(self,locker):
+        """
+        A function to unmount the filesystem
+        """
+        #  first we check if the mount is locked by another instance
+        if not self.isOtherLocked(locker):
+            self.umountCommand()
+            if self.loopDevice != '':
+                self.freeLoop()
+        # we remove our lock file
+        self.removeLock(locker)
+
     def listFiles(self):
         if self.isMounted():
             for dirpath, dirs, files in os.walk(self.fsMountPoint):
@@ -197,6 +250,9 @@ class FileSystem(object):
             toYield = os.path.join(fob.fullpath.fullpath[1:],fob.filename)
             yield toYield
 
+    def undelete(self):
+        pass
+
 class NtfsFileSystem(FileSystem):
     """
     Class for the NTFS file system.
@@ -204,36 +260,19 @@ class NtfsFileSystem(FileSystem):
     def getFormat(self):
         return "NTFS"
 
-    def mount(self,locker,reason):
-        """
-        locker is the intermediate extension given to the lockfile.
-        reason is the comment that will be inserted in the lock file.
-        """
-        # We create needed dirs
-        self.makeDirs()
-        # if there is no loop device attached, we atatch one
-        self.acquireLoop()
-        # if the file is not already mounted, we mount it
-        if not self.isMounted() and self.loopDevice != '':
-            try:
-                fritutils.fritmount.ntfs3gMount(self.loopDevice,self.fsMountPoint)
-            except fritutils.fritmount.fritMountError:
-                self.freeLoop()
-                raise
-        # we create the lock to prevent other instances to unmount
-        self.writeLock(locker,reason)
+    def mountCommand(self):
+        fritutils.fritmount.ntfs3gMount(self.loopDevice,self.fsMountPoint)
 
-    def umount(self,locker):
+    def umountCommand(self):
+        fritutils.fritmount.fuserUnmount(self.fsMountPoint)
+       
+    def undelete(self):
         """
-        A function to unmount the filesystem
+        A function to undelete files on NTFS
         """
-        #  first we check if the mount is locked by another instance
-        if not self.isOtherLocked(locker):
-            fritutils.fritmount.fuserUnmount(self.fsMountPoint)
-            if self.loopDevice != '':
-                self.freeLoop()
-        # we remove our lock file
-        self.removeLock(locker)
+        self.mount('undelete','Used by ntfsundelete')
+        print "UNDELETE IN ACTION"
+        self.umount('undelete')
 
 class FatFileSystem(FileSystem):
     """
@@ -242,36 +281,11 @@ class FatFileSystem(FileSystem):
     def getFormat(self):
         return "FAT"
 
-    def mount(self,locker,reason):
-        """
-        locker is the intermediate extension given to the lockfile.
-        reason is the comment that will be inserted in the lock file.
-        """
-        # We create needed dirs
-        self.makeDirs()
-        # if there is no loop device attached, we atach one
-        self.acquireLoop()
-        # if the file is not already mounted, we mount it
-        if not self.isMounted() and self.loopDevice != '':
-            try:
-                fritutils.fritmount.fatMount(self.loopDevice,self.fsMountPoint)
-            except fritutils.fritmount.fritMountError:
-                self.freeLoop()
-                raise
-        # we create the lock to prevent other instances to unmount
-        self.writeLock(locker,reason)
-
-    def umount(self,locker):
-        """
-        A function to unmount the filesystem
-        """
-        #  first we check if the mount is locked by another instance
-        if not self.isOtherLocked(locker):
-            fritutils.fritmount.fatUnmount(self.fsMountPoint)
-            if self.loopDevice != '':
-                self.freeLoop()
-        # we remove our lock file
-        self.removeLock(locker)
+    def mountCommand(self):
+        fritutils.fritmount.fatMount(self.loopDevice,self.fsMountPoint)
+    
+    def umountCommand(self):
+        fritutils.fritmount.fatUnmount(self.fsMountPoint)
 
 class HfsPlusFileSystem(FileSystem):
     """
@@ -280,36 +294,11 @@ class HfsPlusFileSystem(FileSystem):
     def getFormat(self):
         return "HFSPLUS"
 
-    def mount(self,locker,reason):
-        """
-        locker is the intermediate extension given to the lockfile.
-        reason is the comment that will be inserted in the lock file.
-        """
-        # We create needed dirs
-        self.makeDirs()
-        # if there is no loop device attached, we atach one
-        self.acquireLoop()
-        # if the file is not already mounted, we mount it
-        if not self.isMounted() and self.loopDevice != '':
-            try:
-                fritutils.fritmount.hfsplusMount(self.loopDevice,self.fsMountPoint)
-            except fritutils.fritmount.fritMountError:
-                self.freeLoop()
-                raise
-        # we create the lock to prevent other instances to unmount
-        self.writeLock(locker,reason)
-
-    def umount(self,locker):
-        """
-        A function to unmount the filesystem
-        """
-        #  first we check if the mount is locked by another instance
-        if not self.isOtherLocked(locker):
-            fritutils.fritmount.hfsplusUnmount(self.fsMountPoint)
-            if self.loopDevice != '':
-                self.freeLoop()
-        # we remove our lock file
-        self.removeLock(locker)
+    def mountCommand(self):
+        fritutils.fritmount.hfsplusMount(self.loopDevice,self.fsMountPoint)
+    
+    def umountCommand(self):
+        fritutils.fritmount.hfsplusUnmount(self.fsMountPoint)
 
 class ISO9660FileSystem(FileSystem):
     """
@@ -318,36 +307,11 @@ class ISO9660FileSystem(FileSystem):
     def getFormat(self):
         return "ISO9660"
 
-    def mount(self,locker,reason):
-        """
-        locker is the intermediate extension given to the lockfile.
-        reason is the comment that will be inserted in the lock file.
-        """
-        # We create needed dirs
-        self.makeDirs()
-        # if there is no loop device attached, we atach one
-        self.acquireLoop()
-        # if the file is not already mounted, we mount it
-        if not self.isMounted() and self.loopDevice != '':
-            try:
-                fritutils.fritmount.isoMount(self.loopDevice,self.fsMountPoint)
-            except fritutils.fritmount.fritMountError:
-                self.freeLoop()
-                raise
-        # we create the lock to prevent other instances to unmount
-        self.writeLock(locker,reason)
+    def mountCommand(self):
+        fritutils.fritmount.isoMount(self.loopDevice,self.fsMountPoint)
 
-    def umount(self,locker):
-        """
-        A function to unmount the filesystem
-        """
-        #  first we check if the mount is locked by another instance
-        if not self.isOtherLocked(locker):
-            fritutils.fritmount.fuserUnmount(self.fsMountPoint)
-            if self.loopDevice != '':
-                self.freeLoop()
-        # we remove our lock file
-        self.removeLock(locker)
+    def umountCommand(self):
+        fritutils.fritmount.fuserUnmount(self.fsMountPoint)
 
 class Evidence(object):
     """
@@ -517,28 +481,28 @@ def evidencesFromConfig(fritConf,verbose):
                 if FsRegex.search(subkey):
                     if fritConf[key][subkey]['Format'] == 'NTFS':
                         off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = NtfsFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
+                        fs = NtfsFileSystem(offset=off,fsConfigName=subkey,evidence=ev)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t NTFS filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'FAT':
                         off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = FatFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
+                        fs = FatFileSystem(offset=off,fsConfigName=subkey,evidence=ev)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t FAT filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'HFSPLUS':
                         off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = HfsPlusFileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
+                        fs = HfsPlusFileSystem(offset=off,fsConfigName=subkey,evidence=ev)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t HFS+ filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'ISO9660':
                         off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = ISO9660FileSystem(offset=off,fsConfigName=subkey,evidenceConfigName=ev.configName)
+                        fs = ISO9660FileSystem(offset=off,fsConfigName=subkey,evidence=ev)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
