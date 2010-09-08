@@ -75,6 +75,9 @@ def mainFrit():
         
     if command == 'undelete':
         fritcommands.undelete.factory(Evidences, args)
+        
+    if command == 'add':
+        fritcommands.add.factory(Evidences, args)
     
     # Obviously, the given command was not found
     fritutils.termout.printWarning('The "%s" command was not found.' % command)
