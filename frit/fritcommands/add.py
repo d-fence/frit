@@ -30,6 +30,7 @@ def factory(fritConfig, args):
         elif fileName in cfiles:
             fritutils.termout.printWarning("File %s already in config file." % fileName)
         else:
+            evi = None
             cformat = fritutils.containerprobe.detectContainer(fileName)
             if cformat in validContainersFormat:
                 # creating an Evidence object
@@ -40,4 +41,10 @@ def factory(fritConfig, args):
                 elif cformat == 'ewf':
                     # At this moment, the aff supports ewf too !!
                     evi = fritutils.fritobjects.AffEvidence(filename=argPath,configName='tempconfig')
-                fritutils.fritconf.addEvidence(fritConfig,evi)
+                
+                # Now we, if we have an evidence, we mount it and probe it for the contained filesystems
+                if evi:
+                    evi.mount('add','probing for filesystems')
+                    # and now we write the config file
+                    fritutils.fritconf.addEvidence(fritConfig,evi)
+                    evi.umount('add')

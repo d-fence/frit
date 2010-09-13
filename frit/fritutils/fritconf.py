@@ -31,4 +31,4 @@ def addEvidence(fritConfig,Evidence):
     fritConfig[keyName]['Name'] = Evidence.fileName
     fritConfig[keyName]['Format'] = Evidence.getFormat()
     fritConfig.write()
-    
+
