@@ -25,10 +25,25 @@ def getNewEviName(fritConfig):
             return nkey
         num += 1
 
+def getNewFsName(fritConfig,EviKey):
+    FsRegex = re.compile("^Filesystem\d+")
+    oldNum = 0
+    for subkey in fritConfig[EviKey].keys():
+        if FsRegex.search(subkey):
+            num = int(subkey[10:])
+            if num > oldNum:
+                oldNum = num
+    return "Filesystem" + str(oldNum + 1)
+
 def addEvidence(fritConfig,Evidence):
     keyName = getNewEviName(fritConfig)
     fritConfig[keyName] = {}
     fritConfig[keyName]['Name'] = Evidence.fileName
     fritConfig[keyName]['Format'] = Evidence.getFormat()
+    for fs in Evidence.fileSystems:
+        fs.configName = getNewFsName(fritConfig, keyName)
+        fritConfig[keyName][fs.configName] = {}
+        fritConfig[keyName][fs.configName]['Format'] = fs.getFormat()
+        fritConfig[keyName][fs.configName]['Offset'] = fs.offset
     fritConfig.write()
 

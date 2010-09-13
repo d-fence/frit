@@ -10,6 +10,7 @@ import fritutils.termout
 import fritutils.containerprobe
 import fritutils.fritconf
 import fritutils.fritobjects
+import fritutils.fsprobe
 
 def factory(fritConfig, args):
     """
@@ -33,6 +34,7 @@ def factory(fritConfig, args):
             evi = None
             cformat = fritutils.containerprobe.detectContainer(fileName)
             if cformat in validContainersFormat:
+                fritutils.termout.printSuccess('Found that %s is a "%s" container.' % (argPath, cformat))
                 # creating an Evidence object
                 if cformat == 'dd':
                     evi = fritutils.fritobjects.DdEvidence(filename=argPath,configName='tempconfig')
@@ -45,6 +47,17 @@ def factory(fritConfig, args):
                 # Now we, if we have an evidence, we mount it and probe it for the contained filesystems
                 if evi:
                     evi.mount('add','probing for filesystems')
+                    evi.populateRawImage()
+                    fsys = fritutils.fsprobe.getFileSystems(evi.rawImage)
+                    newFs = None
+                    for fs in fsys:
+                        if fs.name == 'NTFS':
+                            newFs = fritutils.fritobjects.NtfsFileSystem(fs.position,'tempconfig',evi)
+                        elif fs.name == 'FAT':
+                            newFs = fritutils.fritobjects.FatFileSystem(fs.position,'tempconfig',evi)
+                        if newFs:
+                            fritutils.termout.printSuccess('\tFound "%s" filesystem at offset %d' % (fs.name, fs.position))
+                            evi.fileSystems.append(newFs)
                     # and now we write the config file
                     fritutils.fritconf.addEvidence(fritConfig,evi)
                     evi.umount('add')

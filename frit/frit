@@ -40,7 +40,7 @@ def mainFrit():
     # The command is not init, so we should find a config file
     if os.path.exists('.frit/config'):
         try:
-            fritConfig = configobj.ConfigObj('.frit/config')
+            fritConfig = configobj.ConfigObj('.frit/config', indent_type='    ' )
         except configobj.ParseError,e:
             fritutils.termout.printWarning('The config file contains error: %s' % e)
             sys.exit(1)
