@@ -14,6 +14,7 @@ import os
 import glob
 import fritutils.termout
 import fritutils.fritmount
+import fritutils.fritundelete
 import fritutils.fritdb as fritModel
 from sqlalchemy import func
 
@@ -32,6 +33,7 @@ class FileSystem(object):
         self.fsMountPoint = os.path.join('.frit','filesystems',self.evidenceConfigName,self.configName)
         self.loopLockFile = self.fsMountPoint + 'looplock'
         self.loopDevice = self.getLoopDevice()
+        self.undeleteDestination = unicode(os.path.join('.frit/extractions/undeleted/',evidence.configName,self.configName))
 
     def getLoopDevice(self):
         if os.path.exists(self.loopLockFile):
@@ -115,6 +117,10 @@ class FileSystem(object):
     def makeDirs(self):
         if not os.path.exists(self.fsMountPoint):
             os.makedirs(self.fsMountPoint)
+
+    def makeUndelDir(self):
+        if not os.path.exists(self.undeleteDestination):
+            os.makedirs(self.undeleteDestination)
 
     def isMounted(self):
         """
@@ -270,8 +276,9 @@ class NtfsFileSystem(FileSystem):
         """
         A function to undelete files on NTFS
         """
+        self.makeUndelDir()
         self.mount('undelete','Used by ntfsundelete')
-        print "UNDELETE IN ACTION"
+        fritutils.fritundelete.NtfsUndelete(self.loopDevice,self.undeleteDestination)
         self.umount('undelete')
 
 class FatFileSystem(FileSystem):

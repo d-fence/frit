@@ -208,14 +208,20 @@ This will extract the corresponding files in the directory
 ".frit/extractions/by_extensions/Evidence#number/filesystem#number/..."
 The fullpath will be reconstructed behind this path.
 
-5.6 status
+5.6 undelete
+
+Perform an undelete on filesystems and store the results in
+'.frit/extractions/undeleted'.
+
+Currently only ntfs is supported.
+
+5.7 status
 
 to be written
 
 6. Future
 
 What is palnned in the future releases:
-- undelete
 - carving
 - file hashing
 - file indexing
