@@ -9,6 +9,7 @@ import fritcommands.status
 import fritcommands.store
 import fritcommands.extensions
 import fritcommands.undelete
+import fritcommands.add
 from fritutils import fritobjects
 
 def mainFrit():
@@ -75,9 +76,11 @@ def mainFrit():
         
     if command == 'undelete':
         fritcommands.undelete.factory(Evidences, args)
+        sys.exit(0)
         
     if command == 'add':
         fritcommands.add.factory(Evidences, args)
+        sys.exit(0)
     
     # Obviously, the given command was not found
     fritutils.termout.printWarning('The "%s" command was not found.' % command)

@@ -514,5 +514,4 @@ def evidencesFromConfig(fritConf,verbose):
 
     if len(Evidences) ==0:
         fritutils.termout.printWarning("No evidences found in config file.")
-        sys.exit(1)
     return Evidences
