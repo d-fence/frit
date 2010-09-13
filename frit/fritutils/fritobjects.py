@@ -186,7 +186,7 @@ class FileSystem(object):
                 for f in files:
                     yield(os.path.join(dirpath,f))
         else:
-            firutils.termout.printWarning('%s is not mounted. Cannot list files.' % self.configName)
+            fritutils.termout.printWarning('%s is not mounted. Cannot list files.' % self.configName)
             sys.exit(1)
 
     def getEviDb(self):
