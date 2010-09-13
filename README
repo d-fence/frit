@@ -113,7 +113,32 @@ The "Filesystem#number" subsection must contain the format of this filesystem
 NTFS and vfat) and the offset in bytes where to find this filesystem on the
 image.
 
-5.2 mount
+5.2 add
+
+The "add" command is used to add an evidence to the config file, without
+manually edit this config file.
+
+The arguments to the "add" command are file names of the evidences that
+you want to add.
+
+Frit will try to identify wich kind of container it is.
+Then it will mount the container and try to probe for the filesystems
+that are present in this container.
+
+At this moment, Frit is able to recognize thos containers:
+- raw DD
+- AFF
+- EWF
+
+The filesystems recognized are:
+- NTFS
+- FAT
+
+The partitioning schemes recognized are:
+- MSDOS partition types
+- No partitioning at all
+
+5.3 mount
 
 The "mount" command will mount each filesystem from each evidence.
 It's useful to test that your configuration file is working.
@@ -126,7 +151,7 @@ If you are only intersted in mounting containers to access a raw image,
 for example to use a carving tool on the raw image, you can use the "mount
 containers" command.
 
-5.3 store
+5.4 store
 
 Frit use a sqlite3 database to store various elements about the files.
 The database itself is a simple slite file stored in ".frit/frit.sqlite".
@@ -148,7 +173,7 @@ Use the "store update" command for this purpose.
 Once you added the new evidence in your config file, use:
 $ frit store update
 
-5.4 extensions
+5.5 extensions
 
 The extension command is used to manipulate files based on their extensions.
 This command has to be used after the "store init" command is finished.
@@ -183,7 +208,7 @@ This will extract the corresponding files in the directory
 ".frit/extractions/by_extensions/Evidence#number/filesystem#number/..."
 The fullpath will be reconstructed behind this path.
 
-5.5 status
+5.6 status
 
 to be written
 
