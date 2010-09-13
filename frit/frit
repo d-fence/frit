@@ -79,7 +79,7 @@ def mainFrit():
         sys.exit(0)
         
     if command == 'add':
-        fritcommands.add.factory(Evidences, args)
+        fritcommands.add.factory(fritConfig, args)
         sys.exit(0)
     
     # Obviously, the given command was not found

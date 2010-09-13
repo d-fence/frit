@@ -382,6 +382,9 @@ class Evidence(object):
         pass
 
 class DdEvidence(Evidence):
+    def getFormat(self):
+        return 'dd'
+        
     def populateRawImage(self):
         """
         This function populate the raw image filename to all filesystems of the Evidence.
@@ -392,6 +395,9 @@ class DdEvidence(Evidence):
             fs.rawImage = self.rawImage   
 
 class AffEvidence(Evidence):
+    def getFormat(self):
+        return 'aff'
+        
     def isMounted(self):
         return os.path.ismount(self.containerMountPoint)
             

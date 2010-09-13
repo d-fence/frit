@@ -23,4 +23,4 @@ def detectContainer(containerFile):
     elif buf[0:3] == 'EVF':
         return 'ewf'
         
-    return 'raw'   
+    return 'dd'   
