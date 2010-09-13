@@ -77,7 +77,7 @@ def store(Evidences, args):
     """
     args are the store command arguments
     """
-    validArgs = ('create', 'update', 'dump')
+    validArgs = ('create', 'update', 'dump', 'undeleted')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('store command need at least an argument')
         sys.exit(1)
@@ -95,6 +95,11 @@ def store(Evidences, args):
             if not os.path.exists(fritutils.fritdb.DBFILE):
                 fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
             else:
-                update(Evidences)            
+                update(Evidences)
+        if args[0] == 'undeleted':
+            if not os.path.exists(fritutils.fritdb.DBFILE):
+                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
+            else:
+                storeUndeleted(Evidences)
                 
 
