@@ -20,5 +20,7 @@ def detectContainer(containerFile):
     # search if it's an AFF image
     if buf[0:3] == 'AFF':
         return 'aff'
+    elif buf[0:3] == 'EVF':
+        return 'ewf'
         
     return 'raw'   
