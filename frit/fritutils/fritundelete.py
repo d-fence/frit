@@ -14,7 +14,7 @@ NTFSUNDELETE = '/usr/sbin/ntfsundelete'
 def NtfsUndelete(lodevice,destination):
     fritutils.termout.printMessage('\tNTFS Undeleting "%s" to "%s".' % (lodevice,destination))
     ntfsundelete = subprocess.Popen([NTFSUNDELETE, '-p', '100', '-u', '-m', '*', '-d', destination, '-f', lodevice])
-    afmount.wait()
-    if afmount.returncode > 0:
+    ntfsundelete.wait()
+    if ntfsundelete.returncode > 0:
         print "Error with ntfsundelete"
     print "Successful undelete."
