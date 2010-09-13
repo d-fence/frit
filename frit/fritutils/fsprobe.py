@@ -273,8 +273,11 @@ def getFileSystems(fname):
     # begining of the file.
     if len(FileSystems) == 0:
         fs = detectFs(fname, 0)
+        if fs:
+            FileSystems.append(fs)
+        return FileSystems
     else:
-            return FileSystems
+        return FileSystems
 
 if __name__ == '__main__':
     fname = sys.argv[1]

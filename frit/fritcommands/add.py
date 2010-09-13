@@ -43,7 +43,7 @@ def factory(fritConfig, args):
                 elif cformat == 'ewf':
                     # At this moment, the aff supports ewf too !!
                     evi = fritutils.fritobjects.AffEvidence(filename=argPath,configName='tempconfig')
-                
+
                 # Now we, if we have an evidence, we mount it and probe it for the contained filesystems
                 if evi:
                     evi.mount('add','probing for filesystems')
