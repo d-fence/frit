@@ -189,6 +189,11 @@ class FileSystem(object):
             fritutils.termout.printWarning('%s is not mounted. Cannot list files.' % self.configName)
             sys.exit(1)
 
+    def listUndeleted(self):
+        for dirpath, dirs, files in os.walk(self.undeleteDestination):
+            for f in files:
+                yield(os.path.join(dirpath,f))
+
     def getEviDb(self):
         """
         A function that return the Evidence model object for this filesystem

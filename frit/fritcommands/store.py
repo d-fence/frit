@@ -73,6 +73,58 @@ def update(Evidences):
                     fs.umount("store")
             evi.umount("store")
 
+def storeUndeleted(Evidences):
+    """
+    A function to store the metadata of undeleted files.
+    Here we don't need to mount anything.
+    """
+    for evi in Evidences:
+        # evidence creation in the database
+        EviDb = fritModel.Evidence.query.filter_by(name=fritutils.unicodify(evi.fileName)).first()
+        if not EviDb:
+            EviDb = fritModel.Evidence(name=fritutils.unicodify(evi.fileName),configName=fritutils.unicodify(evi.configName))
+        for fs in evi.fileSystems:
+            # filesystem creation in the database
+            FsDb = fritModel.Filesystem.query.filter_by(evidence=EviDb,configName=fritutils.unicodify(fs.configName)).first()
+            if not FsDb:
+                FsDb = fritModel.Filesystem(evidence=EviDb,configName=fritutils.unicodify(fs.configName))
+
+            nbFiles = 0
+            fritutils.termout.printNormal('Start inserting undeleted files metadata in database for "%s"\n' % fs.configName)
+            for f in fs.listUndeleted():                                    
+                fsize = 0
+                try:
+                    fsize = os.path.getsize(f)
+                except:
+                    print >> sys.stderr, "ERROR GETTING SIZE OF: %s\n" % f
+                fname,ext = os.path.splitext(f)
+                ext = fritutils.unicodify(ext.lower())
+                if ext == '':
+                    ext = u'No Extension'
+                nbFiles += 1
+                dname = fritutils.unicodify(os.path.dirname(f))
+                bname = fritutils.unicodify(os.path.basename(f))
+                Ext = fritModel.Extension.query.filter_by(extension=ext).first()
+                if not Ext:
+                    Ext = fritModel.Extension(extension=ext)
+                Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
+                if not Fpath:
+                    Fpath = fritModel.FullPath(fullpath=dname)
+                
+                fstate = fritModel.FileState.query.filter_by(state=u'Undeleted').first()
+                nFile = fritModel.File.query.filter_by(evidence=EviDb,filesystem=FsDb,filename=bname,fullpath=Fpath,state=fstate).first()
+                if not nFile:
+                    nFile = fritModel.File(evidence=EviDb,filesystem=FsDb)
+                nFile.state = fstate
+                nFile.filename = bname
+                nFile.filesize = fsize
+                nFile.fullpath = Fpath
+                nFile.extension = Ext
+                                       
+                fritModel.elixir.session.commit()
+                print "\t%s : %d\r" % (fs.configName,nbFiles),           
+        print "\n"
+
 def store(Evidences, args):
     """
     args are the store command arguments
