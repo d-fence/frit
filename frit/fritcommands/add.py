@@ -46,18 +46,22 @@ def factory(fritConfig, args):
 
                 # Now we, if we have an evidence, we mount it and probe it for the contained filesystems
                 if evi:
-                    evi.mount('add','probing for filesystems')
-                    evi.populateRawImage()
-                    fsys = fritutils.fsprobe.getFileSystems(evi.rawImage)
-                    newFs = None
-                    for fs in fsys:
-                        if fs.name == 'NTFS':
-                            newFs = fritutils.fritobjects.NtfsFileSystem(fs.position,'tempconfig',evi)
-                        elif fs.name == 'FAT':
-                            newFs = fritutils.fritobjects.FatFileSystem(fs.position,'tempconfig',evi)
-                        if newFs:
-                            fritutils.termout.printSuccess('\tFound "%s" filesystem at offset %d' % (fs.name, fs.position))
-                            evi.fileSystems.append(newFs)
-                    # and now we write the config file
-                    fritutils.fritconf.addEvidence(fritConfig,evi)
-                    evi.umount('add')
+                    try:
+                        evi.mount('add','probing for filesystems')
+                    except:
+                        fritutils.termout.printWarning('Unable to mount %s' % evi.configName)
+                    if evi.isMounted():
+                        evi.populateRawImage()
+                        fsys = fritutils.fsprobe.getFileSystems(evi.rawImage)
+                        newFs = None
+                        for fs in fsys:
+                            if fs.name == 'NTFS':
+                                newFs = fritutils.fritobjects.NtfsFileSystem(fs.position,'tempconfig',evi)
+                            elif fs.name == 'FAT':
+                                newFs = fritutils.fritobjects.FatFileSystem(fs.position,'tempconfig',evi)
+                            if newFs:
+                                fritutils.termout.printSuccess('\tFound "%s" filesystem at offset %d' % (fs.name, fs.position))
+                                evi.fileSystems.append(newFs)
+                        # and now we write the config file
+                        fritutils.fritconf.addEvidence(fritConfig,evi)
+                        evi.umount('add')
