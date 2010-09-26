@@ -179,6 +179,8 @@ class FileSystem(object):
                 self.freeLoop()
         # we remove our lock file
         self.removeLock(locker)
+        # The caller have to umount the container by itself.
+        # We have some race condition if we try to do it here.
 
     def listFiles(self):
         if self.isMounted():
@@ -457,7 +459,7 @@ class AffEvidence(Evidence):
                 elif fs.isOtherLocked(locker):
                     # Not safe to unmount container because locked by another thing
                     safeToUnmount = False
-            if safeToUnmount:   
+            if safeToUnmount:
                 fritutils.fritmount.fuserUnmount(self.containerMountPoint)
             else:
                 fritutils.termout.printWarning('\tSome filsystems are still in use, not unmounting %s' % self.fileName)
