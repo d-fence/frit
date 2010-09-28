@@ -331,6 +331,20 @@ class ISO9660FileSystem(FileSystem):
     def umountCommand(self):
         fritutils.fritmount.fuserUnmount(self.fsMountPoint)
 
+class Ext2FileSystem(FileSystem):
+    """
+    Class for the EXT 2/3 file system.
+    """
+    def getFormat(self):
+        return "EXT2/3"
+
+    def mountCommand(self):
+        fritutils.fritmount.ext2Mount(self.loopDevice,self.fsMountPoint)
+
+    def umountCommand(self):
+        fritutils.fritmount.fuserUnmount(self.fsMountPoint)
+       
+
 class Evidence(object):
     """
     This is the basic class for evidence files.

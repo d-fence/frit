@@ -31,6 +31,7 @@ LOSETUP = '/sbin/losetup'
 SUDO = '/usr/bin/sudo'
 MOUNT = '/bin/mount'
 UMOUNT = '/bin/umount'
+FUSEEXT2 = '/usr/bin/fuseext2'
 
 class fritMountError(Exception):
     def __init__(self,errorString):
@@ -145,3 +146,13 @@ def isoMount(loopDevice,mountpoint):
     isomount.wait()
     if isomount.returncode > 0:
         raise fritMountError('Unable to mount the ISO 9660 filesystem "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(isomount.returncode)))
+
+def ext2Mount(loopDevice,mountpoint):
+    fritutils.termout.printMessage('\tMounting "%s" with fuseext2 on "%s"' % (loopDevice,mountpoint))
+    uid = str(os.getuid())
+    gid = str(os.getgid())
+    options = 'ro,noatime,allow_other,uid=' + uid + ',gid=' + gid
+    ext2mount = subprocess.Popen([FUSEEXT2, '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    ext2mount.wait()
+    if ext2mount.returncode > 0:
+        raise fritMountError('Unable to mount the EXT2/3 partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ext2mount.returncode)))
