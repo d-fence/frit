@@ -71,7 +71,7 @@ Be aware of the security risk.
 5. Usage
 
 Frit is a command line tool. The synospis is:
-frit COMMAND ARGS
+frit COMMAND ARGS [EvidenceX/File Name] [EvidenceY/File Name] ...
 
 5.1 Init
 
@@ -218,6 +218,23 @@ Currently only ntfs is supported.
 5.7 status
 
 to be written
+
+5.8 Specify an evidence
+
+You can specify on which Evidence(s) you want to work on the command line.
+For example, if you want to mount only the "Evidence3" and their filesystems,
+you can use this command:
+
+$ frit mount Evidence3
+
+You could also specify multiple ones. For example, this command will count
+.xls .doc and .jpg extensions for Evidence3 and Evidence 5:
+
+$ frit extensions count .xls .doc .jpg Evidence3 Evidence5
+
+It's also possible to specify an Evidence by its file name like this:
+
+$ frit store update my_nice_container.ewf
 
 6. Future
 
