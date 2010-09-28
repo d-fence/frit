@@ -26,7 +26,7 @@ def mainFrit():
     # we have to work on this :-)
     if args:
         if '-v' in args:
-            args = args.pop('-v')
+            args.remove('-v')
             verbose = True
     # If the command is init, just do it
     if command == 'init':
@@ -52,7 +52,21 @@ def mainFrit():
         sys.exit(1)
     # Here we try to map evidences from config file to Evidence objects
     Evidences = fritobjects.evidencesFromConfig(fritConfig, verbose=verbose)
-
+    # Here we check if one ore more evidence names or evidence file names are
+    # passed as an arguemnt, which means that the user only wants to work on
+    # them
+    if args:
+        specifiedEvidences = []
+        for evi in Evidences:
+            if evi.configName in args:
+                args.remove(evi.configName)
+                specifiedEvidences.append(evi)
+            elif evi.fileName in args:
+                args.remove(evi.fileName)
+                specifiedEvidences.append(evi)
+        if len(specifiedEvidences) > 0:
+            Evidences = specifiedEvidences
+        
     # user isued a mount command
     if command == 'mount':
         fritcommands.mount.mountCommand(Evidences,args)
