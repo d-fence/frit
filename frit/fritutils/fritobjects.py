@@ -60,9 +60,13 @@ class FileSystem(object):
             self.writeLoopLock()
 
     def freeLoop(self):
-        fritutils.fritmount.detachLoopDevice(self.loopDevice)
-        self.loopDevice = ''
-        self.delLoopLock()
+        try:
+            fritutils.fritmount.detachLoopDevice(self.loopDevice)
+        except fritutils.fritmount.fritMountError:
+            fritutils.termout.printWarning('Filesystem %s was not able to detach itself from %s' % (self.rawimage, self.loopDevice))
+        finally:
+            self.loopDevice = ''
+            self.delLoopLock()
 
     def getLockFile(self,locker):
         """
