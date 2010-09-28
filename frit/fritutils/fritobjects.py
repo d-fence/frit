@@ -498,7 +498,7 @@ def evidencesFromConfig(fritConf,verbose):
     Evidences = []
     EviRegex = re.compile("^Evidence\d+")
     FsRegex = re.compile("^Filesystem\d+")
-    ValidFileSystems = ('FAT','NTFS','ISO9660','HFSPLUS')
+    ValidFileSystems = ('FAT','NTFS','ISO9660','HFSPLUS','EXT2/3')
     ev = ''
     for key in fritConf.keys():
         if EviRegex.search(key):
@@ -545,6 +545,13 @@ def evidencesFromConfig(fritConf,verbose):
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t ISO 9660 filesystem Found at offset %d." % fs.offset)
+                    elif fritConf[key][subkey]['Format'] == 'EXT2/3':
+                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
+                        fs = Ext2FileSystem(offset=off,fsConfigName=subkey,evidence=ev)
+                        ev.fileSystems.append(fs)
+                        ev.populateRawImage()
+                        if verbose:
+                            fritutils.termout.printSuccess("\t\t EXT2/3 filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] not in ValidFileSystems:
                         fritutils.termout.printWarning("%s This filesystem type (%s) is unknow by frit." % (ev.configName,fritConf[key][subkey]['Format']))
 
