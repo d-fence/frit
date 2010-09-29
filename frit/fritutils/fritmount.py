@@ -151,7 +151,7 @@ def ext2Mount(loopDevice,mountpoint):
     fritutils.termout.printMessage('\tMounting "%s" with fuseext2 on "%s"' % (loopDevice,mountpoint))
     uid = str(os.getuid())
     gid = str(os.getgid())
-    options = 'ro,noatime,allow_other,uid=' + uid + ',gid=' + gid
+    options = 'ro,noatime,allow_other,uid=' + uid + ',gid=' + gid + ',modules=iconv,from_code=UTF-8,to_code=UTF-8'
     ext2mount = subprocess.Popen([FUSEEXT2, '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     ext2mount.wait()
     if ext2mount.returncode > 0:
