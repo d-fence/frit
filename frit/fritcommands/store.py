@@ -125,11 +125,26 @@ def storeUndeleted(Evidences):
                 print "\t%s : %d\r" % (fs.configName,nbFiles),           
         print "\n"
 
+def storeClear(Evidences):
+    """
+    A function to delete records for specified Evidences
+    """
+    for evi in Evidences:
+        eviNb = 0
+        for fs in evi.fileSystems:
+            fso =  fs.getFsDb()          
+            fq = fritModel.File.query.filter(fritModel.File.filesystem==fso)
+            nb = fq.count()
+            fritutils.termout.printNormal('Deleting %d records for %s / %s' % (nb,evi.configName,fs.configName))
+            fq.delete()
+            fritModel.elixir.session.commit()
+            fp = fritModel.FullPath.query.join(fritModel.File.filesystem).filter(fritModel.File.filesystem==fso)
+
 def store(Evidences, args):
     """
     args are the store command arguments
     """
-    validArgs = ('create', 'update', 'dump', 'undeleted')
+    validArgs = ('create', 'update', 'dump', 'undeleted', 'clear')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('store command need at least an argument')
         sys.exit(1)
@@ -153,5 +168,9 @@ def store(Evidences, args):
                 fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
             else:
                 storeUndeleted(Evidences)
-                
+        if args[0] == 'clear':
+            if not os.path.exists(fritutils.fritdb.DBFILE):
+                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
+            else:
+                storeClear(Evidences)
 
