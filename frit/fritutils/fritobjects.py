@@ -63,7 +63,7 @@ class FileSystem(object):
         try:
             fritutils.fritmount.detachLoopDevice(self.loopDevice)
         except fritutils.fritmount.fritMountError:
-            fritutils.termout.printWarning('Filesystem %s was not able to detach itself from %s' % (self.rawimage, self.loopDevice))
+            fritutils.termout.printWarning('Filesystem %s was not able to detach itself from %s' % (self.rawImage, self.loopDevice))
         finally:
             self.loopDevice = ''
             self.delLoopLock()
