@@ -424,7 +424,11 @@ class DdEvidence(Evidence):
         """
         self.rawImage = self.fileName
         for fs in self.fileSystems:
-            fs.rawImage = self.rawImage   
+            fs.rawImage = self.rawImage 
+    
+    def isMounted(self):
+        # as the file exists, it like if it is always mounted
+        return True
 
 class AffEvidence(Evidence):
     def getFormat(self):
