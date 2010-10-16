@@ -180,6 +180,17 @@ def detectNtfs(buf):
     fs = FileSystem(name="NTFS")
     return fs
 
+def detectIso9660(buf):
+    if buf[32769:32774] != "CD001":
+        return None
+    # NSR0 means UDF filesystem
+    if buf[38913:38917] == "NSR0":
+        return None
+    
+    fs = FileSystem(name="ISO9660")
+    return fs
+    
+
 def detectFs(fname,position):
     buf = getBuffer(fname, position, 512)
     fs = detectFat(buf)
@@ -187,6 +198,12 @@ def detectFs(fname,position):
         fs.setPosition(position)
         return fs
     fs = detectNtfs(buf)
+    if fs:
+        fs.setPosition(position)
+        return fs
+    
+    buf = getBuffer(fname, position, 39424)
+    fs = detectIso9660(buf)
     if fs:
         fs.setPosition(position)
         return fs

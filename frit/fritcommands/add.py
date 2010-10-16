@@ -59,6 +59,8 @@ def factory(fritConfig, args):
                                 newFs = fritutils.fritobjects.NtfsFileSystem(fs.position,'tempconfig',evi)
                             elif fs.name == 'FAT':
                                 newFs = fritutils.fritobjects.FatFileSystem(fs.position,'tempconfig',evi)
+                            elif fs.name == 'ISO9660':
+                                newFs = fritutils.fritobjects.ISO9660FileSystem(fs.position,'tempconfig',evi)
                             if newFs:
                                 fritutils.termout.printSuccess('\tFound "%s" filesystem at offset %d' % (fs.name, fs.position))
                                 evi.fileSystems.append(newFs)
