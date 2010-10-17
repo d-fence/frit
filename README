@@ -21,6 +21,7 @@ elixir (python-elixir)
 sqlaclhemy (python-sqlalchemy)
 configobj (python-configobj)
 fuse iso (fuse-iso)
+libpff (not yet in debian repositories)
 
 3. Installation
 
@@ -215,11 +216,16 @@ Perform an undelete on filesystems and store the results in
 
 Currently only ntfs is supported.
 
-5.7 status
+5.7 getmails
+
+Search for PST outlook mailboxes files and extract their mails and
+attachments using libpff.
+
+5.8 status
 
 to be written
 
-5.8 Specify an evidence
+5.9 Specify an evidence
 
 You can specify on which Evidence(s) you want to work on the command line.
 For example, if you want to mount only the "Evidence3" and their filesystems,
