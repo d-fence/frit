@@ -10,6 +10,7 @@ import fritcommands.store
 import fritcommands.extensions
 import fritcommands.undelete
 import fritcommands.add
+import fritcommands.getmails
 from fritutils import fritobjects
 
 def mainFrit():
@@ -94,6 +95,10 @@ def mainFrit():
         
     if command == 'add':
         fritcommands.add.factory(fritConfig, args)
+        sys.exit(0)
+    
+    if command == 'getmails':
+        fritcommands.getmails.factory(Evidences, args)
         sys.exit(0)
     
     # Obviously, the given command was not found
