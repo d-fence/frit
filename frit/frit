@@ -49,7 +49,7 @@ def mainFrit():
             fritutils.termout.printWarning('The config file contains errors.')
             sys.exit(1)
     else:
-        fritutils.termout.printWarning('No ".frit/config" foud. Run "frit init" first."')
+        fritutils.termout.printWarning('No ".frit/config" found. Run "frit init" first."')
         sys.exit(1)
     # Here we try to map evidences from config file to Evidence objects
     Evidences = fritobjects.evidencesFromConfig(fritConfig, verbose=verbose)
