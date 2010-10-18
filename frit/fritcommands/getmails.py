@@ -10,6 +10,7 @@ import fritutils.termout
 import fritutils.fritobjects
 import fritutils.fritdb as fritModel
 import fritutils.fritemails
+import fritutils.fritprobe
 
 def factory(Evidences,args):
     for evi in Evidences:
@@ -18,12 +19,17 @@ def factory(Evidences,args):
             # Working on normal files first
             for filepath in fs.ExtensionsOriginalFiles(u'.pst'):
                 exportPath = os.path.join('.frit/extractions/emails/outlook/', filepath)
+                pathToCreate = os.path.join('.frit/extractions/emails/outlook/', os.path.split(filepath)[0])
                 pstPath = os.path.join(fs.fsMountPoint, filepath)
                 if os.path.isdir(exportPath + '.export'):
                     fritutils.termout.printWarning('Extraction path already exists. Not exporting.')
                 else:
                     fs.mount('getmails', 'Extracting Outlook emails')
-                    fritutils.fritemails.pffExport(pstPath,exportPath)
+                    if fritutils.fritprobe.pffProbe(pstPath):
+                        os.makedirs(pathToCreate)
+                        fritutils.fritemails.pffExport(pstPath,exportPath)
+                    else:
+                        fritutils.termout.printWarning('%s is not a PFF file.' % pstPath)
                     fs.umount('getmails')
             
             # Working on undeleted filesize
