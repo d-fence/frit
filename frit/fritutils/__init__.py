@@ -83,3 +83,15 @@ def unicodify(x):
         print >> sys.stderr, "ERROR TRANSCODING %s TO UNICODE" % x
         y = x
     return y
+
+def getBuffer(fname,pos,size):
+    """
+    Get a buffer from a filename starting at position pos
+    with a size of size.
+    """
+    # should check if file exists first and what kind of filename
+    fic = open(fname,"rb")
+    fic.seek(pos)
+    buf = fic.read(size)
+    fic.close()
+    return buf
