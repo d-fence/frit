@@ -11,6 +11,7 @@ import fritcommands.extensions
 import fritcommands.undelete
 import fritcommands.add
 import fritcommands.getmails
+import fritcommands.hashes
 from fritutils import fritobjects
 
 def mainFrit():
@@ -99,6 +100,10 @@ def mainFrit():
     
     if command == 'getmails':
         fritcommands.getmails.factory(Evidences, args)
+        sys.exit(0)
+        
+    if command == 'hashes':
+        fritcommands.hashes.factory(Evidences, args)
         sys.exit(0)
     
     # Obviously, the given command was not found
