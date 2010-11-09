@@ -92,6 +92,18 @@ def md5search(md5list):
             else:
                 fritutils.termout.printNormal("%s NOT FOUND" % x)
 
+def sha1search(sha1list):
+    for x in sha1list:
+        if len(x) < 3:
+            fritutils.termout.printWarning('"%s" is too short to be searched for.' % x)
+        else:
+            Sha1s = fritModel.Sha1.query.filter(fritModel.Sha1.sha1.like(unicode(x + '%'))).first()
+            if Sha1s:
+                for f in Sha1s.files:
+                    fritutils.termout.printNormal("%s %s %s %s" % ( f.sha1.sha1, f.evidence.configName, f.filesystem.configName,f.filename))
+            else:
+                fritutils.termout.printNormal("%s NOT FOUND" % x)
+
 def factory(Evidences,args):
     """
     args are the hashes command arguments
@@ -113,3 +125,10 @@ def factory(Evidences,args):
                 sys.exit(1)
             else:
                 md5search(args)
+        if args[0] == 'sha1search':
+            args.remove('sha1search')
+            if len(args) < 1:
+                fritutils.termout.printWarning('sha1search command need at least one sha1 to search for.')
+                sys.exit(1)
+            else:
+                sha1search(args)
