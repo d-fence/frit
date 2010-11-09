@@ -209,23 +209,60 @@ This will extract the corresponding files in the directory
 ".frit/extractions/by_extensions/Evidence#number/filesystem#number/..."
 The fullpath will be reconstructed behind this path.
 
-5.6 undelete
+5.6 hashes
+
+This command is used to manipulate file hashes in frit environment.
+This command need arguments.
+To manipulate hashes, you first need to have a initial database, so you need
+to use the store command first.
+$ frit store create
+
+5.6.1 Update the database
+
+The update command will calculates md5, sha1, sha256 and ssdeep hashes for all
+files and update the database.
+
+$ frit hashes update
+
+5.6.2 Searching for hashes
+
+You can search for md5 like this:
+$ frit hashes md5search a743b
+
+This command will search for a md5 hash begining by "a743b".
+A hash to search have at least to be 3 characters long.
+sha1 and sha256 can be searched with sha1search and sha256search
+
+5.6.3 Searching for ssdeep hashes
+
+to be done
+
+5.6.4 csv dump of database
+
+You can dump the all database with this command:
+$ frit hashes csvdump
+
+It will dump the db like this:
+Evidence name, File system name ,file name , md5 hash, sha1 hash, sha256 hash, 
+ssdeep hash
+
+5.7 undelete
 
 Perform an undelete on filesystems and store the results in
 '.frit/extractions/undeleted'.
 
 Currently only ntfs is supported.
 
-5.7 getmails
+5.8 getmails
 
 Search for PST outlook mailboxes files and extract their mails and
 attachments using libpff.
 
-5.8 status
+5.9 status
 
 to be written
 
-5.9 Specify an evidence
+5.10 Specify an evidence
 
 You can specify on which Evidence(s) you want to work on the command line.
 For example, if you want to mount only the "Evidence3" and their filesystems,
