@@ -244,7 +244,7 @@ $ frit hashes csvdump
 
 It will dump the db like this:
 Evidence name, File system name ,file name , md5 hash, sha1 hash, sha256 hash, 
-ssdeep hash
+ssdeep hash, file state
 
 5.7 undelete
 

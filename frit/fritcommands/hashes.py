@@ -11,6 +11,45 @@ import fritutils.fritobjects
 import fritutils.fritdb as fritModel
 import fritutils.frithashes
 
+def updateDb(dbFile,hmd5,hsha1,hsha256,hssdeep):
+    fname = os.path.join(dbFile.fullpath.fullpath,dbFile.filename)
+    if not dbFile.md5:
+        nMd5 = fritModel.Md5.query.filter_by(md5=hmd5).first()
+        if not nMd5:
+            nMd5 = fritModel.Md5()
+            nMd5.md5 = hmd5
+        nMd5.files.append(dbFile)
+        fritModel.elixir.session.commit()
+    else:
+        fritutils.termout.printWarning('Md5 for "%s" is already in database.' % fname)
+    if not dbFile.sha1:
+        nSha1 = fritModel.Sha1.query.filter_by(sha1=hsha1).first()
+        if not nSha1:
+            nSha1 = fritModel.Sha1()
+            nSha1.sha1 = hsha1
+        nSha1.files.append(dbFile)
+        fritModel.elixir.session.commit()
+    else:
+        fritutils.termout.printWarning('Sha1 for "%s" is already in database.' % fname)
+    if not dbFile.sha256:
+        nSha256 = fritModel.Sha256.query.filter_by(sha256=hsha256).first()
+        if not nSha256:
+            nSha256 = fritModel.Sha256()
+            nSha256.sha256 = hsha256
+        nSha256.files.append(dbFile)
+        fritModel.elixir.session.commit()
+    else:
+        fritutils.termout.printWarning('Sha256 for "%s" is already in database.' % fname)
+    if not dbFile.ssdeep:
+        nSsdeep = fritModel.Ssdeep.query.filter_by(ssdeep=hssdeep).first()
+        if not nSsdeep:
+            nSsdeep = fritModel.Ssdeep()
+            nSsdeep.ssdeep = hssdeep
+        nSsdeep.files.append(dbFile)
+        fritModel.elixir.session.commit()
+    else:
+        fritutils.termout.printWarning('Ssdeep for "%s" is already in database.' % fname)
+
 def update(Evidences):
     # First we check if the database exists
     if not os.path.exists(fritModel.DBFILE):
@@ -42,42 +81,9 @@ def update(Evidences):
                 if not nFile:
                     fritutils.termout.printWarning('This file cannot be found in database: %s' % (dname + '/' + bname))
                 else:
-                    if not nFile.md5:
-                        nMd5 = fritModel.Md5.query.filter_by(md5=hashes[0]).first()
-                        if not nMd5:
-                            nMd5 = fritModel.Md5()
-                            nMd5.md5 = hashes[0]
-                        nMd5.files.append(nFile)
-                        fritModel.elixir.session.commit()
-                    else:
-                        fritutils.termout.printWarning('Md5 for "%s" is already in database.' % (dname + '/' + bname))
-                    if not nFile.sha1:
-                        nSha1 = fritModel.Sha1.query.filter_by(sha1=hashes[1]).first()
-                        if not nSha1:
-                            nSha1 = fritModel.Sha1()
-                            nSha1.sha1 = hashes[1]
-                        nSha1.files.append(nFile)
-                        fritModel.elixir.session.commit()
-                    else:
-                        fritutils.termout.printWarning('Sha1 for "%s" is already in database.' % (dname + '/' + bname))
-                    if not nFile.sha256:
-                        nSha256 = fritModel.Sha256.query.filter_by(sha256=hashes[2]).first()
-                        if not nSha256:
-                            nSha256 = fritModel.Sha256()
-                            nSha256.sha256 = hashes[2]
-                        nSha256.files.append(nFile)
-                        fritModel.elixir.session.commit()
-                    else:
-                        fritutils.termout.printWarning('Sha256 for "%s" is already in database.' % (dname + '/' + bname))
-                    if not nFile.ssdeep:
-                        nSsdeep = fritModel.Ssdeep.query.filter_by(ssdeep=hashes[3]).first()
-                        if not nSsdeep:
-                            nSsdeep = fritModel.Ssdeep()
-                            nSsdeep.ssdeep = hashes[3]
-                        nSsdeep.files.append(nFile)
-                        fritModel.elixir.session.commit()
-                    else:
-                        fritutils.termout.printWarning('Ssdeep for "%s" is already in database.' % (dname + '/' + bname))
+                    updateDb(nFile,hashes[0],hashes[1],hashes[2],hashes[3])
+            for f in fs.listUndeleted():
+                print f
             fs.umount('hashes')
 
 def md5search(md5list):
@@ -122,7 +128,10 @@ def csvdump(Evidences):
             fso =  fs.getFsDb()          
             fq = fritModel.File.query.filter(fritModel.File.filesystem==fso)
             for f in fq:
-                fritutils.termout.printNormal("%s,%s,%s,%s,%s,%s,%s" % (f.evidence.configName, f.filesystem.configName, f.filename, f.md5.md5, f.sha1.sha1, f.sha256.sha256, f.ssdeep.ssdeep))
+                fritutils.termout.printNormal("%s,%s,%s,%s,%s,%s,%s,%s" % \
+                (f.evidence.configName, f.filesystem.configName, f.filename,\
+                 f.md5.md5, f.sha1.sha1, f.sha256.sha256, f.ssdeep.ssdeep,
+                 f.state.state))
 
 def factory(Evidences,args):
     """
