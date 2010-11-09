@@ -104,11 +104,31 @@ def sha1search(sha1list):
             else:
                 fritutils.termout.printNormal("%s NOT FOUND" % x)
 
+def sha256search(sha256list):
+    for x in sha256list:
+        if len(x) < 3:
+            fritutils.termout.printWarning('"%s" is too short to be searched for.' % x)
+        else:
+            Sha256s = fritModel.Sha256.query.filter(fritModel.Sha256.sha256.like(unicode(x + '%'))).first()
+            if Sha256s:
+                for f in Sha256s.files:
+                    fritutils.termout.printNormal("%s %s %s %s" % ( f.sha256.sha256, f.evidence.configName, f.filesystem.configName,f.filename))
+            else:
+                fritutils.termout.printNormal("%s NOT FOUND" % x)
+
+def csvdump(Evidences):
+    for evi in Evidences:
+        for fs in evi.fileSystems:
+            fso =  fs.getFsDb()          
+            fq = fritModel.File.query.filter(fritModel.File.filesystem==fso)
+            for f in fq:
+                fritutils.termout.printNormal("%s,%s,%s,%s,%s,%s,%s" % (f.evidence.configName, f.filesystem.configName, f.filename, f.md5.md5, f.sha1.sha1, f.sha256.sha256, f.ssdeep.ssdeep))
+
 def factory(Evidences,args):
     """
     args are the hashes command arguments
     """
-    validArgs = ('update','md5search','sha1search')
+    validArgs = ('update','md5search','sha1search','sha256search', 'csvdump')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('hashes command need at least an argument')
         sys.exit(1)
@@ -132,3 +152,12 @@ def factory(Evidences,args):
                 sys.exit(1)
             else:
                 sha1search(args)
+        if args[0] == 'sha256search':
+            args.remove('sha256search')
+            if len(args) < 1:
+                fritutils.termout.printWarning('sha256search command need at least one sha256 to search for.')
+                sys.exit(1)
+            else:
+                sha256search(args)
+        if args[0] == 'csvdump':
+            csvdump(Evidences)
