@@ -36,6 +36,7 @@ class File(elixir.Entity):
     mimetype = elixir.ManyToOne('MimeType')
     md5 = elixir.ManyToOne('Md5')
     sha1 = elixir.ManyToOne('Sha1')
+    sha256 = elixir.ManyToOne('Sha256')
     ssdeep = elixir.ManyToOne('Ssdeep')
     
 class Extension(elixir.Entity):
@@ -56,6 +57,10 @@ class Md5(elixir.Entity):
 
 class Sha1(elixir.Entity):
     sha1 = elixir.Field(elixir.Unicode(40))
+    files = elixir.OneToMany('File')
+
+class Sha256(elixir.Entity):
+    sha256 = elixir.Field(elixir.Unicode(64))
     files = elixir.OneToMany('File')
 
 class Ssdeep(elixir.Entity):

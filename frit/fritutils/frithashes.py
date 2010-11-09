@@ -14,8 +14,8 @@ SSDEEP='/usr/bin/ssdeep'
 def getSsdeep(fullpath):
     ssdeep = subprocess.Popen([SSDEEP, fullpath], stdout=subprocess.PIPE)
     ssdeep.wait()
-    output = ssdeep.stdout.readlines()[1]
-    print output
+    sshash = ssdeep.stdout.readlines()[1].split(',')[0]
+    return sshash
 
 def getSize(fullpath):
     try:
@@ -43,8 +43,5 @@ def hashes(fullpath):
         md5 = hashlib.md5(data).hexdigest()
         sha1 = hashlib.sha1(data).hexdigest()
         sha256 = hashlib.sha256(data).hexdigest()
-        getSsdeep(fullpath)
-        print md5
-        print sha1
-        print sha256
-        
+        ssdeep = getSsdeep(fullpath)
+        return (md5,sha1,sha256,ssdeep)
