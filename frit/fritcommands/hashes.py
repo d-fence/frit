@@ -50,6 +50,24 @@ def updateDb(dbFile,hmd5,hsha1,hsha256,hssdeep):
     else:
         fritutils.termout.printWarning('Ssdeep for "%s" is already in database.' % fname)
 
+def hashFile(EviDb,FsDb,realFile,dbFile):
+    dname = fritutils.unicodify(os.path.dirname(dbFile))
+    bname = fritutils.unicodify(os.path.basename(dbFile))
+    Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
+    nFile = fritModel.File.query.filter_by(evidence=EviDb,filesystem=FsDb,filename=bname,fullpath=Fpath).first()
+    if not nFile:
+        fritutils.termout.printWarning('This file cannot be found in database: %s' % (dname + '/' + bname))
+    else:
+        # Now we do a little check to see if an md5 exists for the file
+        # if yes, we assume that all hashes are already in databases
+        # we do that to avoid to do the time consuming real hashes 
+        # on files. We double check the database inside updateDb()
+        if not nFile.md5:
+            hashes = fritutils.frithashes.hashes(realFile)
+            updateDb(nFile,hashes[0],hashes[1],hashes[2],hashes[3])
+        else:
+            fritutils.termout.printWarning('Hashes for "%s" seems to be already in database.' % nFile.filename)
+        
 def update(Evidences):
     # First we check if the database exists
     if not os.path.exists(fritModel.DBFILE):
@@ -72,19 +90,13 @@ def update(Evidences):
             fritutils.termout.printNormal('Start inserting Hashes in database for regular files on "%s"\n' % fs.configName)
             spos = len(fs.fsMountPoint)
             for f in fs.listFiles():
-                rfile = f[spos:]
-                hashes = fritutils.frithashes.hashes(f)
-                dname = fritutils.unicodify(os.path.dirname(rfile))
-                bname = fritutils.unicodify(os.path.basename(rfile))
-                Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
-                nFile = fritModel.File.query.filter_by(evidence=EviDb,filesystem=FsDb,filename=bname,fullpath=Fpath).first()
-                if not nFile:
-                    fritutils.termout.printWarning('This file cannot be found in database: %s' % (dname + '/' + bname))
-                else:
-                    updateDb(nFile,hashes[0],hashes[1],hashes[2],hashes[3])
-            for f in fs.listUndeleted():
-                print f
+                dbfile = f[spos:]
+                hashFile(EviDb,FsDb,f,dbfile)
             fs.umount('hashes')
+            
+            fritutils.termout.printNormal('Start inserting Hashes in database for undeleted files on "%s"\n' % fs.configName)
+            for f in fs.listUndeleted():
+                hashFile(EviDb,FsDb,f,f)
 
 def md5search(md5list):
     for x in md5list:
