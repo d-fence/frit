@@ -67,6 +67,12 @@ def factory(Evidences, args):
                             fritutils.termout.printNormal(fp)
         elif args[0] == 'extract':
             args.remove('extract')
+            # The '--merge' option is used to merge extractions in a single
+            # directory base instead of having a directory by extension.            
+            merge = False
+            if '--merge' in args:
+                merge = True
+                args.remove('--merge')
             if not args or len(args) == 0:
                 extList = []
                 for ex in fritModel.elixir.session.query(fritModel.Extension.extension).all():
@@ -90,7 +96,10 @@ def factory(Evidences, args):
                             else:
                                 extPath = ext[1:]
                             basePath = os.path.dirname(filepath)
-                            Destination = unicode(os.path.join('.frit/extractions/by_extensions/',evi.configName,fs.configName,extPath,basePath))
+                            if merge:
+                                Destination = unicode(os.path.join('.frit/extractions/by_extensions/',evi.configName,fs.configName,basePath))
+                            else:
+                                Destination = unicode(os.path.join('.frit/extractions/by_extensions/',evi.configName,fs.configName,extPath,basePath))
                             mountedPath = os.path.join(fs.fsMountPoint,filepath)
                             extractFile(mountedPath,Destination)
                     fs.umount('extensions')

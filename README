@@ -206,8 +206,12 @@ You can use this command:
 $ frit extensions extract .pdf .xls
 
 This will extract the corresponding files in the directory
-".frit/extractions/by_extensions/Evidence#number/filesystem#number/..."
+".frit/extractions/by_extensions/Evidence#number/filesystem#number/extension/..."
 The fullpath will be reconstructed behind this path.
+
+If you don't want to have a directory by extension, use the merge option like
+this:
+$ frit extensions extract --merge .pdf .xls .doc
 
 5.6 hashes
 
