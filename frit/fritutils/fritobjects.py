@@ -82,6 +82,18 @@ class FileSystem(object):
            llist.append(flock[lstart:-5])
         return llist
 
+    def lockListString(self):
+        """
+        Return a locklist in form of a string
+        With the PID included
+        """
+        lstring = ''
+        for l in self.lockList():
+            lstring += l 
+            p = ' '.join(self.getPids(l))
+            lstring += ' (PIDS: ' + p + ') '
+        return lstring
+
     def writeLock(self,locker,reason):
         pidReason = "PID: %d -- %s" % (os.getpid(),reason)
         lockFile = self.getLockFile(locker)
@@ -106,6 +118,16 @@ class FileSystem(object):
         else:
             return False
 
+    def getPids(self,locker):
+        pidlist = []
+        lockFile = self.getLockFile(locker)
+        lf = open(lockFile,'r')
+        for line in lf.readlines():
+            pid = line.split(': ')[1].split(' -- ')[0]
+            pidlist.append(pid)
+        lf.close()
+        return pidlist
+
     def isRunning(self,locker):
         """
         Return True if at least a locker as a running PID
@@ -113,10 +135,7 @@ class FileSystem(object):
         if not self.isLocked(locker):
             return None
         else:
-            lockFile = self.getLockFile(locker)
-            lf = open(lockFile,'r')
-            for line in lf.readlines():
-                pid = line.split(': ')[1].split(' -- ')[0]
+            for pid in self.getPids(locker):
                 procfile = os.path.join('/proc/',pid)
                 if os.path.exists(procfile):
                     return True
@@ -402,6 +421,18 @@ class Evidence(object):
            llist.append(flock[lstart:-5])
         return llist
         
+    def lockListString(self):
+        """
+        Return a locklist in form of a string
+        With the PID included
+        """
+        lstring = ''
+        for l in self.lockList():
+            lstring += l 
+            p = ' '.join(self.getPids(l))
+            lstring += ' (PIDS: ' + p + ') '
+        return lstring
+        
     def writeLock(self,locker,reason):
         pidReason = "PID: %d -- %s" % (os.getpid(),reason)
         lockFile = self.getLockFile(locker)
@@ -423,6 +454,16 @@ class Evidence(object):
         else:
             return False
 
+    def getPids(self,locker):
+        pidlist = []
+        lockFile = self.getLockFile(locker)
+        lf = open(lockFile,'r')
+        for line in lf.readlines():
+            pid = line.split(': ')[1].split(' -- ')[0]
+            pidlist.append(pid)
+        lf.close()
+        return pidlist
+
     def isRunning(self,locker):
         """
         Return True if at least a locker as a running PID
@@ -430,10 +471,7 @@ class Evidence(object):
         if not self.isLocked(locker):
             return None
         else:
-            lockFile = self.getLockFile(locker)
-            lf = open(lockFile,'r')
-            for line in lf.readlines():
-                pid = line.split(': ')[1].split(' -- ')[0]
+            for pid in self.getPids(locker):
                 procfile = os.path.join('/proc/',pid)
                 if os.path.exists(procfile):
                     return True

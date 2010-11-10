@@ -37,8 +37,7 @@ def status(Evidences,args):
             fritutils.termout.printNormal('\tMounted on : %s' % evi.containerMountPoint)
         locklist = evi.lockList()
         if len(locklist) > 0:
-            ll = ' '.join(locklist)
-            fritutils.termout.printNormal('\t\tLocked by: %s' % ll)
+            fritutils.termout.printNormal('\t\tLocked by: %s' % evi.lockListString())
             # if the Evidence is not mounted and at least a lockfile, we have an inconsistency
             if not evi.isMounted():
                 fritutils.termout.printWarning('\t\tInconsistency: %s is locked but not mounted. Use the "status clean" command to remove this lock file.' % evi.configName)
@@ -73,8 +72,7 @@ def status(Evidences,args):
                     fritutils.termout.printNormal('\t\tMounted on : %s' % fs.fsMountPoint)
                 fsLockList = fs.lockList()
                 if len(fsLockList) > 0:
-                    fsll = ' '.join(fsLockList)
-                    fritutils.termout.printNormal('\t\t\tLocked by: %s' % fsll)
+                    fritutils.termout.printNormal('\t\t\tLocked by: %s' % fs.lockListString())
                     if not fs.isMounted():
                         #if the filesystem is not mounted and at least a lockfile, we have an inconsistency
                         fritutils.termout.printWarning('\t\t\tInconsistency: %s is locked but not mounted. Use the "status clean" command to remove this lock file.' % fs.configName)
