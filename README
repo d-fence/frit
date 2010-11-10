@@ -260,7 +260,33 @@ attachments using libpff.
 
 5.9 status
 
-to be written
+The status command give a status of the frit system.
+It parses the config file and describe the systems.
+It shows if a container or a filesystem is locked by another instance of frit.
+It also shows if a container or a filesystem is mounted.
+
+5.9.1 status clean
+
+In case of a crash or for another reason, the frit environement can be left in 
+an inconsistent state.
+For example:
+- A file system is mounted but not locked
+- A file system is locked but not mounted
+- A file system is locked but the process which locked it is not running anymore
+...
+
+Those inconsistencies are shown in red. If the user want to clean it, he can
+launch this command:
+$ frit status clean
+
+It's possible that a clean command result in another inconsistency. In this case
+the user have to launch this command until the system is completely clean.
+
+5.9.2 database status
+
+It's possible to have information about the frit sqlite database by issuing this
+command:
+$ frit status database
 
 5.10 Specify an evidence
 

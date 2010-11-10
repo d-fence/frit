@@ -106,6 +106,22 @@ class FileSystem(object):
         else:
             return False
 
+    def isRunning(self,locker):
+        """
+        Return True if at least a locker as a running PID
+        """
+        if not self.isLocked(locker):
+            return None
+        else:
+            lockFile = self.getLockFile(locker)
+            lf = open(lockFile,'r')
+            for line in lf.readlines():
+                pid = line.split(': ')[1].split(' -- ')[0]
+                procfile = os.path.join('/proc/',pid)
+                if os.path.exists(procfile):
+                    return True
+        return False
+
     def isOtherLocked(self,locker):
         """
         Check if the filesystem mount is locked by another action
@@ -374,7 +390,7 @@ class Evidence(object):
 
     def getLockFile(self,locker):
         """
-        A function to construct the lockfile
+        A function to construct the lockfile name
         """
         lockSuffix = '_' + locker + '.lock'
         return self.containerMountPoint + lockSuffix
@@ -406,6 +422,22 @@ class Evidence(object):
             return True
         else:
             return False
+
+    def isRunning(self,locker):
+        """
+        Return True if at least a locker as a running PID
+        """
+        if not self.isLocked(locker):
+            return None
+        else:
+            lockFile = self.getLockFile(locker)
+            lf = open(lockFile,'r')
+            for line in lf.readlines():
+                pid = line.split(': ')[1].split(' -- ')[0]
+                procfile = os.path.join('/proc/',pid)
+                if os.path.exists(procfile):
+                    return True
+        return False
 
     def isMounted(self):
         """
@@ -482,6 +514,11 @@ class AffEvidence(Evidence):
                 elif fs.isOtherLocked(locker):
                     # Not safe to unmount container because locked by another thing
                     safeToUnmount = False
+                elif fs.isMounted():
+                    # Here we have an inconsistency, fs is not locked by anything but is mounted.
+                    # Let's unmount it.
+                    fritutils.termout.printMessage('\tUnmounting filesystems "%s" because mounted and not locked' % fs.configName)
+                    fs.umount(locker)
             if safeToUnmount:
                 fritutils.fritmount.fuserUnmount(self.containerMountPoint)
             else:

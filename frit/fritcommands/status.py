@@ -46,8 +46,17 @@ def status(Evidences,args):
                     for lock in locklist:
                         fritutils.termout.printNormal('\t\tremoving lock: %s' % lock)
                         evi.removeLock(lock)
+            else:
+                # If the Evidence is mounted and there is no running process we probably have a problem
+                for lock in locklist:
+                    if not evi.isRunning(lock):
+                        fritutils.termout.printWarning('\t\tInconsistency: %s is locked and mounted but the locker is not running. Use the "status clean" command to remove this lock file.' % evi.configName)
+                    if clean:
+                        # we simply remove the lock file. It will create another inconsitsency, up to the user to clean it.
+                        fritutils.termout.printNormal('\t\tremoving lock: %s' % lock)
+                        evi.removeLock(lock)
         else:
-            # if the Evidence is mounted with no lockfile we have an incosistency
+            # if the Evidence is mounted with no lockfile we have an inconsistency
             if evi.isMounted() and evi.getFormat() != 'dd' :
                 fritutils.termout.printWarning('\t\tInconsistency: %s is mounted with no lockfile. Use the "status clean" command to unmount.' % evi.configName)
                 if clean:
@@ -71,6 +80,15 @@ def status(Evidences,args):
                         fritutils.termout.printWarning('\t\t\tInconsistency: %s is locked but not mounted. Use the "status clean" command to remove this lock file.' % fs.configName)
                         if clean:
                             for lock in fsLockList:
+                                fritutils.termout.printNormal('\t\t\tremoving lock: %s' % lock)
+                                fs.removeLock(lock)
+                    else:
+                        # if the filesystem is mounted with a lockfile and no running process, we have a problem
+                        for lock in fsLockList:
+                            if not fs.isRunning(lock):
+                                fritutils.termout.printWarning('\t\t\tInconsistency: %s is locked and mounted but the process is not running anymore. Use the "status clean" command to remove this lock file.' % fs.configName)
+                            if clean:
+                                # we simply remove the lock, this will create another inconsistency, up to the user to clean it.
                                 fritutils.termout.printNormal('\t\t\tremoving lock: %s' % lock)
                                 fs.removeLock(lock)
                 else:
