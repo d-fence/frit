@@ -387,9 +387,10 @@ class Evidence(object):
         return llist
         
     def writeLock(self,locker,reason):
+        pidReason = "PID: %d -- %s" % (os.getpid(),reason)
         lockFile = self.getLockFile(locker)
         lf = open(lockFile,'a')
-        lf.write(reason)
+        lf.write(pidReason)
         lf.close()
 
     def removeLock(self,locker):
