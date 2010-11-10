@@ -128,10 +128,11 @@ def csvdump(Evidences):
             fso =  fs.getFsDb()          
             fq = fritModel.File.query.filter(fritModel.File.filesystem==fso)
             for f in fq:
-                fritutils.termout.printNormal("%s,%s,%s,%s,%s,%s,%s,%s" % \
-                (f.evidence.configName, f.filesystem.configName, f.filename,\
-                 f.md5.md5, f.sha1.sha1, f.sha256.sha256, f.ssdeep.ssdeep,
-                 f.state.state))
+                if f.md5:
+                    fritutils.termout.printNormal("%s,%s,%s,%s,%s,%s,%s,%s" % \
+                    (f.evidence.configName, f.filesystem.configName,\
+                     f.filename, f.md5.md5, f.sha1.sha1, f.sha256.sha256,\
+                     f.ssdeep.ssdeep, f.state.state))
 
 def factory(Evidences,args):
     """
