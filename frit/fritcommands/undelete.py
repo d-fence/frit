@@ -32,7 +32,7 @@ def listUndeleted(Evidences):
                 fritutils.termout.printNormal(f)
             
 def factory(Evidences, args):
-    if len(args) == 0:
+    if not args:
         # There is no other argument to the undelete command.
         # So we really undelete
         undelete(Evidences)
