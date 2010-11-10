@@ -29,7 +29,7 @@ class File(elixir.Entity):
     evidence = elixir.ManyToOne('Evidence')
     filesystem = elixir.ManyToOne('Filesystem')
     state = elixir.ManyToOne('FileState')
-    filename = elixir.Field(elixir.Unicode(300))
+    filename = elixir.Field(elixir.Unicode(300), index=True)
     filesize = elixir.Field(elixir.Integer)
     fullpath = elixir.ManyToOne('FullPath')
     extension = elixir.ManyToOne('Extension')
@@ -40,11 +40,11 @@ class File(elixir.Entity):
     ssdeep = elixir.ManyToOne('Ssdeep')
     
 class Extension(elixir.Entity):
-    extension = elixir.Field(elixir.Unicode(50))
+    extension = elixir.Field(elixir.Unicode(50), index=True)
     files = elixir.OneToMany('File')
 
 class FullPath(elixir.Entity):
-    fullpath = elixir.Field(elixir.Unicode(900))
+    fullpath = elixir.Field(elixir.Unicode(900), index=True)
     files = elixir.OneToMany('File')
     
 class MimeType(elixir.Entity):
@@ -52,19 +52,19 @@ class MimeType(elixir.Entity):
     files = elixir.OneToMany('File')
 
 class Md5(elixir.Entity):
-    md5 = elixir.Field(elixir.Unicode(32))
+    md5 = elixir.Field(elixir.Unicode(32), index=True)
     files = elixir.OneToMany('File')
 
 class Sha1(elixir.Entity):
-    sha1 = elixir.Field(elixir.Unicode(40))
+    sha1 = elixir.Field(elixir.Unicode(40), index=True)
     files = elixir.OneToMany('File')
 
 class Sha256(elixir.Entity):
-    sha256 = elixir.Field(elixir.Unicode(64))
+    sha256 = elixir.Field(elixir.Unicode(64), index=True)
     files = elixir.OneToMany('File')
 
 class Ssdeep(elixir.Entity):
-    ssdeep = elixir.Field(elixir.Unicode(150))
+    ssdeep = elixir.Field(elixir.Unicode(150), index=True)
     files = elixir.OneToMany('File')
 
 elixir.setup_all()
