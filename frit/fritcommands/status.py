@@ -67,7 +67,13 @@ def status(Evidences,args):
                 fritutils.termout.printMessage('\t\t%s (format: %s , offset: %d)' % (fs.configName, fs.getFormat(),fs.offset))
                 ld = fs.getLoopDevice()
                 if ld != '':
-                    fritutils.termout.printNormal('\t\tAssociated with loop device: %s' % ld)
+                    fritutils.termout.printNormal('\t\tLoop device "%s" is locked by %s' % (ld,fs.configName))
+                    if not fs.verifyLoopDevice():
+                        if clean:
+                            fritutils.termout.printNormal('\t\tremoving lock: %s' % fs.loopLockFile)
+                            fs.delLoopLock()
+                        else:
+                            fritutils.termout.printWarning('\t\tInconsistency: "%s" is not really associated with "%s". Use the "status clean" command to remove the lock.' % (fs.rawImage,fs.loopDevice))
                 if fs.isMounted():
                     fritutils.termout.printNormal('\t\tMounted on : %s' % fs.fsMountPoint)
                 fsLockList = fs.lockList()

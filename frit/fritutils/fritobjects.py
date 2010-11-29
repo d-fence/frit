@@ -68,6 +68,9 @@ class FileSystem(object):
             self.loopDevice = ''
             self.delLoopLock()
 
+    def verifyLoopDevice(self):
+        return fritutils.fritmount.verifyLoopDevice(self.loopDevice,self.rawImage)
+
     def getLockFile(self,locker):
         """
         A function to construct the lockfile

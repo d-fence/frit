@@ -107,6 +107,40 @@ def detachLoopDevice(loopdev):
     if losetup.returncode > 0:
         raise fritMountError('Unable to detach loop device "%s" (return code: %d)' % (loopdev, losetup.returncode))
 
+def verifyLoopDevice(loopdev,filename):
+    """
+    Function to verify if a loop device is really attached to a file.
+    The command is "/sbin:losetup -j filename"
+    The error code are:
+    1 if the device is not configured
+    2 if an error occured that prevented losetup to run correctly
+    If the loop device is really attached, we return True
+    If the file "filename" doesn't even exist, how could it be attached ? So we return false.
+    """
+    answer = False
+    if not os.path.exists(filename):
+        return answer
+    losetup = subprocess.Popen([LOSETUP, '-j', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    losetup.wait()
+    if losetup.returncode > 1:
+        raise fritMountError('losetup error for loop device "%s" (return code: %d)' % (loopdev, losetup.returncode))
+    elif losetup.returncode == 0 :
+        """
+        As a shortcut, we consider that the file is correctly attached if there
+        We verify the the loop device returned is the one specified in the lockfile.
+        """
+        loresponse,stderr = losetup.communicate()
+        lines = loresponse.split('\n')
+        if lines:
+            for line in lines:
+                if len(line) > 1:
+                    s = line.split(' ')
+                    if len(s) > 0:
+                        lodev= s[0][:-1]
+                        if lodev == loopdev:
+                            answer = True
+    return answer
+
 def ntfs3gMount(loopDevice,mountpoint):
     fritutils.termout.printMessage('\tMounting "%s" with NTFS-3G on "%s"' % (loopDevice,mountpoint))
     uid = str(os.getuid())
