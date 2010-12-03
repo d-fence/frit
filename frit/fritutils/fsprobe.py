@@ -266,7 +266,7 @@ def detectDosMap(fname,buf):
     offset = 446
     for i in range(0,4):
         ty = ord(buf[offset + 4])
-        if ty in DosSystypes.keys:
+        if ty in DosSystypes.keys():
             partType = DosSystypes[ty]
         else:
             partType = ''
