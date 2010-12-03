@@ -259,8 +259,13 @@ Currently only ntfs is supported.
 
 5.8 getmails
 
-Search for PST outlook mailboxes files and extract their mails and
+Search for PST and OST outlook mailboxes files and extract their mails and
 attachments using libpff.
+
+The search is performed against the database, so the database have to be
+created first. 
+If you want to search for those files by walking through the directories, you
+must append the '--walk' option.
 
 5.9 status
 
