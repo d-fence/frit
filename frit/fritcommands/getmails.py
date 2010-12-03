@@ -12,10 +12,36 @@ import fritutils.fritdb as fritModel
 import fritutils.fritemails
 import fritutils.fritprobe
 
-def getOutlookMails(fs,extension):
+def getExportPath(filepath,fs):
+    exportPath = os.path.join('.frit/extractions/emails/outlook/', fs.evidenceConfigName, fs.configName, filepath)
+    return exportPath
+
+def getOutlookMailsFromWalk(fs,extension):
+    fs.mount('getmails', 'Walking for Outlook emails')
+    for filepath in fs.listFiles():
+        ext = os.path.splitext(filepath)[1]
+        if ext == extension:
+            filepath = filepath.replace(fs.fsMountPoint,'')
+            if filepath[0] == '/':
+                filepath = filepath[1:]
+            exportPath = getExportPath(filepath,fs)
+            pathToCreate = os.path.split(exportPath)[0]
+            pstPath = os.path.join(fs.fsMountPoint, filepath)
+            if os.path.isdir(exportPath + '.export'):
+                fritutils.termout.printWarning('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
+            else:
+                if fritutils.fritprobe.pffProbe(pstPath):
+                    if not os.path.isdir(pathToCreate):
+                        os.makedirs(pathToCreate)
+                    fritutils.fritemails.pffExport(pstPath,exportPath)
+                else:
+                    fritutils.termout.printWarning('%s is not a PFF file.' % pstPath)
+    fs.umount('getmails')
+
+def getOutlookMailsFromDb(fs,extension):
     for filepath in fs.ExtensionsOriginalFiles(extension):
-        exportPath = os.path.join('.frit/extractions/emails/outlook/', filepath)
-        pathToCreate = os.path.join('.frit/extractions/emails/outlook/', os.path.split(filepath)[0])
+        exportPath = getExportPath(filepath,fs)
+        pathToCreate = os.path.split(exportPath)[0]
         pstPath = os.path.join(fs.fsMountPoint, filepath)
         if os.path.isdir(exportPath + '.export'):
             fritutils.termout.printWarning('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
@@ -29,12 +55,12 @@ def getOutlookMails(fs,extension):
                 fritutils.termout.printWarning('%s is not a PFF file.' % pstPath)
             fs.umount('getmails')
 
-def getOutlookUndeleted(fs):
+def getOutlookUndeletedFromDb(fs):
     for filepath in fs.listUndeleted():
         if os.path.splitext(filepath)[1] == u'.pst' or os.path.splitext(filepath)[1] == u'.ost' :
             cleanedPath = filepath.replace('.frit/extractions/','')
-            exportPath = os.path.join('.frit/extractions/emails/outlook/' , cleanedPath)
-            pathToCreate = os.path.join('.frit/extractions/emails/outlook/', os.path.split(cleanedPath)[0])
+            exportPath = getExportPath(cleanedPath,fs)
+            pathToCreate = os.path.split(exportPath)[0]
             if os.path.isdir(exportPath + '.export'):
                 fritutils.termout.printWarning('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
             else:
@@ -44,13 +70,24 @@ def getOutlookUndeleted(fs):
                     fritutils.fritemails.pffExport(filepath,exportPath)
             
 def factory(Evidences,args):
+    if args and '--walk' in args:
+        for evi in Evidences:
+            for fs in evi.fileSystems:
+                getOutlookMailsFromWalk(fs,u'.pst')
+                getOutlookMailsFromWalk(fs,u'.ost')
+    else:
+        if fritModel.dbExists():
+            for evi in Evidences:
+                for fs in evi.fileSystems:
+                    # Searching for PST and OST files first
+                    # Working on normal files first
+                    getOutlookMailsFromDb(fs,u'.pst')
+                    getOutlookMailsFromDb(fs,u'.ost')
+        else:
+            fritutils.termout.printWarning('You need to create the database first with the "store create" command or use the "--walk" option')
+            
+    # Working on undeleted files
+    # It's probably quicker to walk undelete files than to query db
     for evi in Evidences:
         for fs in evi.fileSystems:
-            # Searching for PST and OST files first
-            # Working on normal files first
-            getOutlookMails(fs,u'.pst')
-            getOutlookMails(fs,u'.ost')
-          
-            # Working on undeleted files
-            # It's probably quicker to walk undelete files than to query db
-            getOutlookUndeleted(fs)
+            getOutlookUndeletedFromDb(fs)
