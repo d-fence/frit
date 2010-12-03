@@ -266,7 +266,10 @@ def detectDosMap(fname,buf):
     offset = 446
     for i in range(0,4):
         ty = ord(buf[offset + 4])
-        partType = DosSystypes[ty]
+        if ty in DosSystypes.keys:
+            partType = DosSystypes[ty]
+        else:
+            partType = ''
         # We assume that sector size is always 512 bytes
         fsStart =  struct.unpack('I',buf[offset + 8:offset + 12])[0] * 512
         partSize = struct.unpack('I',buf[offset + 12:offset+16])[0] * 512
