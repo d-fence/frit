@@ -68,12 +68,21 @@ class Ssdeep(elixir.Entity):
     files = elixir.OneToMany('File')
 
 elixir.setup_all()
-    
+
+def dbExists():
+    """
+    A function that return True if the db exists
+    """
+    if not os.path.exists(DBFILE):
+        return False
+    else:
+        return True
+   
 def createDb():
     """
     A function to create the database and fill some tables
     """
-    if not os.path.exists(DBFILE):
+    if not dbExists():
         elixir.create_all()
         for fstate in FILESTATES:
             fis = FileState(state=fstate)
