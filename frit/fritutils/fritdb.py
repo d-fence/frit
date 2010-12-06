@@ -1,6 +1,11 @@
 #!/usr/bin/python
 """
 module for the sqlite support
+FILESTATES:
+Normal: normal files.
+Undeleted: undeleted fiels.
+Carved: carved files.
+Contained: Files that were contained inside a parent file (a zip, a mailbox, a rar, ...)
 """
 
 import elixir
@@ -9,7 +14,7 @@ import os.path
 import fritutils
 
 DBFILE = ".frit/frit.sqlite"
-FILESTATES = (u'Normal', u'Undeleted', u'Carved')
+FILESTATES = (u'Normal', u'Undeleted', u'Carved', u'Contained')
 
 elixir.metadata.bind = "sqlite:///" + DBFILE
 elixir.metadata.bind.echo = False
@@ -26,6 +31,8 @@ class FileState(elixir.Entity):
     state = elixir.Field(elixir.Unicode(20))
 
 class File(elixir.Entity):
+    parent = elixir.ManyToOne('File')
+    children = elixir.OneToMany('File')
     evidence = elixir.ManyToOne('Evidence')
     filesystem = elixir.ManyToOne('Filesystem')
     state = elixir.ManyToOne('FileState')
