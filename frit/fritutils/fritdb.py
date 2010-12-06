@@ -128,3 +128,14 @@ def listExtensions(Evidences,extlist):
         for ext in extlist:
             fritutils.termout.printNormal('\t%s %d %s' % (ext, totalExt[ext][0], fritutils.humanize(totalExt[ext][1])))
         fritutils.termout.printNormal('Total files (size): %d (%s)' % (grandTotalNb, fritutils.humanize(grandTotalSize)))
+        
+def fileNameSearch(Evidence,fileName):
+    """
+    A function that yield files where the filename match.
+    """
+    for filesystem in Evidence.fileSystems:
+        fso = filesystem.getFsDb()
+        fq = File.query.filter(File.filesystem==fso)
+        fq = fq.filter(File.filename.like(unicode(fileName)))
+        for f in fq.all():
+            yield(f)

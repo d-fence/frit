@@ -140,11 +140,27 @@ def storeClear(Evidences):
             fritModel.elixir.session.commit()
             fp = fritModel.FullPath.query.join(fritModel.File.filesystem).filter(fritModel.File.filesystem==fso)
 
+def filenameSearch(Evidences,args):
+    """
+    A function to search for a file based on filename(s).
+    Filenames to search are the args
+    """
+    for evi in Evidences:
+        for searchTerm in args:
+            fritutils.termout.printNormal("Searching for %s in %s" % (searchTerm, evi.configName))
+            for f in fritModel.fileNameSearch(evi,searchTerm):
+                fp = os.path.join(f.fullpath.fullpath,f.filename)
+                fsize = fritutils.humanize(f.filesize)
+                md5 = 'NO_MD5_COMPUTED'
+                if f.md5:
+                    md5 = f.md5.md5
+                fritutils.termout.printMessage("\t%s %s %s %s %s" % (f.filesystem.configName, f.state.state, fsize, md5, fp))
+
 def store(Evidences, args):
     """
     args are the store command arguments
     """
-    validArgs = ('create', 'update', 'dump', 'undeleted', 'clear')
+    validArgs = ('create', 'update', 'dump', 'undeleted', 'clear', 'search')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('store command need at least an argument')
         sys.exit(1)
@@ -173,4 +189,10 @@ def store(Evidences, args):
                 fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
             else:
                 storeClear(Evidences)
+        if args[0] == 'search':
+            if not os.path.exists(fritutils.fritdb.DBFILE):
+                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
+            else:
+                args.remove("search")
+                filenameSearch(Evidences, args)
 
