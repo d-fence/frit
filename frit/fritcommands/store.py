@@ -109,7 +109,7 @@ def storeUndeleted(Evidences):
             nbFiles = 0
             fritutils.termout.printNormal('Start inserting undeleted files metadata in database for "%s"\n' % fs.configName)
             for f in fs.listUndeleted():
-                insertFile(f,fs.fsMountPoint,u'Undeleted',EviDb,FsDb)                                    
+                insertFile(f,'',u'Undeleted',EviDb,FsDb)                                    
                 nbFiles += 1
                 print "\t%s : %d\r" % (fs.configName,nbFiles),           
         print "\n"
