@@ -33,7 +33,6 @@ def insertFile(File,prefix,state,eviDb,fsDb):
             dname = u'/'
         
     bname = fritutils.unicodify(os.path.basename(File))
-    print fsize,ext,dname,bname
     
     Ext = fritModel.Extension.query.filter_by(extension=ext).first()
     if not Ext:
@@ -173,7 +172,7 @@ def store(Evidences, args):
     """
     args are the store command arguments
     """
-    validArgs = ('create', 'update', 'dump', 'undeleted', 'clear', 'search')
+    validArgs = ('create', 'update', 'dump', 'undeleted', 'clear', 'search', 'emails')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('store command need at least an argument')
         sys.exit(1)
@@ -208,4 +207,8 @@ def store(Evidences, args):
             else:
                 args.remove("search")
                 filenameSearch(Evidences, args)
-
+        if args[0] == 'emails':
+            if not os.path.exists(fritutils.fritdb.DBFILE):
+                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
+            else:
+                storeEmails(Evidences)
