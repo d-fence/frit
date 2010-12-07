@@ -241,6 +241,21 @@ class FileSystem(object):
             for f in files:
                 f = f.decode('utf-8')
                 yield(os.path.join(dirpath,f))
+                
+    def listEmails(self):
+        """
+        Return the extracted mails files (even metadata files.)
+        We have to append more maildirs like outlook express extractions ...
+        """
+        maildirs = []
+        outlookMailDir = unicode(os.path.join('.frit/extractions/emails/outlook',self.evidence.configName,self.configName))
+        maildirs.append(outlookMailDir)
+        for md in maildirs:
+            for dirpath, dirs, files in os.walk(md):
+                dirpath = dirpath.decode('utf-8')
+                for f in files:
+                    f = f.decode('utf-8')
+                    yield(os.path.join(dirpath,f))
 
     def getEviDb(self):
         """
