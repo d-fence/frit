@@ -114,6 +114,29 @@ def storeUndeleted(Evidences):
                 print "\t%s : %d\r" % (fs.configName,nbFiles),           
         print "\n"
 
+def storeEmails(Evidences):
+    """
+    A function to store the metadata of extracted emails files.
+    """
+    for evi in Evidences:
+        # evidence creation in the database
+        EviDb = fritModel.Evidence.query.filter_by(name=fritutils.unicodify(evi.fileName)).first()
+        if not EviDb:
+            EviDb = fritModel.Evidence(name=fritutils.unicodify(evi.fileName),configName=fritutils.unicodify(evi.configName))
+        for fs in evi.fileSystems:
+            # filesystem creation in the database
+            FsDb = fritModel.Filesystem.query.filter_by(evidence=EviDb,configName=fritutils.unicodify(fs.configName)).first()
+            if not FsDb:
+                FsDb = fritModel.Filesystem(evidence=EviDb,configName=fritutils.unicodify(fs.configName))
+
+            nbFiles = 0
+            fritutils.termout.printNormal('Start inserting undeleted files metadata in database for "%s"\n' % fs.configName)
+            for f in fs.listEmails():
+                insertFile(f,'',u'Contained',EviDb,FsDb)                                    
+                nbFiles += 1
+                print "\t%s : %d\r" % (fs.configName,nbFiles),           
+        print "\n"
+    
 def storeClear(Evidences):
     """
     A function to delete records for specified Evidences
