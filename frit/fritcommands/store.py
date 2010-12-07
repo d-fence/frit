@@ -130,7 +130,7 @@ def storeEmails(Evidences):
                 FsDb = fritModel.Filesystem(evidence=EviDb,configName=fritutils.unicodify(fs.configName))
 
             nbFiles = 0
-            fritutils.termout.printNormal('Start inserting undeleted files metadata in database for "%s"\n' % fs.configName)
+            fritutils.termout.printNormal('Start inserting emails files metadata in database for "%s"\n' % fs.configName)
             for f in fs.listEmails():
                 insertFile(f,'',u'Contained',EviDb,FsDb)                                    
                 nbFiles += 1
