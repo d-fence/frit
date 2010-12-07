@@ -93,10 +93,12 @@ def update(Evidences):
                 dbfile = f[spos:]
                 hashFile(EviDb,FsDb,f,dbfile)
             fs.umount('hashes')
-            
+                
             fritutils.termout.printNormal('Start inserting Hashes in database for undeleted files on "%s"\n' % fs.configName)
             for f in fs.listUndeleted():
                 hashFile(EviDb,FsDb,f,f)
+        
+        evi.umount('hashes')
 
 def md5search(md5list):
     for x in md5list:
