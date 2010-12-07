@@ -136,6 +136,7 @@ def filenameSearch(Evidences,args):
     """
     for evi in Evidences:
         for searchTerm in args:
+            searchTerm = searchTerm.decode('utf-8')
             fritutils.termout.printNormal("Searching for %s in %s" % (searchTerm, evi.configName))
             for f in fritModel.fileNameSearch(evi,searchTerm):
                 fp = os.path.join(f.fullpath.fullpath,f.filename)
