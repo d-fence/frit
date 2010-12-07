@@ -9,6 +9,51 @@ import fritutils
 import fritutils.termout
 import fritutils.fritdb as fritModel
 
+def insertFile(File,prefix,state,eviDb,fsDb):
+    """
+    A function that insert a file into the database.
+    prefix: the prefix to remove from the path before inserting (.frit/filesystems/Evidencex/filesystemx...)
+    state: the database file state (normal, undeleted, carved, contained ...)
+    """
+    fsize = 0
+    try:
+        fsize = os.path.getsize(File)
+    except:
+        print >> sys.stderr, "ERROR GETTING SIZE OF: %s\n" % File
+
+    fname,ext = os.path.splitext(File)
+    ext = fritutils.unicodify(ext.lower())
+    if ext == '':
+        ext = u'No Extension'
+
+    dname = fritutils.unicodify(os.path.dirname(File))
+    if prefix != '':
+        dname = dname.replace(prefix,'')
+        if dname == '':
+            dname = u'/'
+        
+    bname = fritutils.unicodify(os.path.basename(File))
+    print fsize,ext,dname,bname
+    
+    Ext = fritModel.Extension.query.filter_by(extension=ext).first()
+    if not Ext:
+        Ext = fritModel.Extension(extension=ext)
+    Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
+    if not Fpath:
+        Fpath = fritModel.FullPath(fullpath=dname)
+    
+    nFile = fritModel.File.query.filter_by(evidence=eviDb,filesystem=fsDb,filename=bname,fullpath=Fpath).first()
+    if not nFile:
+        nFile = fritModel.File(evidence=eviDb,filesystem=fsDb)
+    nFile.state = fritModel.FileState.query.filter_by(state=state).first()
+    nFile.filename = bname
+    nFile.filesize = fsize
+    nFile.fullpath = Fpath
+    nFile.extension = Ext
+                           
+    fritModel.elixir.session.commit()
+    
+                            
 def update(Evidences):
     for evi in Evidences:
         # evidence creation in the database
@@ -38,36 +83,8 @@ def update(Evidences):
                         nbFiles = 0
                         fritutils.termout.printNormal('Start inserting files metadata in database for "%s"\n' % fs.configName)
                         for f in fs.listFiles():                                    
-                            rfile = f[spos:]
-                            fsize = 0
-                            try:
-                                fsize = os.path.getsize(f)
-                            except:
-                                print >> sys.stderr, "ERROR GETTING SIZE OF: %s\n" % f
-                            fname,ext = os.path.splitext(rfile)
-                            ext = fritutils.unicodify(ext.lower())
-                            if ext == '':
-                                ext = u'No Extension'
+                            insertFile(f,fs.fsMountPoint,u'Normal',EviDb,FsDb)
                             nbFiles += 1
-                            dname = fritutils.unicodify(os.path.dirname(rfile))
-                            bname = fritutils.unicodify(os.path.basename(rfile))
-                            Ext = fritModel.Extension.query.filter_by(extension=ext).first()
-                            if not Ext:
-                                Ext = fritModel.Extension(extension=ext)
-                            Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
-                            if not Fpath:
-                                Fpath = fritModel.FullPath(fullpath=dname)
-                            
-                            nFile = fritModel.File.query.filter_by(evidence=EviDb,filesystem=FsDb,filename=bname,fullpath=Fpath).first()
-                            if not nFile:
-                                nFile = fritModel.File(evidence=EviDb,filesystem=FsDb)
-                            nFile.state = fritModel.FileState.query.filter_by(state=u'Normal').first()
-                            nFile.filename = bname
-                            nFile.filesize = fsize
-                            nFile.fullpath = Fpath
-                            nFile.extension = Ext
-                                                   
-                            fritModel.elixir.session.commit()
                             print "\t%s : %d\r" % (fs.configName,nbFiles),           
                     print "\n"
                     fs.umount("store")
@@ -91,37 +108,9 @@ def storeUndeleted(Evidences):
 
             nbFiles = 0
             fritutils.termout.printNormal('Start inserting undeleted files metadata in database for "%s"\n' % fs.configName)
-            for f in fs.listUndeleted():                                    
-                fsize = 0
-                try:
-                    fsize = os.path.getsize(f)
-                except:
-                    print >> sys.stderr, "ERROR GETTING SIZE OF: %s\n" % f
-                fname,ext = os.path.splitext(f)
-                ext = fritutils.unicodify(ext.lower())
-                if ext == '':
-                    ext = u'No Extension'
+            for f in fs.listUndeleted():
+                insertFile(f,fs.fsMountPoint,u'Undeleted',EviDb,FsDb)                                    
                 nbFiles += 1
-                dname = fritutils.unicodify(os.path.dirname(f))
-                bname = fritutils.unicodify(os.path.basename(f))
-                Ext = fritModel.Extension.query.filter_by(extension=ext).first()
-                if not Ext:
-                    Ext = fritModel.Extension(extension=ext)
-                Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
-                if not Fpath:
-                    Fpath = fritModel.FullPath(fullpath=dname)
-                
-                fstate = fritModel.FileState.query.filter_by(state=u'Undeleted').first()
-                nFile = fritModel.File.query.filter_by(evidence=EviDb,filesystem=FsDb,filename=bname,fullpath=Fpath,state=fstate).first()
-                if not nFile:
-                    nFile = fritModel.File(evidence=EviDb,filesystem=FsDb)
-                nFile.state = fstate
-                nFile.filename = bname
-                nFile.filesize = fsize
-                nFile.fullpath = Fpath
-                nFile.extension = Ext
-                                       
-                fritModel.elixir.session.commit()
                 print "\t%s : %d\r" % (fs.configName,nbFiles),           
         print "\n"
 
