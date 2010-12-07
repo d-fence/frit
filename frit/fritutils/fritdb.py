@@ -31,8 +31,8 @@ class FileState(elixir.Entity):
     state = elixir.Field(elixir.Unicode(20))
 
 class File(elixir.Entity):
-    parent = elixir.ManyToOne('File')
-    children = elixir.OneToMany('File')
+    #parent = elixir.ManyToOne('File')
+    #children = elixir.OneToMany('File')
     evidence = elixir.ManyToOne('Evidence')
     filesystem = elixir.ManyToOne('Filesystem')
     state = elixir.ManyToOne('FileState')

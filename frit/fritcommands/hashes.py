@@ -10,6 +10,7 @@ import fritutils.termout
 import fritutils.fritobjects
 import fritutils.fritdb as fritModel
 import fritutils.frithashes
+import ssdeep
 
 def updateDb(dbFile,hmd5,hsha1,hsha256,hssdeep):
     fname = os.path.join(dbFile.fullpath.fullpath,dbFile.filename)
@@ -139,6 +140,25 @@ def sha256search(sha256list):
                     fritutils.termout.printNormal("%s %s %s %s" % ( f.sha256.sha256, f.evidence.configName, f.filesystem.configName,f.filename))
             else:
                 fritutils.termout.printNormal("%s NOT FOUND" % x)
+                
+def ssdeepsearch(args):
+    """
+    ssdeep support is based on pyssdep (http://code.google.com/p/pyssdeep/)
+    args should contain a ssdeep hash and a minimal score
+    """
+    s = ssdeep.ssdeep()
+    h = unicode(args[0].decode('utf-8'))
+    mscore = int(args[1])
+    if mscore < 10:
+        fritutils.termout.printWarning('"%d" is too low to use as a score.' % mscore)
+    else:
+        fritutils.termout.printMessage("Starting to search for ssdeep hashes.")
+        for f in fritModel.File.query.all():
+            if f.ssdeep:
+                score = s.compare(f.ssdeep.ssdeep,h)
+                if score >= mscore:
+                    fp = os.path.join(f.fullpath.fullpath, f.filename)
+                    fritutils.termout.printNormal("Score: %d, %s %s %s" % ( score, f.evidence.configName, f.filesystem.configName,fp))
 
 def csvdump(Evidences):
     for evi in Evidences:
@@ -156,7 +176,7 @@ def factory(Evidences,args):
     """
     args are the hashes command arguments
     """
-    validArgs = ('update','md5search','sha1search','sha256search', 'csvdump')
+    validArgs = ('update','md5search','sha1search','sha256search', 'csvdump', 'ssdsearch')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('hashes command need at least an argument')
         sys.exit(1)
@@ -189,3 +209,9 @@ def factory(Evidences,args):
                 sha256search(args)
         if args[0] == 'csvdump':
             csvdump(Evidences)
+        if args[0] == 'ssdsearch':
+            args.remove('ssdsearch')
+            if len(args) < 2:
+                fritutils.termout.printWarning('ssdsearch command need a ssdeep hash and a minimal score to match.')
+            else:
+                ssdeepsearch(args)
