@@ -98,6 +98,10 @@ def update(Evidences):
             for f in fs.listUndeleted():
                 hashFile(EviDb,FsDb,f,f)
         
+            fritutils.termout.printNormal('Start inserting Hashes in database for emails files on "%s"\n' % fs.configName)
+            for f in fs.listEmails():
+                hashFile(EviDb,FsDb,f,f)
+       
         evi.umount('hashes')
 
 def md5search(md5list):
