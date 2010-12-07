@@ -64,7 +64,7 @@ def hashFile(EviDb,FsDb,realFile,dbFile):
         # on files. We double check the database inside updateDb()
         if not nFile.md5:
             hashes = fritutils.frithashes.hashes(realFile)
-            updateDb(nFile,hashes[0],hashes[1],hashes[2],hashes[3])
+            updateDb(nFile,unicode(hashes[0]),unicode(hashes[1]),unicode(hashes[2]),unicode(hashes[3]))
         else:
             fritutils.termout.printWarning('Hashes for "%s" seems to be already in database.' % nFile.filename)
         
