@@ -77,12 +77,15 @@ def getOffset(offString):
         sys.exit(1)
 
 def unicodify(x):
-    try:
-        y = unicode(x.decode('utf-8'))
-    except:
-        print >> sys.stderr, "ERROR TRANSCODING %s TO UNICODE" % x
-        y = x
-    return y
+    if not isinstance(x,unicode):
+        try:
+            y = unicode(x,'utf-8')
+        except:
+            print >> sys.stderr, "ERROR TRANSCODING %s TO UNICODE" % x
+            y = x
+        return y
+    else:
+        return x
 
 def getBuffer(fname,pos,size):
     """
