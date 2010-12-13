@@ -12,6 +12,7 @@ import fritcommands.undelete
 import fritcommands.add
 import fritcommands.getmails
 import fritcommands.hashes
+import fritutils.fritlog
 from fritutils import fritobjects
 
 def mainFrit():
@@ -30,6 +31,9 @@ def mainFrit():
         if '-v' in args:
             args.remove('-v')
             verbose = True
+        if '--debug' in args:
+            args.remove('--debug')
+            fritutils.fritlog.setLevels('DEBUG')
     # If the command is init, just do it
     if command == 'init':
         # check to see if .frit already exists
