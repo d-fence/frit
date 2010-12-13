@@ -232,7 +232,8 @@ class FileSystem(object):
             for dirpath, dirs, files in os.walk(self.fsMountPoint):
                 dirpath = dirpath.decode('utf-8')
                 for f in files:
-                    f = f.decode('utf-8')
+                    if not isinstance(f,unicode):
+                        f = f.decode('utf-8')
                     yield(os.path.join(dirpath,f))
         else:
             fritutils.termout.printWarning('%s is not mounted. Cannot list files.' % self.configName)
@@ -260,7 +261,8 @@ class FileSystem(object):
             for dirpath, dirs, files in os.walk(md):
                 dirpath = dirpath.decode('utf-8')
                 for f in files:
-                    f = f.decode('utf-8')
+                    if not isinstance(f,unicode):
+                        f = f.decode('utf-8')
                     yield(os.path.join(dirpath,f))
 
     def getEviDb(self):

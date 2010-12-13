@@ -42,6 +42,7 @@ def getOutlookMailsFromWalk(fs,extension):
                 else:
                     fritutils.termout.printWarning('%s is not a PFF file.' % pstPath)
     fs.umount('getmails')
+    fs.evidence.umount('getmails')
 
 def getOutlookMailsFromDb(fs,extension):
     logger.info('Starting to search for "%s" files from database' % extension)
