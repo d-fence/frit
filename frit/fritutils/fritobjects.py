@@ -16,7 +16,10 @@ import fritutils.termout
 import fritutils.fritmount
 import fritutils.fritundelete
 import fritutils.fritdb as fritModel
+import fritutils.fritlog
 from sqlalchemy import func
+
+logger = fritutils.fritlog.loggers['fritobjectsLog']
 
 class FileSystem(object):
     """
@@ -236,10 +239,13 @@ class FileSystem(object):
             sys.exit(1)
 
     def listUndeleted(self):
+        logger.info('Listing undeleted files for "%s".' % self.configName)
         for dirpath, dirs, files in os.walk(self.undeleteDestination):
             dirpath = dirpath.decode('utf-8')
             for f in files:
-                f = f.decode('utf-8')
+                logger.debug('File "%s" found.' % f)
+                if not isinstance(f,unicode):
+                    f = f.decode('utf-8')
                 yield(os.path.join(dirpath,f))
                 
     def listEmails(self):
