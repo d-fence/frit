@@ -33,6 +33,13 @@ def initCommand():
             except:
                 fritutils.termout.printWarning("Cannot create .frit directory.")
                 sys.exit(1)
+        if not os.path.exists('.frit/logs'):
+            try:
+                os.mkdir('.frit/logs')
+            except:
+                fritutils.termout.printWarning("Cannot create .frit/logs directory.")
+                sys.exit(1)
+                
         try:
             fc=open('.frit/config','w')
             fc.write(CONFIG_TEMPLATE)
