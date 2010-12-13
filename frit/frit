@@ -15,7 +15,10 @@ import fritcommands.hashes
 import fritutils.fritlog
 from fritutils import fritobjects
 
+logger = fritutils.fritlog.loggers['mainfritLog']
+
 def mainFrit():
+    logger.info('Frit starting')
     verbose = False
     # Check to see if a command was given.
     if len(sys.argv) < 2:
