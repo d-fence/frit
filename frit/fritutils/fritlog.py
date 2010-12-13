@@ -9,7 +9,11 @@ logging.basicConfig(level=logging.INFO,
                     filename='.frit/logs/frit-' +  str(os.getpid()) + '.log',
                     filemode='w')
 
-loggers = { 'getmailsLog' : logging.getLogger('frit.getmails'), 'fritobjectsLog' : logging.getLogger('frit.fritobjects')}
+loggers = {
+        'getmailsLog' : logging.getLogger('frit.getmails'),
+        'fritobjectsLog' : logging.getLogger('frit.fritobjects'),
+        'hashesLog': logging.getLogger('frit.hashes'),
+        }
 
 def setLevels(level):
     if level == 'DEBUG':

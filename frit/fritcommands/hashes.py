@@ -10,7 +10,10 @@ import fritutils.termout
 import fritutils.fritobjects
 import fritutils.fritdb as fritModel
 import fritutils.frithashes
+import fritutils.fritlog
 import ssdeep
+
+logger = fritutils.fritlog.loggers['hashesLog']
 
 def updateDb(dbFile,hmd5,hsha1,hsha256,hssdeep):
     fname = os.path.join(dbFile.fullpath.fullpath,dbFile.filename)
@@ -80,25 +83,31 @@ def update(Evidences):
             fritutils.termout.printWarning('Cannot find this Evidence (%s) in database' % evi.fileName)
             break
         for fs in evi.fileSystems:
+            logger.info('Starting to update hashes database for "%s/%s"' % (fs.evidence.configName, fs.configName))
             FsDb = fritModel.Filesystem.query.filter_by(evidence=EviDb,configName=fritutils.unicodify(fs.configName)).first()
             if not FsDb:
                 fritutils.termout.printWarning('Cannot find this File System (%s - %s) in database' % (evi.fileName,fs.configName))
                 break
             if fs.isLocked("store") or fs.isLocked("hashes"):
                 fritutils.termout.printWarning('Filesystem "%s" is already locked by a "store" or a "hashes" instance.' % fs.configName)
+                logger.warning('"%s/%s" is already locked by a "store" or "hashes" command.' % (fs.evidence.configName, fs.configName))
                 break
+            logger.info('Mounting filesystem "%s/%s" if needed' % (fs.evidence.configName, fs.configName))
             fs.mount('hashes', 'Hashing files')
             fritutils.termout.printNormal('Start inserting Hashes in database for regular files on "%s"\n' % fs.configName)
             spos = len(fs.fsMountPoint)
             for f in fs.listFiles():
                 dbfile = f[spos:]
                 hashFile(EviDb,FsDb,f,dbfile)
+            logger.info('Unmounting "%s/%s" if needed' % (fs.evidence.configName, fs.configName))
             fs.umount('hashes')
                 
             fritutils.termout.printNormal('Start inserting Hashes in database for undeleted files on "%s"\n' % fs.configName)
+            logger.info('Updating hashes for undeleted files for "%s/%s".' % (fs.evidence.configName, fs.configName))
             for f in fs.listUndeleted():
                 hashFile(EviDb,FsDb,f,f)
         
+            logger.info('Updating hashes for emails files for "%s/%s".' % (fs.evidence.configName, fs.configName))
             fritutils.termout.printNormal('Start inserting Hashes in database for emails files on "%s"\n' % fs.configName)
             for f in fs.listEmails():
                 hashFile(EviDb,FsDb,f,f)
@@ -176,20 +185,25 @@ def factory(Evidences,args):
     """
     args are the hashes command arguments
     """
+    logger.info('Starting hashes command.')
     validArgs = ('update','md5search','sha1search','sha256search', 'csvdump', 'ssdsearch')
     if not args or len(args) == 0:
-        fritutils.termout.printWarning('hashes command need at least an argument')
+        fritutils.termout.printWarning('hashes command need at least an argument. Exiting.')
+        logger.error('No argument given.')
         sys.exit(1)
     elif args[0] not in validArgs:
         fritutils.termout.printWarning('hashes command need a valid argument (%s)' % ', '.join(validArgs))
+        logger.error('"%s" in not a valid arguement. Exiting.' % args[0])
         sys.exit(1)
     else:
         if args[0] == 'update':
+            logger.info('Update arguement given. Starting update.')
             update(Evidences)
         if args[0] == 'md5search':
             args.remove('md5search')
             if len(args) < 1:
                 fritutils.termout.printWarning('md5search command need at least one md5 to search for.')
+                logger.error('md5search command but no argument to search for. Exiting.')
                 sys.exit(1)
             else:
                 md5search(args)
@@ -197,6 +211,7 @@ def factory(Evidences,args):
             args.remove('sha1search')
             if len(args) < 1:
                 fritutils.termout.printWarning('sha1search command need at least one sha1 to search for.')
+                logger.error('sha1search command but no argument to search for. Exiting.')
                 sys.exit(1)
             else:
                 sha1search(args)
@@ -204,6 +219,7 @@ def factory(Evidences,args):
             args.remove('sha256search')
             if len(args) < 1:
                 fritutils.termout.printWarning('sha256search command need at least one sha256 to search for.')
+                logger.error('sha256search command but no argument to search for. Exiting.')
                 sys.exit(1)
             else:
                 sha256search(args)
@@ -213,5 +229,6 @@ def factory(Evidences,args):
             args.remove('ssdsearch')
             if len(args) < 2:
                 fritutils.termout.printWarning('ssdsearch command need a ssdeep hash and a minimal score to match.')
+                logger.error('ssdsearch command but not enough argument (hash and a score). Exiting.')
             else:
                 ssdeepsearch(args)

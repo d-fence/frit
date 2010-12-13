@@ -60,13 +60,16 @@ class FileSystem(object):
     def acquireLoop(self):
         if self.loopDevice == '':
             self.loopDevice = fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
+            logger.info('Aquired a loop device: %s' % self.loopDevice)
             self.writeLoopLock()
 
     def freeLoop(self):
+        logger.info('Detaching loop device %s' % self.loopDevice)
         try:
             fritutils.fritmount.detachLoopDevice(self.loopDevice)
         except fritutils.fritmount.fritMountError:
             fritutils.termout.printWarning('Filesystem %s was not able to detach itself from %s' % (self.rawImage, self.loopDevice))
+            logger.warning('Filesystem %s was not able to detach itself from %s' % (self.rawImage, self.loopDevice))
         finally:
             self.loopDevice = ''
             self.delLoopLock()
@@ -194,9 +197,11 @@ class FileSystem(object):
         # if not, we mount it for the same reason
         # if yes, we check if we need to lock it
         if not self.evidence.isMounted():
+            logger.info('Mounting evidence "%s" from filesystem object.' % self.evidence.configName)
             self.evidence.mount(locker,reason)
         else:
             if not self.evidence.isLocked(locker):
+                logger.info('Evidence "%s" is mounted but mounting to acquire a lock from filesystem object.' % self.evidence.configName)
                 self.evidence.mount(locker,reason)
             
         # We create needed dirs
@@ -343,9 +348,11 @@ class NtfsFileSystem(FileSystem):
         return "NTFS"
 
     def mountCommand(self):
+        logger.info('NTFS mounting "%s" on "%s"' % (self.loopDevice,self.fsMountPoint))
         fritutils.fritmount.ntfs3gMount(self.loopDevice,self.fsMountPoint)
 
     def umountCommand(self):
+        logger.info('NTFS unmounting "%s"' % self.fsMountPoint)
         fritutils.fritmount.fuserUnmount(self.fsMountPoint)
        
     def undelete(self):
@@ -365,9 +372,11 @@ class FatFileSystem(FileSystem):
         return "FAT"
 
     def mountCommand(self):
+        logger.info('FAT mounting "%s" on "%s"' % (self.loopDevice,self.fsMountPoint))
         fritutils.fritmount.fatMount(self.loopDevice,self.fsMountPoint)
     
     def umountCommand(self):
+        logger.info('FAT unmounting "%s"' % self.fsMountPoint)
         fritutils.fritmount.fatUnmount(self.fsMountPoint)
 
 class HfsPlusFileSystem(FileSystem):
@@ -378,9 +387,11 @@ class HfsPlusFileSystem(FileSystem):
         return "HFSPLUS"
 
     def mountCommand(self):
+        logger.info('HFSPLUS mounting "%s" on "%s"' % (self.loopDevice,self.fsMountPoint))
         fritutils.fritmount.hfsplusMount(self.loopDevice,self.fsMountPoint)
     
     def umountCommand(self):
+        logger.info('HFSPLUS unmounting "%s"' % self.fsMountPoint)
         fritutils.fritmount.hfsplusUnmount(self.fsMountPoint)
 
 class ISO9660FileSystem(FileSystem):
