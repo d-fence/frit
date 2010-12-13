@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import logging
+import fritutils.termout
 import os
 
 if not os.path.exists('.frit/logs'):
@@ -22,6 +23,7 @@ loggers = {
         'fritobjectsLog' : logging.getLogger('frit.fritobjects'),
         'hashesLog': logging.getLogger('frit.hashes'),
         'undeleteLog': logging.getLogger('frit.undelete'),
+        'logsLog' : logging.getLogger('frit.logs'),
         }
 
 
@@ -33,6 +35,4 @@ def setLevels(level):
         l = logging.INFO
     for logger in loggers:
         loggers[logger].setLevel(l)
-
-
 
