@@ -17,10 +17,11 @@ logging.basicConfig(level=logging.INFO,
                     filemode='w')
 
 loggers = {
-        'mainfritLog' : logging.getLogger('frit.mainfrit')        
+        'mainfritLog' : logging.getLogger('frit.mainfrit'),
         'getmailsLog' : logging.getLogger('frit.getmails'),
         'fritobjectsLog' : logging.getLogger('frit.fritobjects'),
         'hashesLog': logging.getLogger('frit.hashes'),
+        'undeleteLog': logging.getLogger('frit.undelete'),
         }
 
 
