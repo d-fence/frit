@@ -16,10 +16,7 @@ import fritcommands.logs
 import fritutils.fritlog
 from fritutils import fritobjects
 
-logger = fritutils.fritlog.loggers['mainfritLog']
-
 def mainFrit():
-    logger.info('Frit starting')
     verbose = False
     # Check to see if a command was given.
     if len(sys.argv) < 2:
@@ -47,6 +44,9 @@ def mainFrit():
         else:
             fritutils.termout.printWarning("A .frit directory already exists.")
             sys.exit(1)
+    else:
+            logger = fritutils.fritlog.loggers['mainfritLog']
+            logger.info('Frit starting')
     # The command is not init, so we should find a config file
     if os.path.exists('.frit/config'):
         try:
