@@ -3,19 +3,28 @@
 import logging
 import fritutils.termout
 import os
+import sys
 
-if not os.path.exists('.frit/logs'):
-    try:
-        os.mkdir('.frit/logs')
-    except:
-        fritutils.termout.printWarning("Cannot create .frit/logs directory.")
-        sys.exit(1)
+# We have to check if a .frit exists, if not, we assume that the init command
+# was issued. So we log in the base directory
+if os.path.exists('.frit'):
+    if not os.path.exists('.frit/logs'):
+        try:
+            os.mkdir('.frit/logs')
+        except:
+            fritutils.termout.printWarning("Cannot create .frit/logs directory.")
+            sys.exit(1)
+    basepath = '.frit/logs/frit-'
+else:
+    basepath = './frit-'
+    
         
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    datefmt = '%Y-%m-%d %H:%M:%S',
-                    filename='.frit/logs/frit-' +  str(os.getpid()) + '.log',
-                    filemode='w')
+                    datefmt ='%Y-%m-%d %H:%M:%S',
+                    filename=basepath +  str(os.getpid()) + '.log',
+                    filemode='w'
+                    )
 
 loggers = {
         'mainfritLog' : logging.getLogger('frit.mainfrit'),
