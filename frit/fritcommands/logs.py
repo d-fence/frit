@@ -4,6 +4,7 @@ logs command.
 Various commands to manipulate frit logs
 """
 import os
+import sys
 import fritutils
 
 logger = fritutils.fritlog.loggers['logsLog']
