@@ -64,7 +64,7 @@ def getOutlookMailsFromDb(fs,extension):
                 fritutils.termout.printWarning('%s is not a PFF file.' % pstPath)
             fs.umount('getmails')
 
-def getOutlookUndeletedFromDb(fs):
+def getOutlookUndeletedFromWalk(fs):
     for filepath in fs.listUndeleted():
         if os.path.splitext(filepath)[1] == u'.pst' or os.path.splitext(filepath)[1] == u'.ost' :
             cleanedPath = filepath.replace('.frit/extractions/','')
@@ -104,4 +104,4 @@ def factory(Evidences,args):
     # It's probably quicker to walk undelete files than to query db
     for evi in Evidences:
         for fs in evi.fileSystems:
-            getOutlookUndeletedFromDb(fs)
+            getOutlookUndeletedFromWalk(fs)
