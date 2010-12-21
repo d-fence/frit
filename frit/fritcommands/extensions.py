@@ -63,7 +63,7 @@ def factory(Evidences, args):
                 for fs in evi.fileSystems:
                     fritutils.termout.printMessage("\t%s" % fs.configName)
                     for ext in sorted(extList):
-                        for fp in fs.ExtensionsFritFiles(ext):
+                        for fp in fs.ExtensionsFritFiles(ext,u'Normal'):
                             fritutils.termout.printNormal(fp)
         elif args[0] == 'extract':
             args.remove('extract')
@@ -90,7 +90,7 @@ def factory(Evidences, args):
                     for ext in sorted(extList):
                         nbe = fs.dbCountExtension(ext)
                         fritutils.termout.printMessage("Extracting %d files (%s)" % (nbe['count'],fritutils.humanize(nbe['size'])))
-                        for filepath in fs.ExtensionsOriginalFiles(ext):
+                        for filepath in fs.ExtensionsOriginalFiles(ext,u'Normal'):
                             if ext == "No Extension":
                                 extPath = "no_extension"
                             else:

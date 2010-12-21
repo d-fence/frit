@@ -46,7 +46,7 @@ def getOutlookMailsFromWalk(fs,extension):
 
 def getOutlookMailsFromDb(fs,extension):
     logger.info('Starting to search for "%s" files from database' % extension)
-    for filepath in fs.ExtensionsOriginalFiles(extension):
+    for filepath in fs.ExtensionsOriginalFiles(extension,u'Normal'):
         logger.info('File "%s" found' % filepath)
         exportPath = getExportPath(filepath,fs)
         pathToCreate = os.path.split(exportPath)[0]
