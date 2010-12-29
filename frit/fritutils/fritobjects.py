@@ -420,6 +420,49 @@ class Ext2FileSystem(FileSystem):
     def umountCommand(self):
         fritutils.fritmount.fuserUnmount(self.fsMountPoint)
        
+class RoDirFileSystem(FileSystem):
+    """
+    Class for Read Only directory file system.
+    This is a way for analyzing simple directories.
+    We need to override mount and umount because we dont need a loop device here.
+    """
+    def getFormat(self):
+        return "ROFS"
+
+    def mount(self,locker,reason):
+        """
+        locker is the intermediate extension given to the lockfile.
+        reason is the comment that will be inserted in the lock file.
+        """
+        # No need to mount the evidence
+            
+        # We create needed dirs
+        self.makeDirs()
+        # if the file is not already mounted, we mount it
+        if not self.isMounted():
+            try:
+                self.mountCommand()
+            except fritutils.fritmount.fritMountError:
+                raise
+        # we create the lock to prevent other instances to unmount
+        self.writeLock(locker,reason)
+
+    def umount(self,locker):
+        """
+        A function to unmount the filesystem
+        """
+        #  first we check if the mount is locked by another instance
+        if not self.isOtherLocked(locker):
+            self.umountCommand()
+        # we remove our lock file
+        self.removeLock(locker)
+
+
+    def mountCommand(self):
+        fritutils.fritmount.rofsMount(self.rawImage,self.fsMountPoint)
+
+    def umountCommand(self):
+        fritutils.fritmount.fuserUnmount(self.fsMountPoint)   
 
 class Evidence(object):
     """
@@ -539,7 +582,7 @@ class DdEvidence(Evidence):
             fs.rawImage = self.rawImage 
     
     def isMounted(self):
-        # as the file exists, it like if it is always mounted
+        # as the file exists, it is like if it is always mounted
         return True
 
 class AffEvidence(Evidence):
@@ -609,17 +652,40 @@ class AffEvidence(Evidence):
 
 class EwfEvidence(Evidence):
     pass
+
+class RofsEvidence(Evidence):
+    """
+    A pseudo container for simple directories.
+    They doesn't need to be mounted as they already exist.
+    """
+    def getFormat(self):
+        return 'rofs'
+
+    def populateRawImage(self):
+        """
+        This function populate the raw image filename to all filesystems of the Evidence.
+        Even if this file does not exists yet.
+        rawimage is a directory in this special case
+        """
+        self.rawImage = self.fileName
+        for fs in self.fileSystems:
+            fs.rawImage = self.rawImage 
     
+    def isMounted(self):
+        # as the directory exists, it is like if it is always mounted
+        return True
+
 def evidencesFromConfig(fritConf,verbose):
     """
     A function that parse a configObj and map the Evidences to Evidence object.
     """
     if verbose:
         fritutils.termout.printMessage("Parsing config file.")
+    logger.info('Parsing config file.')
     Evidences = []
     EviRegex = re.compile("^Evidence\d+")
     FsRegex = re.compile("^Filesystem\d+")
-    ValidFileSystems = ('FAT','NTFS','ISO9660','HFSPLUS','EXT2/3')
+    ValidFileSystems = ('FAT','NTFS','ISO9660','HFSPLUS','EXT2/3','ROFS')
     ev = ''
     for key in fritConf.keys():
         if EviRegex.search(key):
@@ -630,9 +696,13 @@ def evidencesFromConfig(fritConf,verbose):
                 ev = DdEvidence(filename=fritConf[key]['Name'],configName=key)
             elif format == 'ewf':
                 ev = EwfEvidence(filename=fritConf[key]['Name'],configName=key)
+            elif format == 'rofs':
+                ev =  RofsEvidence(filename=fritConf[key]['Name'],configName=key)
             else:
                 fritutils.termout.printWarning('No valid format found.')
+                logger.error('No valid format found')
                 sys.exit(1)
+            logger.info('%s found as %s with format "%s"' % (ev.fileName,ev.configName,ev.getFormat()))
             if verbose:
                 fritutils.termout.printSuccess("\t" + ev.fileName + " Found.")
             fs = ''
@@ -673,11 +743,19 @@ def evidencesFromConfig(fritConf,verbose):
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t EXT2/3 filesystem Found at offset %d." % fs.offset)
+                    elif fritConf[key][subkey]['Format'] == 'ROFS':
+                        fs = RoDirFileSystem(offset=0,fsConfigName=subkey,evidence=ev)
+                        ev.fileSystems.append(fs)
+                        ev.populateRawImage()
+                        if verbose:
+                            fritutils.termout.printSuccess("\t\t ROFS directory Found.")
                     elif fritConf[key][subkey]['Format'] not in ValidFileSystems:
+                        logger.warning("Unknow filesystem %s found for evidence %s in config file." % (fritConf[key][subkey]['Format'],ev.configName))
                         fritutils.termout.printWarning("%s This filesystem type (%s) is unknow by frit." % (ev.configName,fritConf[key][subkey]['Format']))
 
             Evidences.append(ev)
 
     if len(Evidences) ==0:
         fritutils.termout.printWarning("No evidences found in config file.")
+        logger.warning('No evidences found in config file.')
     return Evidences
