@@ -33,7 +33,7 @@ def status(Evidences,args):
     fritutils.termout.printMessage("Frit Status:")
     for evi in Evidences:
         fritutils.termout.printMessage('\t%s : %s' % (evi.configName,evi.fileName))
-        if evi.isMounted() and evi.getFormat() != 'dd':
+        if evi.isMounted() and evi.getFormat() != 'dd' and evi.getFormat() != 'rofs':
             fritutils.termout.printNormal('\tMounted on : %s' % evi.containerMountPoint)
         locklist = evi.lockList()
         if len(locklist) > 0:
@@ -58,7 +58,7 @@ def status(Evidences,args):
                             evi.removeLock(lock)
         else:
             # if the Evidence is mounted with no lockfile we have an inconsistency
-            if evi.isMounted() and evi.getFormat() != 'dd' :
+            if evi.isMounted() and evi.getFormat() != 'dd' and evi.getFormat() != 'rofs':
                 fritutils.termout.printWarning('\t\tInconsistency: %s is mounted with no lockfile. Use the "status clean" command to unmount.' % evi.configName)
                 if clean:
                     fritutils.termout.printWarning('\t\tUnmounting')
