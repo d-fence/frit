@@ -33,6 +33,8 @@ loggers = {
         'hashesLog': logging.getLogger('frit.hashes'),
         'undeleteLog': logging.getLogger('frit.undelete'),
         'logsLog' : logging.getLogger('frit.logs'),
+        'mountLog' : logging.getLogger('frit.mount'),
+        'fritmountLog' : logging.getLogger('frit.fritmount'),
         }
 
 
