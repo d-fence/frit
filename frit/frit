@@ -17,17 +17,15 @@ import fritcommands.logs
 import fritutils.fritlog
 from fritutils import fritobjects
 
-logger = fritutils.fritlog.loggers['mainfritLog']
 
-def startLog(command):
+def startLog(command,logger):
     logger.info('Starting %s command' % command)
     
-def stopLog(command,startTime):
+def stopLog(command,startTime,logger):
     diffTime = datetime.datetime.today() - startTime
     logger.info('%s command successfully ended in %s' % (command,diffTime))
 
 def mainFrit():
-    logger.info('Frit starting')
     startTime = datetime.datetime.today()
     verbose = False
     # Check to see if a command was given.
@@ -36,6 +34,8 @@ def mainFrit():
         sys.exit(1)
     # check to see if the current working dir is allowed
     fritutils.noBadPath()
+    logger = fritutils.fritlog.loggers['mainfritLog']
+    logger.info('Frit starting')    
     # Separate command and the command arguemnts
     (command,args) = fritutils.getCommand(sys.argv[1:])
     # here we get the options from the args
@@ -86,57 +86,61 @@ def mainFrit():
                 specifiedEvidences.append(evi)
         if len(specifiedEvidences) > 0:
             Evidences = specifiedEvidences
+            for evi in Evidences:
+                logger.info('Working on evidence %s specified on command line' % evi.configName)
+        else:
+            logger.info('Working on all evidences.')
         
     # user isued a mount command
-    startLog(command)
+    startLog(command,logger)
     if command == 'mount':
         fritcommands.mount.mountCommand(Evidences,args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
 
     if command == 'umount':
         fritcommands.mount.Umount(Evidences)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'status':
         fritcommands.status.status(Evidences,args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'store':
         fritcommands.store.store(Evidences,args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'extensions':
         fritcommands.extensions.factory(Evidences,args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'undelete':
         fritcommands.undelete.factory(Evidences, args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'add':
         fritcommands.add.factory(fritConfig, args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'getmails':
         fritcommands.getmails.factory(Evidences, args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'hashes':
         fritcommands.hashes.factory(Evidences, args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'logs':
         fritcommands.logs.factory(Evidences, args)
-        stopLog(command,startTime)
+        stopLog(command,startTime,logger)
         sys.exit(0)
         
     # Obviously, the given command was not found
