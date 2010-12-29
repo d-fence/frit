@@ -4,6 +4,9 @@ Mount command
 """
 
 import fritutils.termout
+import fritutils.fritlog
+
+logger = fritutils.fritlog.loggers['mountLog']
 
 def Mount(Evidences,fullMount=False):
     """
@@ -18,12 +21,15 @@ def Mount(Evidences,fullMount=False):
         else:
             fritutils.termout.printMessage("\tMounting " + evi.fileName + ". Please wait.")
             evi.mount("user","Mounted by the user\n")
+            logger.info('Evidence %s succesfully mounted' % evi.configName)
             fritutils.termout.printSuccess("\t" + evi.fileName + " mounted")
             if fullMount:
                 for fs in evi.fileSystems:
                     try:
+                        logger.info('Trying to mount filesystem %s' % evi.configName + '/' + fs.configName)
                         fs.mount("user","Mounted by the user\n")
                     except fritutils.fritmount.fritMountError:
+                        logger.warning('Unable to mount filesystem %s' % evi.configName + '/' + fs.configName)
                         fritutils.termout.printWarning('\tUnable to mount filsystem %s' % fs.configName) 
 
 def Umount(Evidences):
@@ -48,10 +54,13 @@ def mountCommand(Evidences,args):
     """
     Handles the mount command and if 'containers' is specified in args, it only mount containers.
     """
+    logger.info('mount command started.')
     if args:
         if 'containers' in args:
+            logger.info('Only mounting containers as requested by the user.')
             Mount(Evidences)
         else:
             fritutils.termout.printWarning('Unknown mount command parameters : "%s"' % args)
     else:
+        logger.info('Mounting containers and filesystems.')
         Mount(Evidences,fullMount=True)
