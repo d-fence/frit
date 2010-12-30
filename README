@@ -295,6 +295,8 @@ Perform an undelete on filesystems and store the results in
 
 Currently only ntfs is supported.
 
+If the '--list' option is used, frit will list already undeleted files.
+
 5.8 getmails
 
 Search for PST and OST outlook mailboxes files and extract their mails and
