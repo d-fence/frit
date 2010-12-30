@@ -37,15 +37,11 @@ def mainFrit():
     logger = fritutils.fritlog.loggers['mainfritLog']
     logger.info('Frit starting')    
     # Separate command and the command arguemnts
-    (command,args) = fritutils.getCommand(sys.argv[1:])
-    # here we get the options from the args
-    # we have to work on this :-)
-    if args:
-        if '-v' in args:
-            args.remove('-v')
+    (command,args,options) = fritutils.getCommand(sys.argv[1:])
+    if options:
+        if '-v' in options:
             verbose = True
-        if '--debug' in args:
-            args.remove('--debug')
+        if '--debug' in options:
             fritutils.fritlog.setLevels('DEBUG')
     # If the command is init, just do it
     if command == 'init':
@@ -94,52 +90,52 @@ def mainFrit():
     # user isued a mount command
     startLog(command,logger)
     if command == 'mount':
-        fritcommands.mount.mountCommand(Evidences,args)
+        fritcommands.mount.mountCommand(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
 
     if command == 'umount':
-        fritcommands.mount.Umount(Evidences)
+        fritcommands.mount.Umount(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'status':
-        fritcommands.status.status(Evidences,args)
+        fritcommands.status.status(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'store':
-        fritcommands.store.store(Evidences,args)
+        fritcommands.store.store(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'extensions':
-        fritcommands.extensions.factory(Evidences,args)
+        fritcommands.extensions.factory(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'undelete':
-        fritcommands.undelete.factory(Evidences, args)
+        fritcommands.undelete.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'add':
-        fritcommands.add.factory(fritConfig, args)
+        fritcommands.add.factory(fritConfig, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'getmails':
-        fritcommands.getmails.factory(Evidences, args)
+        fritcommands.getmails.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'hashes':
-        fritcommands.hashes.factory(Evidences, args)
+        fritcommands.hashes.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'logs':
-        fritcommands.logs.factory(Evidences, args)
+        fritcommands.logs.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
