@@ -36,14 +36,14 @@ def listUndeleted(Evidences):
             for f in fs.listUndeleted():
                 fritutils.termout.printNormal(f)
             
-def factory(Evidences, args):
-    if not args:
+def factory(Evidences, args, options):
+    if not options:
         # There is no other argument to the undelete command.
         # So we really undelete
         logger.info('Start undelete command.')
         undelete(Evidences)
     else:
-        if '--list' in args:
+        if options and '--list' in options:
             logger.info('Listing undeleted files.')
             listUndeleted(Evidences)
         else:

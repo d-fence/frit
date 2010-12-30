@@ -168,7 +168,7 @@ def filenameSearch(Evidences,args):
                     md5 = f.md5.md5
                 fritutils.termout.printMessage("\t%s %s %s %s %s" % (f.filesystem.configName, f.state.state, fsize, md5, fp))
 
-def store(Evidences, args):
+def store(Evidences, args, options):
     """
     args are the store command arguments
     """

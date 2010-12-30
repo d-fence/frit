@@ -19,7 +19,7 @@ def dbStatus(Evidences):
     else:
         fritutils.termout.printMessage('No Database found, use the "store create" command to create one')
 
-def status(Evidences,args):
+def status(Evidences,args,options):
     """
     Print a status report for all evidences
     """

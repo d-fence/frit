@@ -181,7 +181,7 @@ def csvdump(Evidences):
                      f.filename, f.md5.md5, f.sha1.sha1, f.sha256.sha256,\
                      f.ssdeep.ssdeep, f.state.state))
 
-def factory(Evidences,args):
+def factory(Evidences,args,options):
     """
     args are the hashes command arguments
     """

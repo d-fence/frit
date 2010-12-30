@@ -35,6 +35,7 @@ loggers = {
         'logsLog' : logging.getLogger('frit.logs'),
         'mountLog' : logging.getLogger('frit.mount'),
         'fritmountLog' : logging.getLogger('frit.fritmount'),
+        'extensionsLog': logging.getLogger('frit.extensions'),
         }
 
 

@@ -12,7 +12,7 @@ import fritutils.fritconf
 import fritutils.fritobjects
 import fritutils.fsprobe
 
-def factory(fritConfig, args):
+def factory(fritConfig, args, options):
     """
     The factory receive the config object and the remaining args.
     Those args are files that the user wants to add in the config file.

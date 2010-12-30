@@ -78,9 +78,9 @@ def getOutlookUndeletedFromWalk(fs):
                         os.makedirs(pathToCreate)
                     fritutils.fritemails.pffExport(filepath,exportPath)
             
-def factory(Evidences,args):
+def factory(Evidences,args, options):
     logger.info('Starting getmails command')
-    if args and '--walk' in args:
+    if options and '--walk' in options:
         logger.info('Using "--walk" argument.')
         for evi in Evidences:
             logger.info('Working on evidence "%s"' % evi.configName)

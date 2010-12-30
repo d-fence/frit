@@ -50,7 +50,7 @@ def Umount(Evidences):
                     fritutils.termout.printMessage("\tUnmounting " + fs.configName + ". please wait.")
                     fs.umount("user")
 
-def mountCommand(Evidences,args):
+def mountCommand(Evidences,args,options):
     """
     Handles the mount command and if 'containers' is specified in args, it only mount containers.
     """

@@ -21,7 +21,7 @@ def showLogs():
         fritutils.termout.printNormal(text)
         f.close()
         
-def factory(Evidences,args):
+def factory(Evidences,args,options):
     """
     args are the logs command arguments
     """
