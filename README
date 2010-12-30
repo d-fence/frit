@@ -101,7 +101,7 @@ For example:
         Format=NTFS
         Offset=32256
     [[Filesystem2]]
-        Format=VFAT
+        Format=FAT
         Offset=71328600*512
 
 The "Name" parameter is the filepath to the evidence.
@@ -110,9 +110,27 @@ forensic image (frit currently supported raw files (dd), aff (advenced forensic
 format and ewf (encase)).
 
 The "Filesystem#number" subsection must contain the format of this filesystem
-(frit currently support
-NTFS and vfat) and the offset in bytes where to find this filesystem on the
-image.
+(frit currently support NTFS, FAT, HFSPLUS, EXT2/3, ISO9660, ROFS) 
+and the offset in bytes where to find this filesystem on the image.
+
+5.1.1
+
+Rofs special case.
+Instead of using a container file (a forensic image copy), one can use a simple
+directory instead. For example, in case of a forensic copy was not possible,
+an investigator simply copy a directory structure.
+This is where ROFS comes in. Frit can do a mirror mount of this directory but
+in Read Only mount thanks to the ROFS fuse file system.
+Offset MUST be set to 0. The directory cannot be outside of the frit working
+directory (you cannot set it to ../../other_dir).
+
+Configuration example:
+[Evidence1]
+    Name=server-files-directory
+    Format=rofs
+    [[Filesystem1]]
+        Format=ROFS
+        Offset=0
 
 5.2 add
 
@@ -239,7 +257,27 @@ sha1 and sha256 can be searched with sha1search and sha256search
 
 5.6.3 Searching for ssdeep hashes
 
-to be done
+An investigator can search for a fragment of file using this method.
+For example, an investigator find an MS Word document during the investigation
+and he wants to know if similar docs are elsewhere on the other forensic images
+copies.
+
+First thing to do is to use ssdeep against this document to create a piecewise
+hash like this:
+
+$ ssdeep README
+ssdeep,1.0--blocksize:hash:hash,filename
+48:aIylX3pU+GR+YGul0qWEnF80IzUbuHL946kEQIH8OtosKgIVi/X18fb:aHlnpU/vZWEnF809be94
+6kEjH5c6gb,"/usr/share/doc/python-pefile/README"
+
+You can then search on all files stored in the frit database for a similar
+file matching a score (on a scale of 100).
+
+Example:
+$ frit ssdsearch 48:aIylX3pU+GR+YGul0qWEnF80IzUbuHL946kEQIH8OtosKgIVi/X18fb:aHl
+npU/vZWEnF809be946kEjH5c6gb 50
+
+Will search for files matching this ssdeep hash on a score of 50.
 
 5.6.4 csv dump of database
 
@@ -314,11 +352,23 @@ It's also possible to specify an Evidence by its file name like this:
 
 $ frit store update my_nice_container.ewf
 
+5.11 Logs
+
+frit uses a logging system. log files are stored in the ".frit/logs" directory.
+There is one log file per frit process. It means that each time you launch a 
+frit command, there is a new log files. This can quickly makes a lot of files.
+File naming is like this :
+frit-10046.log 
+where the number is the PID of the frit process.
+
+One can launch the "logs show" command to display the content of the log files.
+Be aware that even the "logs show" command create a log entry that will be 
+displayed too.
+
 6. Future
 
 What is palnned in the future releases:
 - carving
-- file hashing
 - file indexing
 - ...
 
