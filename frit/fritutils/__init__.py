@@ -8,11 +8,21 @@ import fritutils.termout
 
 def getCommand(args):
     command = args[0]
+    commandArgs = []
+    options = []
     if len(args) > 1:
         commandArgs = args[1:]
+        # here we force a list copy otherwise, when we remove the element from
+        # the original list, the for loop is broken
+        for a in list(commandArgs):
+            if len(a) > 1 and (a[0]=='-' or a[:1]=='--'):
+                options.append(a)
+                commandArgs.remove(a)
     else:
         commandArgs= None
-    return (command,commandArgs)
+    if len(options) == 0:
+        options = None
+    return (command,commandArgs,options)
 
 def noBadPath():
     """
