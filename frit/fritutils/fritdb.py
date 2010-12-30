@@ -95,7 +95,7 @@ def createDb():
             fis = FileState(state=fstate)
             elixir.session.commit()
             
-def listExtensions(Evidences,extlist):
+def listExtensions(Evidences,extlist,states):
         """
         A function to print a count and a size sum of the specified extension
         for all filsystems of specified Evidences list.
@@ -113,22 +113,23 @@ def listExtensions(Evidences,extlist):
                 totalNumber = 0
                 fso =  filesystem.getFsDb()
                 for ext in extlist:
-                    fq = File.query.filter(File.filesystem==fso)
-                    fq = fq.filter(File.state.has(state=u'Normal'))
-                    fq = fq.filter(File.extension.has(extension=ext))
-                    nb = fq.count()
-                    if nb >0 :
-                        size=fq.value(func.sum(File.filesize))
-                        fritutils.termout.printNormal('\t\t%s %d (%s)' % (ext,nb,fritutils.humanize(size)))
-                        totalSize += size
-                        totalNumber += nb
-                        grandTotalNb += nb
-                        grandTotalSize += size
-                        if ext in totalExt.keys():
-                            totalExt[ext][0] += nb
-                            totalExt[ext][1] += size
-                        else:
-                            totalExt[ext] = [nb, size]
+                    for state in states:
+                        fq = File.query.filter(File.filesystem==fso)
+                        fq = fq.filter(File.state.has(state=state))
+                        fq = fq.filter(File.extension.has(extension=ext))
+                        nb = fq.count()
+                        if nb >0 :
+                            size=fq.value(func.sum(File.filesize))
+                            fritutils.termout.printNormal('\t\t%s %d (%s) (state: %s)' % (ext,nb,fritutils.humanize(size),state))
+                            totalSize += size
+                            totalNumber += nb
+                            grandTotalNb += nb
+                            grandTotalSize += size
+                            if ext in totalExt.keys():
+                                totalExt[ext][0] += nb
+                                totalExt[ext][1] += size
+                            else:
+                                totalExt[ext] = [nb, size]
                 fritutils.termout.printNormal('\t\tFilesystem Total Files : %d' % totalNumber)
                 fritutils.termout.printNormal('\t\tFilesystem Total Size : %s' % fritutils.humanize(totalSize))
         fritutils.termout.printSuccess('Summary:')
