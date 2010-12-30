@@ -284,14 +284,14 @@ class FileSystem(object):
         cfn = fritutils.unicodify(self.configName)
         return fritModel.elixir.session.query(fritModel.Filesystem).filter_by(configName=cfn, evidence=eviDb).first()
 
-    def dbCountExtension(self, ext):
+    def dbCountExtension(self, ext, state):
         """
         A function to count a specified extension found on the filesystem
         """
         toReturn = {}
         fso =  self.getFsDb()
         fq = fritModel.File.query.filter(fritModel.File.filesystem==fso)
-        fq = fq.filter(fritModel.File.state.has(state=u'Normal'))
+        fq = fq.join(fritModel.FileState).filter(fritModel.FileState.state==state)
         fq = fq.filter(fritModel.File.extension.has(extension=ext))
         nb = fq.count()
         size = 0
@@ -567,6 +567,25 @@ class Evidence(object):
         have to be overriden by the different filesystems
         """
         pass
+
+    def dbCountExtension(self, extlist, state):
+        """
+        A function to count a specified extension found on the Evidence
+        """
+        toReturn = {}
+       
+        evio =  fritModel.elixir.session.query(fritModel.Evidence).filter_by(configName=fritutils.unicodify(self.configName)).first()
+
+        fq = fritModel.File.query.filter(fritModel.File.evidence==evio)
+        fq = fq.join(fritModel.FileState).filter(fritModel.FileState.state==state)
+        fq = fq.join(fritModel.Extension).filter(fritModel.Extension.extension.in_(extlist))
+        nb = fq.count()
+        size = 0
+        if nb > 0:
+            size=fq.value(func.sum(fritModel.File.filesize))
+        toReturn['count'] = nb
+        toReturn['size'] = size
+        return toReturn
 
 class DdEvidence(Evidence):
     def getFormat(self):
