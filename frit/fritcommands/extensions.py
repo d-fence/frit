@@ -28,7 +28,7 @@ def extractFile(toExtract,destination):
 def factory(Evidences, args):
     validArgs = ('count', 'extract','list')
     if not args or len(args) == 0:
-        fritutils.termout.printWarning('extensions command need at least an argument')
+        fritutils.termout.printWarning('extensions command need at least an argument to define an action (count, extract or list).')
         sys.exit(1)
     elif args[0] not in validArgs:
         fritutils.termout.printWarning('extensions command need a valid argument (%s)' % ', '.join(validArgs))
