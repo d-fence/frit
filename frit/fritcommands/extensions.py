@@ -50,7 +50,7 @@ def factory(Evidences, args, options):
             for o in options:
                 if o in stateOptions.keys():
                     states.append(stateOptions[o])
-        else:
+        if len(states) == 0:        
             states = list(fritModel.FILESTATES)
         logger.info('states: %s' % ','.join(states))
         if args[0] == 'count':
