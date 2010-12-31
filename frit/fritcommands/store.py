@@ -66,9 +66,9 @@ def update(Evidences):
             evi.mount("store","Mounted to create initial database")
             for fs in evi.fileSystems:
                 # first, we count the files that are already in the DB
-                fcount = fs.dbCountFiles()['Files']
-                if fcount[u'Normal'] > 0:
-                    fritutils.termout.printMessage('%d files are already in the database, not inserting.' % fcount[u'Normal'])
+                fcount = fs.dbCountFiles()[u'Normal']
+                if fcount['Files'] > 0:
+                    fritutils.termout.printMessage('%d files are already in the database, not inserting.' % fcount['Files'])
                 else:
                     # filesystem creation in the database
                     FsDb = fritModel.Filesystem.query.filter_by(evidence=EviDb,configName=fritutils.unicodify(fs.configName)).first()
