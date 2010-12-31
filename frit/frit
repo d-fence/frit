@@ -95,7 +95,7 @@ def mainFrit():
         sys.exit(0)
 
     if command == 'umount':
-        fritcommands.mount.Umount(Evidences,args,options)
+        fritcommands.mount.Umount(Evidences)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
