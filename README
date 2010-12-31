@@ -253,6 +253,20 @@ If you don't want to have a directory by extension, use the merge option like
 this:
 $ frit extensions extract --merge .pdf .xls .doc
 
+You can also provide extensions list into the config file.
+For exemple:
+[Extensions]
+    Office = .odt .ods .odp .doc .docx .xls .ppt .pptx .pdf
+    Images = .jpg .jpeg .png .tif
+    Perso = .dwf .dbx
+
+This entry in ".frit/config" file will give you 3 lists of extensions.
+So, if you use this command:
+$ frit extensions extract Office Images .txt
+
+Will extract "odt .ods .odp .doc .docx .xls .ppt .pptx .pdf .jpg .jpeg .png
+ .tif .txt"
+
 5.6 hashes
 
 This command is used to manipulate file hashes in frit environment.

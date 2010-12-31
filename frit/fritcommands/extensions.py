@@ -32,11 +32,26 @@ def extractFile(toExtract,destination):
     else:
         logger.debug('"%s" already exists' % os.path.join(destination+extractBasename))
 
+def getExtLists(fritConf):
+    # We have to convert to unicode from config file.
+    toReturn = {}
+    if fritConf.has_key('Extensions'):
+        ed = fritConf['Extensions']
+        for k in ed.keys():
+            l = []
+            for v in ed[k].split(' '):
+                l.append(unicode(v))
+            toReturn[k] = l
+        return toReturn
+    else:
+        return {}
 
-def factory(Evidences, args, options):
+def factory(Evidences, args, options, fritConf):
     validArgs = ('count', 'extract','list')
     stateOptions = {'--normal':u'Normal','--contained':u'Contained','--undeleted':u'Undeleted','--carved':u'Carved'}
+    definedExtensions = getExtLists(fritConf)
     states = []
+    extList = []
     if not args or len(args) == 0:
         fritutils.termout.printWarning('extensions command need at least an argument to define an action (%s).' % ', '.join(validArgs))
         sys.exit(1)
@@ -44,7 +59,9 @@ def factory(Evidences, args, options):
         fritutils.termout.printWarning('extensions command need a valid argument (%s)' % ', '.join(validArgs))
         sys.exit(1)
     else:
-        logger.info('command issued: %s' % args[0])
+        subcommand = args[0]
+        args.remove(subcommand)        
+        logger.info('subcommand issued: %s' % subcommand)
         if options:
             logger.info('options: %s' % ','.join(options))
             for o in options:
@@ -53,54 +70,44 @@ def factory(Evidences, args, options):
         if len(states) == 0:        
             states = list(fritModel.FILESTATES)
         logger.info('states: %s' % ','.join(states))
-        if args[0] == 'count':
+        
+        # Finding extensions to work with
+        # Searching if one or more predefined extensions list is in the args
+        for a in list(args):
+            if a in definedExtensions.keys():
+                logger.info('Extension list "%s" asked in command line.' % args)
+                args.remove(a)
+                extList.extend(definedExtensions[a])
+        # the remaining args should be the extensions that we want to list
+        # if there is no more args, we list all extensions
+        if (not args or len(args) == 0) and len(extList) == 0:
+            for ex in fritModel.elixir.session.query(fritModel.Extension.extension).all():
+                extList.append(ex[0])
+        else:
+            for ex in args:
+                extList.append(fritutils.unicodify(ex))        
+
+        logger.info('Extensions: "%s"' % " ".join(extList))
+            
+        if subcommand == 'count':
             logger.info('Starting subcommand count')
-            # the remaining args should be the extensions that we want to list
-            # if there is no more args, we list all extensions
-            args.remove('count')
-            if not args or len(args) == 0:
-                extList = []
-                for ex in fritModel.elixir.session.query(fritModel.Extension.extension).all():
-                    extList.append(ex[0])
-            else:
-                extList = []
-                for ex in args:
-                    extList.append(fritutils.unicodify(ex))
+
             fritModel.listExtensions(Evidences,extList,states)
-                    
-        elif args[0] == 'list':
+        elif subcommand == 'list':
             logger.info('Starting list subcommand.')
-            args.remove('list')
-            if not args or len(args) == 0:
-                extList = []
-                for ex in fritModel.elixir.session.query(fritModel.Extension.extension).all():
-                    extList.append(ex[0])
-            else:
-                extList = []
-                for ex in args:
-                    extList.append(fritutils.unicodify(ex))
             for evi in Evidences:
                 for fs in evi.fileSystems:
                     for ext in sorted(extList):
                         for state in states:
                             for fp in fs.ExtensionsFritFiles(ext,state):
                                 fritutils.termout.printNormal(fp)
-        elif args[0] == 'extract':
+        elif subcommand == 'extract':
             logger.info('Starting extract subcommand')
-            args.remove('extract')
             # The '--merge' option is used to merge extractions in a single
             # directory base instead of having a directory by extension.            
             merge = False
             if options and '--merge' in options:
                 merge = True
-            if not args or len(args) == 0:
-                extList = []
-                for ex in fritModel.elixir.session.query(fritModel.Extension.extension).all():
-                    extList.append(ex[0])
-            else:
-                extList = []
-                for ex in args:
-                    extList.append(fritutils.unicodify(ex))
             # we start by extracting 'normal files' because we need to mount the containers and filesystems
             if u'Normal' in states:
                 logger.info('Starting Normal files extraction.')

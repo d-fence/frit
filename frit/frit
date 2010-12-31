@@ -110,7 +110,7 @@ def mainFrit():
         sys.exit(0)
     
     if command == 'extensions':
-        fritcommands.extensions.factory(Evidences,args,options)
+        fritcommands.extensions.factory(Evidences,args,options,fritConfig)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
