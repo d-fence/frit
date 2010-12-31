@@ -6,16 +6,25 @@ Various commands to manipulate frit logs
 import os
 import sys
 import fritutils
+import stat
 
 logger = fritutils.fritlog.loggers['logsLog']
 
 def showLogs():
     logger.info('Showing log files.')
-    for logfile in os.listdir('.frit/logs'):
-        fritutils.termout.printNormal(logfile)
-        underline = '-' * len(logfile)
+    dirp = '.frit/logs'    
+    ldir = []    
+    for logfile in os.listdir(dirp):
+        fp = os.path.join(dirp,logfile)
+        dt = (logfile,os.stat(fp)[stat.ST_CTIME],fp)
+        ldir.append(dt)
+    
+    ldir = sorted(ldir,key=lambda t: t[1])
+    
+    for log,t,logpath in ldir:
+        fritutils.termout.printNormal(log)
+        underline = '-' * len(log)
         fritutils.termout.printNormal(underline)
-        logpath = os.path.join('.frit/logs',logfile)
         f = open(logpath,'r')
         text = f.read()
         fritutils.termout.printNormal(text)
