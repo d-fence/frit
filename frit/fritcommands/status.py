@@ -15,7 +15,8 @@ def dbStatus(Evidences):
                 fritutils.termout.printMessage('\t\t%s:' % fs.configName)
                 counts = fs.dbCountFiles()
                 for t,c in counts.iteritems():
-                    fritutils.termout.printMessage('\t\t\t%s files: %d' % (t,c))
+                    fritutils.termout.printMessage('\t\t\t%s files: %d ' % (t,c['Files']))
+                    fritutils.termout.printMessage('\t\t\t\t(Md5: %d, Sha1: %d, Sha256: %d, Ssdeep: %d)' % (c['Md5'],c['Sha1'],c['Sha256'],c['Ssdeep']))
     else:
         fritutils.termout.printMessage('No Database found, use the "store create" command to create one')
 

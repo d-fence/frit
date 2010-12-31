@@ -303,14 +303,30 @@ class FileSystem(object):
 
     def dbCountFiles(self):
         """
-        A function to get a count of files belonging to the filesystem
+        A function to get a count of files belonging to the filesystem.
+        Returns a dictionnary with like this:
+        {filestate: {Files:#,Md5s:#, Sha1s:#, Sha256s:#, Ssdeep:#}}
         """
         toReturn = {}
         fsDb = self.getFsDb()
         for fstate in fritModel.FILESTATES:
             nbFiles = fritModel.elixir.session.query(fritModel.File).filter(fritModel.File.filesystem==fsDb)
-            nbFiles = nbFiles.filter(fritModel.File.state.has(state=fstate)).count()
-            toReturn[fstate] = nbFiles
+            nbFiles = nbFiles.filter(fritModel.File.state.has(state=fstate))
+            
+            nbMd5 = nbFiles.join(fritModel.Md5)
+            nbSha1 = nbFiles.join(fritModel.Sha1)
+            nbSha256 = nbFiles.join(fritModel.Sha256)
+            nbSsdeep = nbFiles.join(fritModel.Ssdeep)
+            
+            nbDict = {
+                'Files': nbFiles.count(),
+                'Md5': nbMd5.count(),
+                'Sha1': nbSha1.count(),
+                'Sha256': nbSha256.count(),
+                'Ssdeep': nbSsdeep.count()
+            }
+            
+            toReturn[fstate] = nbDict
         return toReturn
 
     def ExtensionsFritFiles(self,ext,state):
