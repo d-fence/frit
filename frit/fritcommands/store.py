@@ -66,7 +66,7 @@ def update(Evidences):
             evi.mount("store","Mounted to create initial database")
             for fs in evi.fileSystems:
                 # first, we count the files that are already in the DB
-                fcount = fs.dbCountFiles()
+                fcount = fs.dbCountFiles()['Files']
                 if fcount[u'Normal'] > 0:
                     fritutils.termout.printMessage('%d files are already in the database, not inserting.' % fcount[u'Normal'])
                 else:
