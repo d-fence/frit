@@ -81,6 +81,10 @@ That's why you may want to allow your user to gain root privileges when using
 frit without the need of a password.
 Be aware of the security risk.
 
+4.5 fuse
+
+You should enable the option "user_allow_other" in /etc/fuse.conf
+
 5. Usage
 
 Frit is a command line tool. The synospis is:
