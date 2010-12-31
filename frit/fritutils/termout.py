@@ -19,6 +19,7 @@ def hasColor():
             return False
 
 def smartprint(s,color):
+    s = s.replace('\t','    ')
     if hasColor():
         toPrint = "\033[95m" + COLORS[color] + s + "\033[0m"
         print >> sys.stderr, toPrint
@@ -35,4 +36,5 @@ def printMessage(s):
     smartprint(s,'yellow')
     
 def printNormal(s):
+    s = s.replace('\t','    ')
     print s
