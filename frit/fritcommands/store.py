@@ -8,6 +8,9 @@ import os.path
 import fritutils
 import fritutils.termout
 import fritutils.fritdb as fritModel
+import fritutils.fritlog
+
+logger = fritutils.fritlog.loggers['storeLog']
 
 def insertFile(File,prefix,state,eviDb,fsDb):
     """
@@ -172,43 +175,42 @@ def store(Evidences, args, options):
     """
     args are the store command arguments
     """
+    logger.info('Starting store command.')
     validArgs = ('create', 'update', 'dump', 'undeleted', 'clear', 'search', 'emails')
     if not args or len(args) == 0:
         fritutils.termout.printWarning('store command need at least an argument')
+        logger.warning('No argument given to the command.')
         sys.exit(1)
     elif args[0] not in validArgs:
         fritutils.termout.printWarning('store command need a valid argument (%s)' % ', '.join(validArgs))
+        logger.warning('invalid argument %s' % args[0])
         sys.exit(1)
     else:
         if args[0] == 'create':
+            logger.info('Starting create subcommand.')
             if os.path.exists(fritutils.fritdb.DBFILE):
                 fritutils.termout.printWarning('Database already exists, cannot create it.')
             else:
                 fritModel.createDb()
                 update(Evidences)
-        if args[0] == 'update':
+        else:
             if not os.path.exists(fritutils.fritdb.DBFILE):
                 fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
+                logger.warning('Database does not exists.')
             else:
-                update(Evidences)
-        if args[0] == 'undeleted':
-            if not os.path.exists(fritutils.fritdb.DBFILE):
-                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
-            else:
-                storeUndeleted(Evidences)
-        if args[0] == 'clear':
-            if not os.path.exists(fritutils.fritdb.DBFILE):
-                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
-            else:
-                storeClear(Evidences)
-        if args[0] == 'search':
-            if not os.path.exists(fritutils.fritdb.DBFILE):
-                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
-            else:
-                args.remove("search")
-                filenameSearch(Evidences, args)
-        if args[0] == 'emails':
-            if not os.path.exists(fritutils.fritdb.DBFILE):
-                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
-            else:
-                storeEmails(Evidences)
+                if args[0] == 'update':
+                    logger.info('Starting update subcommand.')
+                    update(Evidences)
+                if args[0] == 'undeleted':
+                    logger.info('Starting undeleted subcommand.')
+                    storeUndeleted(Evidences)
+                if args[0] == 'clear':
+                    logger.info('Starting clear subcommand.')
+                    storeClear(Evidences)
+                if args[0] == 'search':
+                    logger.info('Starting search subcommand.')
+                    args.remove("search")
+                    filenameSearch(Evidences, args)
+                if args[0] == 'emails':
+                    logger.info('Starting emails subcommand'.)
+                    storeEmails(Evidences)
