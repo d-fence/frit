@@ -19,7 +19,7 @@ def factory(fritConfig, args, options):
     We should first do some sanity checks to be sure that those files are
     readable ...
     """
-    validContainersFormat = ('dd', 'aff', 'ewf')
+    validContainersFormat = ('dd', 'aff', 'ewf','rofs')
     cfiles = fritutils.fritconf.configContainersFiles(fritConfig)
     for fileName in args:
         argPath = fileName
@@ -43,27 +43,35 @@ def factory(fritConfig, args, options):
                 elif cformat == 'ewf':
                     # At this moment, the aff supports ewf too !!
                     evi = fritutils.fritobjects.AffEvidence(filename=argPath,configName='tempconfig')
+                elif cformat == 'rofs':
+                    evi = fritutils.fritobjects.RofsEvidence(filename=argPath,configName='tempconfig')
 
                 # Now we, if we have an evidence, we mount it and probe it for the contained filesystems
                 if evi:
-                    try:
-                        evi.mount('add','probing for filesystems')
-                    except:
-                        fritutils.termout.printWarning('Unable to mount %s' % evi.configName)
-                    if evi.isMounted():
-                        evi.populateRawImage()
-                        fsys = fritutils.fsprobe.getFileSystems(evi.rawImage)
-                        newFs = None
-                        for fs in fsys:
-                            if fs.name == 'NTFS':
-                                newFs = fritutils.fritobjects.NtfsFileSystem(fs.position,'tempconfig',evi)
-                            elif fs.name == 'FAT':
-                                newFs = fritutils.fritobjects.FatFileSystem(fs.position,'tempconfig',evi)
-                            elif fs.name == 'ISO9660':
-                                newFs = fritutils.fritobjects.ISO9660FileSystem(fs.position,'tempconfig',evi)
-                            if newFs:
-                                fritutils.termout.printSuccess('\tFound "%s" filesystem at offset %d' % (fs.name, fs.position))
-                                evi.fileSystems.append(newFs)
-                        # and now we write the config file
-                        fritutils.fritconf.addEvidence(fritConfig,evi)
+                    # rofs special case (no need to mount anything)
+                    if evi.getFormat() == 'rofs':
+                        newFs = fritutils.fritobjects.RoDirFileSystem(0,'tempconfig',evi)
+                        evi.fileSystems.append(newFs)
+                    else:
+                        try:
+                            evi.mount('add','probing for filesystems')
+                        except:
+                            fritutils.termout.printWarning('Unable to mount %s' % evi.configName)
+                        if evi.isMounted():
+                            evi.populateRawImage()
+                            fsys = fritutils.fsprobe.getFileSystems(evi.rawImage)
+                            for fs in fsys:
+                                newFs = None
+                                if fs.name == 'NTFS':
+                                    newFs = fritutils.fritobjects.NtfsFileSystem(fs.position,'tempconfig',evi)
+                                elif fs.name == 'FAT':
+                                    newFs = fritutils.fritobjects.FatFileSystem(fs.position,'tempconfig',evi)
+                                elif fs.name == 'ISO9660':
+                                    newFs = fritutils.fritobjects.ISO9660FileSystem(fs.position,'tempconfig',evi)
+                                if newFs:
+                                    fritutils.termout.printSuccess('\tFound "%s" filesystem at offset %d' % (fs.name, fs.position))
+                                    evi.fileSystems.append(newFs)
                         evi.umount('add')
+                    # and now we write the config file
+                    fritutils.fritconf.addEvidence(fritConfig,evi)
+
