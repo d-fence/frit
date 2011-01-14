@@ -212,5 +212,5 @@ def store(Evidences, args, options):
                     args.remove("search")
                     filenameSearch(Evidences, args)
                 if args[0] == 'emails':
-                    logger.info('Starting emails subcommand'.)
+                    logger.info('Starting emails subcommand.')
                     storeEmails(Evidences)
