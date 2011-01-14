@@ -130,11 +130,12 @@ class FileSystem(object):
     def getPids(self,locker):
         pidlist = []
         lockFile = self.getLockFile(locker)
-        lf = open(lockFile,'r')
-        for line in lf.readlines():
-            pid = line.split(': ')[1].split(' -- ')[0]
-            pidlist.append(pid)
-        lf.close()
+        if os.path.exists(lockFile):
+            lf = open(lockFile,'r')
+            for line in lf.readlines():
+                pid = line.split(': ')[1].split(' -- ')[0]
+                pidlist.append(pid)
+            lf.close()
         return pidlist
 
     def isRunning(self,locker):
