@@ -45,24 +45,33 @@ def getOutlookMailsFromWalk(fs,extension):
     fs.evidence.umount('getmails')
 
 def getOutlookMailsFromDb(fs,extension):
-    logger.info('Starting to search for "%s" files from database' % extension)
+    logger.info('Starting to search for "%s" files from database in %s/%s' % (extension,fs.evidenceConfigName,fs.configName))
+    pid = str(os.getpid())
     for filepath in fs.ExtensionsOriginalFiles(extension,u'Normal'):
-        logger.info('File "%s" found' % filepath)
+        logger.info('File "%s" found on %s/%s' % (filepath,fs.evidenceConfigName,fs.configName))
         exportPath = getExportPath(filepath,fs)
         pathToCreate = os.path.split(exportPath)[0]
         pstPath = os.path.join(fs.fsMountPoint, filepath)
         if os.path.isdir(exportPath + '.export'):
             fritutils.termout.printWarning('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
-            logger.info('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
+            logger.warning('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
         else:
-            fs.mount('getmails', 'Extracting Outlook emails')
+            # we need to mount the filesystem, so we check if it's already mounted by the same process
+            if not fs.isLocked('getmails') or pid not in fs.getPids('getmails'):
+                    logger.info('Mounting filesystem %s/%s' % (fs.evidenceConfigName,fs.configName))
+                    fs.mount('getmails', 'Extracting Outlook emails')
             if fritutils.fritprobe.pffProbe(pstPath):
                 if not os.path.isdir(pathToCreate):
+                    logger.info('Creating needed directory %s' % pathToCreate)
                     os.makedirs(pathToCreate)
                 fritutils.fritemails.pffExport(pstPath,exportPath)
             else:
+                logger.warning('%s is not a PFF file.' % pstPath)
                 fritutils.termout.printWarning('%s is not a PFF file.' % pstPath)
-            fs.umount('getmails')
+    # if the filesystem have been mounted, we unmount
+    if fs.isLocked('getmails') and pid in fs.getPids('getmails'):
+        logger.info('Unmounting %s/%s' % (fs.evidenceConfigName,fs.configName))
+        fs.umount('getmails')
 
 def getOutlookUndeletedFromWalk(fs):
     for filepath in fs.listUndeleted():
@@ -71,6 +80,7 @@ def getOutlookUndeletedFromWalk(fs):
             exportPath = getExportPath(cleanedPath,fs)
             pathToCreate = os.path.split(exportPath)[0]
             if os.path.isdir(exportPath + '.export'):
+                logger.warning('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
                 fritutils.termout.printWarning('Extraction path "%s" already exists. Not exporting.' % (exportPath + '.export'))
             else:
                 if fritutils.fritprobe.pffProbe(filepath):
