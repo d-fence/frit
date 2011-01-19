@@ -122,7 +122,7 @@ def md5search(md5list):
             Md5s = fritModel.Md5.query.filter(fritModel.Md5.md5.like(unicode(x + '%'))).first()
             if Md5s:
                 for f in Md5s.files:
-                    fritutils.termout.printNormal("%s %s %s %s" % ( f.md5.md5, f.evidence.configName, f.filesystem.configName,f.filename))
+                    fritutils.termout.printNormal("%s" %  f.fullFileSpec())
             else:
                 fritutils.termout.printNormal("%s NOT FOUND" % x)
 
@@ -134,7 +134,7 @@ def sha1search(sha1list):
             Sha1s = fritModel.Sha1.query.filter(fritModel.Sha1.sha1.like(unicode(x + '%'))).first()
             if Sha1s:
                 for f in Sha1s.files:
-                    fritutils.termout.printNormal("%s %s %s %s" % ( f.sha1.sha1, f.evidence.configName, f.filesystem.configName,f.filename))
+                    fritutils.termout.printNormal("%s %s" % ( f.sha1.sha1, f.fullFileSpec()))
             else:
                 fritutils.termout.printNormal("%s NOT FOUND" % x)
 
@@ -146,7 +146,7 @@ def sha256search(sha256list):
             Sha256s = fritModel.Sha256.query.filter(fritModel.Sha256.sha256.like(unicode(x + '%'))).first()
             if Sha256s:
                 for f in Sha256s.files:
-                    fritutils.termout.printNormal("%s %s %s %s" % ( f.sha256.sha256, f.evidence.configName, f.filesystem.configName,f.filename))
+                    fritutils.termout.printNormal("%s %s" % ( f.sha256.sha256, f.fullFileSpec()))
             else:
                 fritutils.termout.printNormal("%s NOT FOUND" % x)
                 
@@ -167,7 +167,7 @@ def ssdeepsearch(args):
                 score = s.compare(f.ssdeep.ssdeep,h)
                 if score >= mscore:
                     fp = os.path.join(f.fullpath.fullpath, f.filename)
-                    fritutils.termout.printNormal("Score: %d, %s %s %s" % ( score, f.evidence.configName, f.filesystem.configName,fp))
+                    fritutils.termout.printNormal("Score: %d, %s " % ( score, f.fullFileSpec()))
 
 def csvdump(Evidences):
     for evi in Evidences:

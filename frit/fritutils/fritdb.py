@@ -45,7 +45,19 @@ class File(elixir.Entity):
     sha1 = elixir.ManyToOne('Sha1')
     sha256 = elixir.ManyToOne('Sha256')
     ssdeep = elixir.ManyToOne('Ssdeep')
-    
+
+    def fullFileSpec(self):
+        fp = os.path.join(self.fullpath.fullpath,self.filename)
+        fsize = fritutils.humanize(self.filesize)
+        fmd5 = 'NO_MD5_COMPUTED'
+        if self.md5:
+            fmd5 = self.md5.md5      
+        specs = "%s,%s,%s,%s/%s,%s" % (self.state.state, fsize, fmd5 , self.evidence.configName, self.filesystem.configName,fp)
+        return specs
+        
+    def __repr__(self):
+        return os.path.join(self.fullpath.fullpath,self.filename)
+        
 class Extension(elixir.Entity):
     extension = elixir.Field(elixir.Unicode(50), index=True)
     files = elixir.OneToMany('File')
@@ -147,3 +159,4 @@ def fileNameSearch(Evidence,fileName):
         fq = fq.filter(File.filename.like(unicode(fileName)))
         for f in fq.all():
             yield(f)
+

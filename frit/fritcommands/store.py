@@ -164,12 +164,7 @@ def filenameSearch(Evidences,args):
             searchTerm = searchTerm.decode('utf-8')
             fritutils.termout.printNormal("Searching for %s in %s" % (searchTerm, evi.configName))
             for f in fritModel.fileNameSearch(evi,searchTerm):
-                fp = os.path.join(f.fullpath.fullpath,f.filename)
-                fsize = fritutils.humanize(f.filesize)
-                md5 = 'NO_MD5_COMPUTED'
-                if f.md5:
-                    md5 = f.md5.md5
-                fritutils.termout.printMessage("\t%s %s %s %s %s" % (f.filesystem.configName, f.state.state, fsize, md5, fp))
+                fritutils.termout.printMessage("\t%s" % f.fullFileSpec())
 
 def store(Evidences, args, options):
     """
