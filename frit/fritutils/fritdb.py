@@ -46,13 +46,14 @@ class File(elixir.Entity):
     sha256 = elixir.ManyToOne('Sha256')
     ssdeep = elixir.ManyToOne('Ssdeep')
 
-    def fullFileSpec(self):
+    def fullFileSpec(self,hashtype='md5'):
         fp = os.path.join(self.fullpath.fullpath,self.filename)
         fsize = fritutils.humanize(self.filesize)
-        fmd5 = 'NO_MD5_COMPUTED'
-        if self.md5:
-            fmd5 = self.md5.md5      
-        specs = "%s,%s,%s,%s/%s,%s" % (self.state.state, fsize, fmd5 , self.evidence.configName, self.filesystem.configName,fp)
+        hashes = { 'md5' : self.md5.md5, 'sha1': self.sha1.sha1, 'sha256': self.sha256.sha256, 'ssdeep': self.ssdeep.ssdeep }
+        fhash = 'NO_HASH_COMPUTED'
+        if hashes[hashtype]:
+            fhash = hashes[hashtype]
+        specs = '%s,%s,%s: "%s" ,%s/%s,"%s"' % (self.state.state, fsize,hashtype, fhash , self.evidence.configName, self.filesystem.configName,fp)
         return specs
         
     def __repr__(self):
