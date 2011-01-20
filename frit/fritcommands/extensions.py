@@ -50,6 +50,10 @@ def factory(Evidences, args, options, fritConf):
     validArgs = ('count', 'extract','list')
     stateOptions = {'--normal':u'Normal','--contained':u'Contained','--undeleted':u'Undeleted','--carved':u'Carved'}
     definedExtensions = getExtLists(fritConf)
+    if not fritModel.dbExists():
+        fritutils.termout.printWarning('The database does not exists yet. You should create it first by issuing "frit store create".')
+        logger.warning('Database was not found')
+        sys.exit(1)
     states = []
     extList = []
     if not args or len(args) == 0:
