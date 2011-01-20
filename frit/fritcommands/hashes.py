@@ -114,41 +114,22 @@ def update(Evidences):
        
         evi.umount('hashes')
 
-def md5search(md5list):
-    for x in md5list:
-        if len(x) < 3:
-            fritutils.termout.printWarning('"%s" is too short to be searched for.' % x)
-        else:
-            Md5s = fritModel.Md5.query.filter(fritModel.Md5.md5.like(unicode(x + '%'))).first()
-            if Md5s:
-                for f in Md5s.files:
-                    fritutils.termout.printNormal("%s" %  f.fullFileSpec())
+def searchFactory(hashlist,Evidences,hashtype):
+    hashModel = { 'md5' : fritModel.Md5, 'sha1' : fritModel.Sha1, 'sha256' : fritModel.Sha256 }
+    hashModelField = { 'md5' : fritModel.Md5.md5, 'sha1' : fritModel.Sha1.sha1, 'sha256' : fritModel.Sha256.sha256 }
+    for evi in Evidences:
+        fritutils.termout.printSuccess('Searching in %s (%s)' % (evi.configName,evi.fileName))
+        for x in hashlist:
+            if len(x) < 3:
+                fritutils.termout.printWarning('"%s" is too short to be searched for.' % x)
             else:
-                fritutils.termout.printNormal("%s NOT FOUND" % x)
-
-def sha1search(sha1list):
-    for x in sha1list:
-        if len(x) < 3:
-            fritutils.termout.printWarning('"%s" is too short to be searched for.' % x)
-        else:
-            Sha1s = fritModel.Sha1.query.filter(fritModel.Sha1.sha1.like(unicode(x + '%'))).first()
-            if Sha1s:
-                for f in Sha1s.files:
-                    fritutils.termout.printNormal("%s %s" % ( f.sha1.sha1, f.fullFileSpec()))
-            else:
-                fritutils.termout.printNormal("%s NOT FOUND" % x)
-
-def sha256search(sha256list):
-    for x in sha256list:
-        if len(x) < 3:
-            fritutils.termout.printWarning('"%s" is too short to be searched for.' % x)
-        else:
-            Sha256s = fritModel.Sha256.query.filter(fritModel.Sha256.sha256.like(unicode(x + '%'))).first()
-            if Sha256s:
-                for f in Sha256s.files:
-                    fritutils.termout.printNormal("%s %s" % ( f.sha256.sha256, f.fullFileSpec()))
-            else:
-                fritutils.termout.printNormal("%s NOT FOUND" % x)
+                files = fritModel.File.query.join(fritModel.Evidence).filter_by(configName=fritutils.unicodify(evi.configName))
+                files = files.join(hashModel[hashtype]).filter(hashModelField[hashtype].like(unicode(x + '%'))).all()
+                if files:
+                    for f in files:
+                        fritutils.termout.printMessage("\t%s" % ( f.fullFileSpec(hashtype=hashtype)))
+                else:
+                    fritutils.termout.printNormal("\t%s NOT FOUND" % x)
                 
 def ssdeepsearch(args):
     """
@@ -195,6 +176,10 @@ def factory(Evidences,args,options):
         fritutils.termout.printWarning('hashes command need a valid argument (%s)' % ', '.join(validArgs))
         logger.error('"%s" in not a valid arguement. Exiting.' % args[0])
         sys.exit(1)
+    elif not fritModel.dbExists():
+        fritutils.termout.printWarning('Database not found. run the "frit store create", followed by "frit hashes update".')
+        logger.error("No database found, exiting.")
+        sys.exit(1)
     else:
         if args[0] == 'update':
             logger.info('Update arguement given. Starting update.')
@@ -206,7 +191,7 @@ def factory(Evidences,args,options):
                 logger.error('md5search command but no argument to search for. Exiting.')
                 sys.exit(1)
             else:
-                md5search(args)
+                searchFactory(args,Evidences,'md5')
         if args[0] == 'sha1search':
             args.remove('sha1search')
             if len(args) < 1:
@@ -214,7 +199,7 @@ def factory(Evidences,args,options):
                 logger.error('sha1search command but no argument to search for. Exiting.')
                 sys.exit(1)
             else:
-                sha1search(args)
+                searchFactory(args,Evidences,'sha1')
         if args[0] == 'sha256search':
             args.remove('sha256search')
             if len(args) < 1:
@@ -222,7 +207,7 @@ def factory(Evidences,args,options):
                 logger.error('sha256search command but no argument to search for. Exiting.')
                 sys.exit(1)
             else:
-                sha256search(args)
+                searchFactory(args,Evidences,'sha256')
         if args[0] == 'csvdump':
             csvdump(Evidences)
         if args[0] == 'ssdsearch':
