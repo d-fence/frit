@@ -193,6 +193,11 @@ def detectIso9660(buf):
 
 def detectFs(fname,position):
     buf = getBuffer(fname, position, 512)
+    # If the buffer is , we probably tried to read beyond the limits
+    # So it's probably an length calculation that is wrong.
+    # We assume that we have to stop searching here
+    if len(buf) == 0:
+        return None
     fs = detectFat(buf)
     if fs:
         fs.setPosition(position)
