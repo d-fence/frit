@@ -236,11 +236,24 @@ class FileSystem(object):
     def listFiles(self):
         if self.isMounted():
             for dirpath, dirs, files in os.walk(self.fsMountPoint):
-                dirpath = dirpath.decode('utf-8')
-                for f in files:
-                    if not isinstance(f,unicode):
-                        f = f.decode('utf-8')
-                    yield(os.path.join(dirpath,f))
+                dirskip = False
+                if not isinstance(dirpath,unicode):
+                    try:
+                        dirpath = dirpath.decode('utf-8')
+                    except UnicodeDecodeError:
+                        logger.warning('Unable to decode this directory name "%s". Skipping.' % dirpath)
+                        dirskip = True
+                if not dirskip:
+                    for f in files:
+                        skip = False
+                        if not isinstance(f,unicode):
+                            try:
+                                f = f.decode('utf-8')
+                            except UnicodeDecodeError:
+                                logger.warning('Unable to decode this filename "%s". Skipping.' % f)
+                                skip = True
+                        if not skip:
+                            yield(os.path.join(dirpath,f))
         else:
             fritutils.termout.printWarning('%s is not mounted. Cannot list files.' % self.configName)
             sys.exit(1)
