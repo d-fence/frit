@@ -66,7 +66,7 @@ def fuserUnmount(mountpoint):
         fuserunmount = subprocess.Popen([FUSERMOUNT,'-u',mountpoint])
         fuserunmount.wait()
         if fuserunmount.returncode > 0:
-            logger.warning('"fusermount -u" command failed when unmounting "%" (return code: %d)' % (mountpoint,fuserunmount.returncode))
+            logger.warning('"fusermount -u" command failed when unmounting "%s" (return code: %d)' % (mountpoint,fuserunmount.returncode))
             raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,fuserunmount.returncode))
 
 def fatUnmount(mountpoint):
@@ -192,11 +192,16 @@ def hfsplusMount(loopDevice,mountpoint):
         raise fritMountError('Unable to mount the HFS+ partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(hfsplusmount.returncode)))
 
 def isoMount(loopDevice,mountpoint):
+    """
+    fuseiso doesn't need a loop file. We can mount the iso file directly.
+    Should work on that to avoid loop devices
+    """
     fritutils.termout.printMessage('\tMounting "%s" with fuseiso on "%s"' % (loopDevice,mountpoint))
     uid = str(os.getuid())
     gid = str(os.getgid())
     options = '-n'
-    isomount = subprocess.Popen([FUSEISO, options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    fuseoptions = 'ro,noatime,allow_other,uid=' + uid + ',gid=' + gid
+    isomount = subprocess.Popen([FUSEISO, options, loopDevice, mountpoint,'-o',fuseoptions], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     isomount.wait()
     if isomount.returncode > 0:
         logger.warning('Unable to mount the ISO 9660 filesystem "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(isomount.returncode)))
