@@ -26,7 +26,7 @@ import fritutils.fritlog
 
 AFFMOUNT = '/usr/bin/affuse'
 FUSERMOUNT = '/usr/bin/fusermount'
-NTFS3G = '/usr/bin/ntfs-3g'
+NTFS3G = '/bin/ntfs-3g'
 FUSEISO = '/usr/bin/fuseiso'
 LOSETUP = '/sbin/losetup'
 SUDO = '/usr/bin/sudo'
