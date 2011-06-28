@@ -383,7 +383,7 @@ class NtfsFileSystem(FileSystem):
 
     def umountCommand(self):
         logger.info('NTFS unmounting "%s"' % self.fsMountPoint)
-        fritutils.fritmount.fuserUnmount(self.fsMountPoint)
+        fritutils.fritmount.sudoUnmount(self.fsMountPoint)
        
     def undelete(self):
         """
