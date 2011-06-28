@@ -23,12 +23,12 @@ import os.path
 import re
 import fritutils.termout
 import fritutils.fritlog
+import fritutils.pyloop
 
 AFFMOUNT = '/usr/bin/affuse'
 FUSERMOUNT = '/usr/bin/fusermount'
 NTFS3G = '/bin/ntfs-3g'
 FUSEISO = '/usr/bin/fuseiso'
-LOSETUP = '/sbin/losetup'
 SUDO = '/usr/bin/sudo'
 MOUNT = '/bin/mount'
 UMOUNT = '/bin/umount'
@@ -68,6 +68,16 @@ def fuserUnmount(mountpoint):
         if fuserunmount.returncode > 0:
             logger.warning('"fusermount -u" command failed when unmounting "%s" (return code: %d)' % (mountpoint,fuserunmount.returncode))
             raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,fuserunmount.returncode))
+
+def sudoUmount(mountpoint):
+    fritutils.termout.printMessage('\tUnmounting "%s"' % mountpoint)
+    # we check if it's really mounted first
+    if os.path.ismount(mountpoint):
+        sudounmount = subprocess.Popen([SUDO,UMOUNT,mountpoint])
+        sudounmount.wait()
+        if sudounmount.returncode > 0:
+            logger.warning('Unable to unmount the system mounted on %s (return code: %d)' % (mountpoint,sudounmount.returncode))
+            raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,sudounmount.returncode))
 
 def fatUnmount(mountpoint):
     fritutils.termout.printMessage('\tUnmounting "%s"' % mountpoint)
