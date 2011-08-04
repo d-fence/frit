@@ -124,7 +124,7 @@ def detachLoopDevice(loopdev):
     if not lodevice.is_loop_used():
         logger.warning('Unable to detach loop device "%s", device not in use.' % loopdev)
         raise fritMountError('Unable to detach loop device "%s", device not in use.' % loopdev)
-    else if not lodevice.unlink():
+    elif not lodevice.unlink():
         logger.warning('Unable to detach loop device "%s"' % loopdev)
         raise fritMountError('Unable to detach loop device "%s"' % loopdev)
 
