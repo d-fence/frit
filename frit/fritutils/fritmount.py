@@ -133,14 +133,19 @@ def verifyLoopDevice(loopdev,filename):
     Function to verify if a loop device is really attached to a file.
     """
     
-    if not os.path.exists(filename):
+    fpath = os.path.abspath(filename)
+    
+    if not os.path.exists(fpath):
+        logger.warning('"%s" file does not exist and therefore, cannot be attached to loop device "%s"' % (filename,loopdev))
         return False
     
     lodevice = fritutils.pyloop.loopDevice(loopdev)
     if not lodevice.is_loop_used():
+        logger.warning('Loop device "%s" is not in use and therefore, cannot be attached to file "%s"' % (loopdev,filename))
         return False
     else:
-        if lodevice.sysBackingFile != filename:
+        if lodevice.sysBackingFile != fpath:
+            logger.warning('Loop device "%s" is attached to "%s", not "%s"' % (loopdev,lodevice.sysBackingFile,filename))
             return False
         else:
             return True
