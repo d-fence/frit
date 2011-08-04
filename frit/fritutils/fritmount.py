@@ -108,65 +108,42 @@ def attachLoopDevice(rawfile, offset):
     """
     fritutils.termout.printMessage('\tAttaching "%s" to a loop device.' % rawfile)
     logger.info('Attaching "%s" to a loop device' % rawfile)
-    losetup = subprocess.Popen([LOSETUP, '-v', '-f', '-r', '-o', str(offset),rawfile], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    losetup.wait()
-    if losetup.returncode > 0:
-        logger.warning('Unable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
-        raise fritMountError('Unable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
+    # finding a free loop device
+    lodevice = fritutils.pyloop.findFreeLoop()
+    if not lodevice.link(rawfile,offset):
+        logger.warning('Unable to attach loop "%s" device to "%s" with offset "%d".' % (lodevice.devPath,rawfile,offset))
+        raise fritMountError('Unable to attach loop device "%s" to "%s" with offset "%d".' % (lodevice.devPath,rawfile,offset))
     else:
-        lodevice,stderr = losetup.communicate()
-        for line in lodevice.split('\n'):
-            if 'Loop device is' in lodevice:
-                logger.info('Loop device found and used: "%s"' % line[15:])
-                return line[15:]
-            else:
-                logger.warning('Unable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
-                raise fritMountError('Unable to attach loop device to "%s" with offset "%d".' % (rawfile,offset))
+       logger.info('Loop device found and used: "%s"' % lodevice.devPath)
+       return lodevice.devPath
         
 def detachLoopDevice(loopdev):
     fritutils.termout.printMessage('\tDetaching loop device "%s"' % loopdev)
     logger.info('Detaching loop device "%s"' % loopdev)
-    losetup = subprocess.Popen([LOSETUP, '-d', loopdev], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    losetup.wait()
-    if losetup.returncode > 0:
-        logger.warning('Unable to detach loop device "%s" (return code: %d)' % (loopdev, losetup.returncode))
-        raise fritMountError('Unable to detach loop device "%s" (return code: %d)' % (loopdev, losetup.returncode))
+    lodevice = fritutils.pyloop.loopDevice(loopdev)
+    if not lodevice.is_loop_used():
+        logger.warning('Unable to detach loop device "%s", device not in use.' % loopdev)
+        raise fritMountError('Unable to detach loop device "%s", device not in use.' % loopdev)
+    else if not lodevice.unlink():
+        logger.warning('Unable to detach loop device "%s"' % loopdev)
+        raise fritMountError('Unable to detach loop device "%s"' % loopdev)
 
 def verifyLoopDevice(loopdev,filename):
     """
     Function to verify if a loop device is really attached to a file.
-    The command is "/sbin:losetup -j filename"
-    The error code are:
-    1 if the device is not configured
-    2 if an error occured that prevented losetup to run correctly
-    If the loop device is really attached, we return True
-    If the file "filename" doesn't even exist, how could it be attached ? So we return false.
     """
-    logger.info('Verifying if "%s" is attached to "%s"' % (loopdev,filename))
-    answer = False
+    
     if not os.path.exists(filename):
-        return answer
-    losetup = subprocess.Popen([LOSETUP, '-j', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    losetup.wait()
-    if losetup.returncode > 1:
-        logger.warning('losetup error for loop device "%s" (return code: %d)' % (loopdev, losetup.returncode))
-        raise fritMountError('losetup error for loop device "%s" (return code: %d)' % (loopdev, losetup.returncode))
-    elif losetup.returncode == 0 :
-        """
-        As a shortcut, we consider that the file is correctly attached if there
-        We verify the the loop device returned is the one specified in the lockfile.
-        """
-        loresponse,stderr = losetup.communicate()
-        lines = loresponse.split('\n')
-        if lines:
-            for line in lines:
-                if len(line) > 1:
-                    s = line.split(' ')
-                    if len(s) > 0:
-                        lodev= s[0][:-1]
-                        if lodev == loopdev:
-                            answer = True
-    return answer
+        return False
+    
+    lodevice = fritutils.pyloop.loopDevice(loopdev)
+    if not lodevice.is_loop_used():
+        return False
+    else:
+        if lodevice.sysBackingFile != filename:
+            return False
+        else:
+            return True
 
 def ntfs3gMount(loopDevice,mountpoint):
     fritutils.termout.printMessage('\tMounting "%s" with NTFS-3G on "%s"' % (loopDevice,mountpoint))
