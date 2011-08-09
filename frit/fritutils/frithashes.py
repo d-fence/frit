@@ -46,5 +46,8 @@ def hashes(fullpath):
         md5 = hashlib.md5(data).hexdigest()
         sha1 = hashlib.sha1(data).hexdigest()
         sha256 = hashlib.sha256(data).hexdigest()
-        ssdeep = getSsdeep(fullpath)
+        if size < 1073741824 :
+            ssdeep = getSsdeep(fullpath)
+        else:
+            ssdeep = "File too big"
         return (md5,sha1,sha256,ssdeep)
