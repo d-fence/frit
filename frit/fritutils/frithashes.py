@@ -32,7 +32,10 @@ def hashes(fullpath):
     """
     size = getSize(fullpath)
     if size == 0:
-        return ("Zero file size", "Zero file size", "Zero file size", "Zero file size")
+        return("Zero file size", "Zero file size", "Zero file size", "Zero file size")
+    
+    if not os.access(fp,os.R_OK:
+        return("Unreadable file", "Unreadable file", "Unreadable file", "Unreadable file")
     
     try:
         fic = open(fullpath,"rb")
