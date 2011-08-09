@@ -108,6 +108,3 @@ def getBuffer(fname,pos,size):
     buf = fic.read(size)
     fic.close()
     return buf
-    
-def isReadable(fullPath):
-    
