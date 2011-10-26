@@ -699,8 +699,36 @@ class AffEvidence(Evidence):
         # we remove our lock file
         self.removeLock(locker)
 
-class EwfEvidence(Evidence):
-    pass
+class EwfEvidence(AffEvidence):
+    """
+    As the umount uses fuser, we can inherit from AffEvidence class to not rewrite the umount method.
+    """
+    def getFormat(self):
+        return 'ewf'
+
+    def populateRawImage(self):
+        """
+        This function populate the raw image filename to all filesystems of the Evidence.
+        Even if this file does not exists yet.
+        xmount removes the .E01 extension and replace it by .dd
+        """
+        self.rawImage = os.path.join(self.containerMountPoint, os.path.splitext(os.path.basename(self.fileName))[0] + '.dd')
+        for fs in self.fileSystems:
+            fs.rawImage = self.rawImage
+
+    def mount(self,locker,reason):
+        """
+        locker is the intermediate extension given to the lockfile.
+        reason is the comment that will be inserted in the lock file.
+        """
+        # We create needed dirs
+        if not os.path.exists(self.containerMountPoint):
+            os.makedirs(self.containerMountPoint)
+        # if the file is not already mounted, we mount it
+        if not os.path.ismount(self.containerMountPoint):
+                fritutils.fritmount.ewfMount(self.fileName,self.containerMountPoint)
+        # we create the lock to prevent other instances to unmount
+        self.writeLock(locker,reason)
 
 class RofsEvidence(Evidence):
     """
