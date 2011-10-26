@@ -34,6 +34,7 @@ MOUNT = '/bin/mount'
 UMOUNT = '/bin/umount'
 FUSEEXT2 = '/usr/bin/fuseext2'
 ROFS = '/usr/bin/rofs'
+XMOUNT = '/usr/bin/xmount'
 
 logger = fritutils.fritlog.loggers['fritmountLog']
 
@@ -58,7 +59,15 @@ def affMount(affFile,mountpoint):
     elif afmount.returncode < 0:
         logger.warning('afmount was interupted by signal "%d"  with file "%s" on mount point "%s"' % (afmount.returncode,affFile,mountpoint))
         raise fritMountError('afmount was interupted by signal "%d"  with file "%s" on mount point "%s"' % (afmount.returncode,affFile,mountpoint))
-    
+
+def ewfMount(ewfFile,mountpoint):
+    fritutils.termout.printMessage('\tMounting EWF file "%s" on "%s".' % (ewfFile,mountpoint))
+    ewfmount = subprocess.Popen([XMOUNT, '--in', 'ewf', '--out', 'dd', ewfFile, mountpoint])
+    ewfmount.wait()
+    if ewfmount.returncode > 0:
+        logger.warning('xmount failed with file "%s" on mount point "%s" (return code: %d) ' % (ewfFile,mountpoint,ewfmount.returncode))
+        raise fritMountError('afmount failed with file "%s" on mount point "%s" (return code: %d) ' % (ewfFile,mountpoint,ewfmount.returncode))
+
 def fuserUnmount(mountpoint):
     fritutils.termout.printMessage('\tUnmounting "%s"' % mountpoint)
     # we check if it's really mounted first
