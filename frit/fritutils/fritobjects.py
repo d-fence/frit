@@ -408,6 +408,15 @@ class FatFileSystem(FileSystem):
     def umountCommand(self):
         logger.info('FAT unmounting "%s"' % self.fsMountPoint)
         fritutils.fritmount.fatUnmount(self.fsMountPoint)
+        
+    def undelete(self):
+        """
+        A function to undelete files on FAT, using sleuthkit tsk_recover
+        """
+        self.makeUndelDir()
+        self.mount('undelete','Used by tsk_recover')
+        fritutils.fritundelete.TskUndelete(self.loopDevice,self.undeleteDestination)
+        self.umount('undelete')
 
 class HfsPlusFileSystem(FileSystem):
     """
