@@ -41,8 +41,8 @@ def factory(fritConfig, args, options):
                 elif cformat == 'aff':
                     evi = fritutils.fritobjects.AffEvidence(filename=argPath,configName='tempconfig')
                 elif cformat == 'ewf':
-                    # At this moment, the aff supports ewf too !!
-                    evi = fritutils.fritobjects.AffEvidence(filename=argPath,configName='tempconfig')
+                    # aff does not support ewf anymore.
+                    evi = fritutils.fritobjects.EwfEvidence(filename=argPath,configName='tempconfig')
                 elif cformat == 'rofs':
                     evi = fritutils.fritobjects.RofsEvidence(filename=argPath,configName='tempconfig')
 
