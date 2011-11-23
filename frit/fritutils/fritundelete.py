@@ -9,7 +9,7 @@ import os.path
 import re
 import fritutils.termout
 
-NTFSUNDELETE = '/usr/sbin/ntfsundelete'
+NTFSUNDELETE = '/sbin/ntfsundelete'
 TSKRECOVER = '/usr/bin/tsk_recover'
 
 def NtfsUndelete(lodevice,destination):
