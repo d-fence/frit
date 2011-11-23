@@ -26,7 +26,7 @@ import fritutils.fritlog
 import fritutils.pyloop
 
 AFFMOUNT = '/usr/bin/affuse'
-FUSERMOUNT = '/usr/bin/fusermount'
+FUSERMOUNT = '/bin/fusermount'
 NTFS3G = '/bin/ntfs-3g'
 FUSEISO = '/usr/bin/fuseiso'
 SUDO = '/usr/bin/sudo'
