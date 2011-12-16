@@ -18,6 +18,7 @@ import fritutils.fritundelete
 import fritutils.fritdb as fritModel
 import fritutils.fritlog
 import fritutils.fritmmls
+import fritutils.fritddump
 from sqlalchemy import func
 
 logger = fritutils.fritlog.loggers['fritobjectsLog']
@@ -516,6 +517,7 @@ class Evidence(object):
         self.fileSystems = []
         self.rawImage = ''
         self.containerMountPoint = os.path.join('.frit','containers',self.configName)
+        self.sectorsExportDir = unicode(os.path.join('.frit/extractions/sectors/',self.configName))
 
     def exists(self):
         """
@@ -637,12 +639,23 @@ class Evidence(object):
 
     def getUnallocatedSectors(self):
         """
-        Return a list of dictionaries with unalloctaed sectors if.
+        Return a list of dictionaries with unallocated sectors if.
         Have to be overriden by specific Evidences as not all type of evidences
         are supporting that.
         By default, it returns an empty list
         """
         return []
+
+    def makeSectorsDir(self):
+        if not os.path.exists(self.sectorsExportDir):
+            os.makedirs(self.sectorsExportDir)
+
+    def ddump(self,start,end,exportfile):
+        """
+        Dump raw sectors from a file. Must be overriden to support different
+        kind of containers.
+        """
+        pass
 
 class DdEvidence(Evidence):
     def getFormat(self):
@@ -663,6 +676,9 @@ class DdEvidence(Evidence):
 
     def getUnallocatedSectors(self):
         return fritutils.fritmmls.getUnallocatedSectors(self.fileName)
+
+    def ddump(self,start,end,exportfile):
+        fritutils.fritddump.ddump(self.fileName,start,end,exportfile)
 
 class AffEvidence(Evidence):
     def getFormat(self):
@@ -735,6 +751,9 @@ class AffEvidence(Evidence):
         """
         return fritutils.fritmmls.getUnallocatedSectors(self.fileName)
 
+    def ddump(self,start,end,exportfile):
+        fritutils.fritddump.affcat(self.fileName,start,end,exportfile)
+
 class EwfEvidence(AffEvidence):
     """
     As the umount uses fuser, we can inherit from AffEvidence class to not rewrite the umount method.
@@ -768,9 +787,12 @@ class EwfEvidence(AffEvidence):
 
     def getUnallocatedSectors(self):
         """
-        As mmls should accept EWF files, we use the aff directly, without mounting it
+        As mmls should accept EWF files, we use the ewf directly, without mounting it
         """
         return fritutils.fritmmls.getUnallocatedSectors(self.fileName)
+
+    def ddump(self,start,end,exportfile):
+        fritutils.fritddump.ewfexport(self.fileName,start,end,exportfile)
 
 class RofsEvidence(Evidence):
     """
