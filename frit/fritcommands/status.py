@@ -34,6 +34,8 @@ def status(Evidences,args,options):
     fritutils.termout.printMessage("Frit Status:")
     for evi in Evidences:
         fritutils.termout.printMessage('\t%s : %s' % (evi.configName,evi.fileName))
+        if not evi.exists():
+            fritutils.termout.printWarning('\t\tEvidence container "%s" not found !' % evi.fileName)
         if evi.isMounted() and evi.getFormat() != 'dd' and evi.getFormat() != 'rofs':
             fritutils.termout.printNormal('\tMounted on : %s' % evi.containerMountPoint)
         locklist = evi.lockList()
