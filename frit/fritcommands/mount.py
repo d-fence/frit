@@ -35,6 +35,7 @@ def Mount(Evidences,fullMount=False):
                             fritutils.termout.printWarning('\tUnable to mount filsystem %s' % fs.configName)
             else:
                 fritutils.termout.printWarning('File "%s", not found ! not mounting.' % evi.fileName)
+                logger.warning('Evidence container file "%s" was not found on the system, unable to mount.' % evi.fileName)
 
 def Umount(Evidences):
     """
