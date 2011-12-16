@@ -17,6 +17,7 @@ import fritutils.fritmount
 import fritutils.fritundelete
 import fritutils.fritdb as fritModel
 import fritutils.fritlog
+import fritutils.fritmmls
 from sqlalchemy import func
 
 logger = fritutils.fritlog.loggers['fritobjectsLog']
@@ -634,6 +635,15 @@ class Evidence(object):
         toReturn['size'] = size
         return toReturn
 
+    def getUnallocatedSectors(self):
+        """
+        Return a list of dictionaries with unalloctaed sectors if.
+        Have to be overriden by specific Evidences as not all type of evidences
+        are supporting that.
+        By default, it returns an empty list
+        """
+        return []
+
 class DdEvidence(Evidence):
     def getFormat(self):
         return 'dd'
@@ -650,6 +660,9 @@ class DdEvidence(Evidence):
     def isMounted(self):
         # as the file exists, it is like if it is always mounted
         return True
+
+    def getUnallocatedSectors(self):
+        return fritutils.fritmmls.getUnallocatedSectors(self.fileName)
 
 class AffEvidence(Evidence):
     def getFormat(self):
@@ -716,6 +729,12 @@ class AffEvidence(Evidence):
         # we remove our lock file
         self.removeLock(locker)
 
+    def getUnallocatedSectors(self):
+        """
+        As mmls should accept AFF files, we use the aff directly, without mounting it
+        """
+        return fritutils.fritmmls.getUnallocatedSectors(self.fileName)
+
 class EwfEvidence(AffEvidence):
     """
     As the umount uses fuser, we can inherit from AffEvidence class to not rewrite the umount method.
@@ -746,6 +765,12 @@ class EwfEvidence(AffEvidence):
                 fritutils.fritmount.ewfMount(self.fileName,self.containerMountPoint)
         # we create the lock to prevent other instances to unmount
         self.writeLock(locker,reason)
+
+    def getUnallocatedSectors(self):
+        """
+        As mmls should accept EWF files, we use the aff directly, without mounting it
+        """
+        return fritutils.fritmmls.getUnallocatedSectors(self.fileName)
 
 class RofsEvidence(Evidence):
     """
