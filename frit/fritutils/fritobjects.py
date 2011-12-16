@@ -516,6 +516,14 @@ class Evidence(object):
         self.rawImage = ''
         self.containerMountPoint = os.path.join('.frit','containers',self.configName)
 
+    def exists(self):
+        """
+        Return true if the container still exists on the system
+        """
+        if os.path.exists(self.fileName):
+            return True
+        return False
+
     def mount(self,*args):
         """
         A function to mount the evidence.
