@@ -21,15 +21,17 @@ def seclist(Evidences):
         if secList:
             fritutils.termout.printSuccess('Unallocated sectors on "%s":' % evi.fileName)
             for u in secList:
-                scount = u['end'] - u['start']
+                scount = u['end'] - u['start'] +1
                 ssize = fritutils.humanize(scount * 512)
                 fritutils.termout.printNormal("\tStart: %d End: %s Count: %d Size: %s." % (u['start'],u['end'],scount,ssize))
         else:
             fritutils.termout.printWarning('No unallocated sectors found on "%s".' % evi.fileName)
 
-def export(Evidences):
+def export(Evidences,options):
     """
     export unallocated sectors to .frit/extractions/unallocated/START-END/START-END.dd
+    As the dump could be time consuming for a single sector, when the '--split'
+    option is given, we first extract the whole range and then split it.
     """
     for evi in Evidences:
         secList = evi.getUnallocatedSectors()
@@ -48,31 +50,31 @@ def export(Evidences):
                 else:
                     fritutils.termout.printMessage('Starting to export sectors from %d to %d' % (u['start'],u['end']))
                     logger.info('Starting to dump sectors %d - %d from %s' % (u['start'],u['end'],evi.fileName))
-                    evi.ddump(u['start'],u['end'],exportFilePath)
-
-def exportSplit(Evidences):
-    """
-    export unallocted sectors and split them by sector in
-    .frit/extractions/unallocated/START-END/splitted/sectorXXX.dd
-    """
-    for evi in Evidences:
-        secList = evi.getUnallocatedSectors()
-        if secList:
-            for u in secList:
-                endPath = "sectors_%d-%d" % (u['start'],u['end'])
-                endPath += '_splitted'
-                exportPath = os.path.join(evi.sectorsExportDir, endPath)
-                if not os.path.exists(exportPath):
-                    logger.info('Export path "%s" does not exist. Creating.' % exportPath)
-                    os.makedirs(exportPath)
-                fritutils.termout.printMessage('Starting to export splitted sectors from %d to %d' % (u['start'],u['end']))
-                logger.info('Starting to dump splitted sectors from %d to %d from %s' % (u['start'],u['end'],evi.fileName))
-                for sector in range(u['start'],u['end']+1):
-                    fname = 'sector-%d.dd' % sector 
-                    exportFilePath = os.path.join(exportPath,fname)
-                    evi.ddump(sector,sector+1,exportFilePath)
-
-                
+                    # the real dump starts here
+                    evi.ddump(u['start'],u['end']+1,exportFilePath)
+                if options and '--split' in options:
+                    endSplitPath = "sectors_%d-%d_splitted" % (u['start'],u['end'])
+                    exportSplitPath = os.path.join(evi.sectorsExportDir, endSplitPath)
+                    if not os.path.exists(exportSplitPath):
+                        logger.info('Directory "%s" does not exists, creating !' % exportSplitPath)
+                        os.makedirs(exportSplitPath)
+                    fritutils.termout.printMessage('Starting to export splitted sectors from %d to %d' % (u['start'],u['end']))
+                    logger.info('Starting to dump splitted sectors from %d to %d from %s' % (u['start'],u['end'],evi.fileName))
+                    sectorCount = 0
+                    rf = open(exportFilePath,'r')
+                    for sector in range(u['start'],u['end']+1):
+                        fname = 'sector-%d.dd' % sector
+                        exportSplitFilePath = os.path.join(exportSplitPath,fname)
+                        if os.path.exists(exportSplitFilePath):
+                            logger.warning('File "%s" already exists, not exporting.' % exportSplitFilePath)
+                        else:
+                            ef = open(exportSplitFilePath,'w')
+                            rf.seek(sectorCount*512)
+                            data = rf.read(512)
+                            ef.write(data)
+                            ef.close()
+                        sectorCount += 1
+                    rf.close()
                 
 def factory(Evidences,args,options):
     """
@@ -94,8 +96,5 @@ def factory(Evidences,args,options):
             seclist(Evidences)
         elif args[0] == 'export':
             logger.info('export arguement given. Starting "sectors export" command.')
-            if options and ('--split' in options):
-                exportSplit(Evidences)
-            else:
-                export(Evidences)
+            export(Evidences,options)
 
