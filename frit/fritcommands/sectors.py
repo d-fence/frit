@@ -49,6 +49,30 @@ def export(Evidences):
                     fritutils.termout.printMessage('Starting to export sectors from %d to %d' % (u['start'],u['end']))
                     logger.info('Starting to dump sectors %d - %d from %s' % (u['start'],u['end'],evi.fileName))
                     evi.ddump(u['start'],u['end'],exportFilePath)
+
+def exportSplit(Evidences):
+    """
+    export unallocted sectors and split them by sector in
+    .frit/extractions/unallocated/START-END/splitted/sectorXXX.dd
+    """
+    for evi in Evidences:
+        secList = evi.getUnallocatedSectors()
+        if secList:
+            for u in secList:
+                endPath = "sectors_%d-%d" % (u['start'],u['end'])
+                endPath += '_splitted'
+                exportPath = os.path.join(evi.sectorsExportDir, endPath)
+                if not os.path.exists(exportPath):
+                    logger.info('Export path "%s" does not exist. Creating.' % exportPath)
+                    os.makedirs(exportPath)
+                fritutils.termout.printMessage('Starting to export splitted sectors from %d to %d' % (u['start'],u['end']))
+                logger.info('Starting to dump splitted sectors from %d to %d from %s' % (u['start'],u['end'],evi.fileName))
+                for sector in range(u['start'],u['end']+1):
+                    fname = 'sector-%d.dd' % sector 
+                    exportFilePath = os.path.join(exportPath,fname)
+                    evi.ddump(sector,sector+1,exportFilePath)
+
+                
                 
 def factory(Evidences,args,options):
     """
@@ -70,5 +94,8 @@ def factory(Evidences,args,options):
             seclist(Evidences)
         elif args[0] == 'export':
             logger.info('export arguement given. Starting "sectors export" command.')
-            export(Evidences)
+            if options and ('--split' in options):
+                exportSplit(Evidences)
+            else:
+                export(Evidences)
 
