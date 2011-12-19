@@ -377,7 +377,30 @@ It's possible to have information about the frit sqlite database by issuing this
 command:
 $ frit status database
 
-5.10 Specify an evidence
+5.10 Unallocated sectors
+
+It's sometimes useful to work on unallocated sectors of a disk image.
+The "sectors" command may be used for exploring unallocated sectors.
+The "mmls" sleuthkit tool is used by frit to search for unallocated sectors.
+Some containers used by frit does not support unallocated sectors, like "rofs",
+in those cases, the sectors command will have no effects.
+
+5.10.1 sectors list
+
+The "list" sub-command can be used to display a list of unallocated sectors:
+$ frit sectors list
+
+5.10.2 sectors export
+
+The "export" subcommand will export unallocated sectors in this directory:
+".frit/extractions/sectors/EvidenceX/sectors_Y-Z/sectors_y-Z.dd", where X 
+is the Evidence number, Y the starting sector and Z the ending sector number.
+
+The consecutive sectors are exported in a single raw file.
+If the "--split" option is used, the sectors are splitted using a file for each
+exported sector.
+
+6. Specify an evidence
 
 You can specify on which Evidence(s) you want to work on the command line.
 For example, if you want to mount only the "Evidence3" and their filesystems,
@@ -394,7 +417,7 @@ It's also possible to specify an Evidence by its file name like this:
 
 $ frit store update my_nice_container.ewf
 
-5.11 Logs
+7. Logs
 
 frit uses a logging system. log files are stored in the ".frit/logs" directory.
 There is one log file per frit process. It means that each time you launch a 
@@ -407,7 +430,7 @@ One can launch the "logs show" command to display the content of the log files.
 Be aware that even the "logs show" command create a log entry that will be 
 displayed too.
 
-6. Future
+8. Future
 
 What is palnned in the future releases:
 - carving
