@@ -37,3 +37,14 @@ def affcat(container,start,end,destination):
         affcat = subprocess.Popen([AFFCAT, '-r', roption, container], stdout=outfile, stderr=subprocess.PIPE)
         affcat.wait()
         outfile.close()
+
+def ewfconvert(container,start,end,destination):
+    """
+    This function is used by EWF evidences objects to dump specified sectors of a raw file.
+    """
+    if os.path.exists(container):
+        nbytes = str((end-start) * 512)
+        offset = str(start * 512)
+        ewfexport = subprocess.Popen([EWFEXPORT, '-u', 'q', '-B', nbytes, '-f','raw', '-o', offset, '-t', destination, container], stdout=outfile, stderr=subprocess.PIPE)
+        ewfexport.wait()
+
