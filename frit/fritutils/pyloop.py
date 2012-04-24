@@ -106,7 +106,7 @@ class LoopException(Exception):
 class loopInfos(object):
     def __init__(self):
         self.infoList = None
-        self.infoStruct = '\0' * 224
+        self.infoStruct = '\0' * 232
         self.BackingFile = None
         self.Offset = 0
         self.unpack()
@@ -127,12 +127,12 @@ class loopInfos(object):
         self.infoList[9] = self.BackingFile
     
     def unpack(self):
-        self.infoList = list(struct.unpack('LLLLLIIII64s64s32sL',self.infoStruct))
+        self.infoList = list(struct.unpack('LLLLLIIII64s64s32sLL',self.infoStruct))
         self._listToObject()
         
     def pack(self):
         self._objectToList()
-        self.infoStruct = struct.pack('LLLLLIIII64s64s32sL',*self.infoList)
+        self.infoStruct = struct.pack('LLLLLIIII64s64s32sLL',*self.infoList)
 
 class loopDevice(object):
     def __init__(self,devPath):
