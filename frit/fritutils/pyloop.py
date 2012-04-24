@@ -48,8 +48,9 @@ class testLoop(unittest.TestCase):
         lodevs = glob.glob('/dev/loop*')
         lonums = []
         for lo in lodevs:
-            lonum = int(lo[9:])
-            lonums.append(lonum)
+            if lo != '/dev/loop-control':
+                lonum = int(lo[9:])
+                lonums.append(lonum)
         lonums.sort()
         lastDev = str(lonums[-1])
         testLoop = loopDevice('/dev/loop' + lastDev)
@@ -203,7 +204,7 @@ class loopDevice(object):
     def link(self,BackingFile,Offset=0):
         self.refresh()
         if not self.is_loop_used():
-            with open(self.devPath,'r') as fd:
+            with open(self.devPath,'w') as fd:
                 fdBackingFile = open(BackingFile,'r')
                 fcntl.ioctl(fd,LOOP_SET_FD,fdBackingFile.fileno())
                 fdBackingFile.close()
