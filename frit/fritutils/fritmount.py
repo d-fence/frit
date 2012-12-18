@@ -164,7 +164,7 @@ def ntfs3gMount(loopDevice,mountpoint):
     uid = str(os.getuid())
     gid = str(os.getgid())
     options = 'ro,noatime,show_sys_files,allow_other,uid=' + uid + ',gid=' + gid
-    ntfsmount = subprocess.Popen([NTFS3G, '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    ntfsmount = subprocess.Popen([SUDO,NTFS3G, '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     ntfsmount.wait()
     if ntfsmount.returncode > 0:
         logger.warning('Unable to mount the ntfs partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ntfsmount.returncode)))
