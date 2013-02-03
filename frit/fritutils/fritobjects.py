@@ -386,14 +386,20 @@ class NtfsFileSystem(FileSystem):
     def umountCommand(self):
         logger.info('NTFS unmounting "%s"' % self.fsMountPoint)
         fritutils.fritmount.sudoUmount(self.fsMountPoint)
-       
+
     def undelete(self):
         """
         A function to undelete files on NTFS
         """
         self.makeUndelDir()
         self.mount('undelete','Used by ntfsundelete')
+        # two different undelete methods are used
+        self.undeleteDestination = unicode(os.path.join('.frit/extractions/undeleted/',self.evidence.configName,self.configName,'ntfsundelete'))
+        self.makeUndelDir()
         fritutils.fritundelete.NtfsUndelete(self.loopDevice,self.undeleteDestination)
+        self.undeleteDestination = unicode(os.path.join('.frit/extractions/undeleted/',self.evidence.configName,self.configName,'tskrecover'))
+        fritutils.fritundelete.TskUndelete(self.loopDevice,self.undeleteDestination)
+        self.makeUndelDir()
         self.umount('undelete')
 
 class FatFileSystem(FileSystem):
@@ -406,11 +412,11 @@ class FatFileSystem(FileSystem):
     def mountCommand(self):
         logger.info('FAT mounting "%s" on "%s"' % (self.loopDevice,self.fsMountPoint))
         fritutils.fritmount.fatMount(self.loopDevice,self.fsMountPoint)
-    
+
     def umountCommand(self):
         logger.info('FAT unmounting "%s"' % self.fsMountPoint)
         fritutils.fritmount.fatUnmount(self.fsMountPoint)
-        
+
     def undelete(self):
         """
         A function to undelete files on FAT, using sleuthkit tsk_recover
