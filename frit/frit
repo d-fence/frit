@@ -4,17 +4,7 @@ import datetime
 import os.path
 import configobj
 import fritutils.termout
-import fritcommands.init
-import fritcommands.mount
-import fritcommands.status
-import fritcommands.store
-import fritcommands.extensions
-import fritcommands.undelete
-import fritcommands.add
-import fritcommands.getmails
-import fritcommands.hashes
-import fritcommands.logs
-import fritcommands.sectors
+import fritcommands
 import fritutils.fritlog
 from fritutils import fritobjects
 
@@ -91,22 +81,22 @@ def mainFrit():
     # user isued a mount command
     startLog(command,logger)
     if command == 'mount':
-        fritcommands.mount.mountCommand(Evidences,args,options)
+        fritcommands.mountCommand(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
 
     if command == 'umount':
-        fritcommands.mount.Umount(Evidences)
+        fritcommands.Umount(Evidences)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'status':
-        fritcommands.status.status(Evidences,args,options)
+        fritcommands.status(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'store':
-        fritcommands.store.store(Evidences,args,options)
+        fritcommands.store(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     
