@@ -5,26 +5,16 @@ import fritutils.termout
 import os
 import sys
 
-# We have to check if a .frit exists, if not, we assume that the init command
-# was issued. So we log in the base directory
-if os.path.exists('.frit'):
-    if not os.path.exists('.frit/logs'):
-        try:
-            os.mkdir('.frit/logs')
-        except:
-            fritutils.termout.printWarning("Cannot create .frit/logs directory.")
-            sys.exit(1)
-    basepath = '.frit/logs/frit-'
-else:
-    basepath = './frit-'
-    
+def setLevels(level):
+    if level == 'DEBUG':
+        l = logging.DEBUG
+    elif level == 'INFO':
+        l = logging.INFO
+    for logger in loggers:
+        loggers[logger].setLevel(l)
         
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    datefmt ='%Y-%m-%d %H:%M:%S',
-                    filename=basepath +  str(os.getpid()) + '.log',
-                    filemode='w'
-                    )
+logFile = '.frit/logs/frit-' + str(os.getpid()) + '.log'
+logFormat = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 
 loggers = {
         'mainfritLog' : logging.getLogger('frit.mainfrit'),
@@ -40,13 +30,27 @@ loggers = {
         'sectorsLog' : logging.getLogger('frit.sectors'),
         }
 
+# Configuring default level to INFO
+for l in loggers:
+    loggers[l].setLevel(logging.INFO)
 
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormat)
 
-def setLevels(level):
-    if level == 'DEBUG':
-        l = logging.DEBUG
-    elif level == 'INFO':
-        l = logging.INFO
-    for logger in loggers:
-        loggers[logger].setLevel(l)
+# We have to check if a .frit exists, if not, we assume that the init command
+# was issued. So we log to the console
+if os.path.exists('.frit'):
+    if not os.path.exists('.frit/logs'):
+        try:
+            os.mkdir('.frit/logs')
+        except:
+            fritutils.termout.printWarning("Cannot create .frit/logs directory.")
+            sys.exit(1)
+    fileHandler = logging.FileHandler(filename=logFile,encoding='utf8')
+    fileHandler.setFormatter(logFormat)
+    for l in loggers:
+        loggers[l].addHandler(fileHandler)
+else:
+    for l in loggers:
+        loggers[l].addHandler(consoleHandler)
 
