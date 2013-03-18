@@ -10,6 +10,8 @@ import hashlib
 import fritutils.termout
 from fritutils.fritglobals import *
 
+BLKSIZE = 512 * 32
+
 def getSsdeep(fullpath):
     ssdeep = subprocess.Popen([SSDEEP, fullpath], stdout=subprocess.PIPE)
     ssdeep.wait()
@@ -38,11 +40,17 @@ def hashes(fullpath):
     
     try:
         fic = open(fullpath,"rb")
-        data = fic.read()
+        md5 = hashlib.md5()
+        sha1 = hashlib.sha1()
+        sha256 = hashlib.sha256()
+        while 1:
+            data = fic.read(BLKSIZE)
+            if len(data) == 0:
+                break
+            md5.update(data)
+            sha1.update(data)
+            sha256.update(data)
     except (IOError,MemoryError):
         return ("Problematic file", "Problematic file", "Problematic file")
     else:
-        md5 = hashlib.md5(data).hexdigest()
-        sha1 = hashlib.sha1(data).hexdigest()
-        sha256 = hashlib.sha256(data).hexdigest()
-        return (md5,sha1,sha256)
+        return (md5.hexdigest(),sha1.hexdigest(),sha256.hexdigest())
