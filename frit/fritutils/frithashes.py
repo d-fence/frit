@@ -8,8 +8,7 @@ import os
 import os.path
 import hashlib
 import fritutils.termout
-
-SSDEEP='/usr/bin/ssdeep'
+from fritutils.fritglobals import *
 
 def getSsdeep(fullpath):
     ssdeep = subprocess.Popen([SSDEEP, fullpath], stdout=subprocess.PIPE)

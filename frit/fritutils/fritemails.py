@@ -8,8 +8,7 @@ import os
 import os.path
 import re
 import fritutils.termout
-
-PFFEXPORT = '/usr/bin/pffexport'
+from fritutils.fritglobals import *
 
 def pffExport(pstFile,destination):
     fritutils.termout.printMessage('\tExporting "%s" to "%s".' % (pstFile,destination))

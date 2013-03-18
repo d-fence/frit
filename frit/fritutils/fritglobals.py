@@ -83,3 +83,26 @@ toolbox.append(ROFS)
 XMOUNT = ExternalTool(ctools.get('XMOUNT', default='/usr/bin/xmount'))
 toolbox.append(XMOUNT)
 
+DD = ExternalTool(ctools.get('DD', default='/bin/dd'))
+toolbox.append(DD)
+
+AFFCAT = ExternalTool(ctools.get('AFFCAT', default='/usr/bin/affcat'))
+toolbox.append(AFFCAT)
+
+EWFEXPORT = ExternalTool(ctools.get('EWFEXPORT', default='/usr/bin/ewfexport'))
+toolbox.append(EWFEXPORT)
+
+PFFEXPORT  = ExternalTool(ctools.get('PFFEXPORT', default= '/usr/bin/pffexport'))
+toolbox.append(PFFEXPORT)
+
+SSDEEP = ExternalTool(ctools.get('SSDEEP', default='/usr/bin/ssdeep'))
+toolbox.append(SSDEEP)
+
+MMLS = ExternalTool(ctools.get('MMLS', default='/usr/bin/mmls'))
+toolbox.append(MMLS)
+
+NTFSUNDELETE = ExternalTool(ctools.get('NTFSUNDELETE', default='/sbin/ntfsundelete'))
+toolbox.append(MMLS)
+
+TSKRECOVER = ExternalTool(ctools.get('TSKRECOVER', default='/usr/bin/tsk_recover'))
+toolbox.append(TSKRECOVER)

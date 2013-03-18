@@ -7,8 +7,7 @@ import subprocess
 import os
 import os.path
 import fritutils.termout
-
-MMLS='/usr/bin/mmls'
+from fritutils.fritglobals import *
 
 def getUnallocatedSectors(container):
     """

@@ -7,10 +7,7 @@ import subprocess
 import os
 import os.path
 import fritutils.termout
-
-DD='/bin/dd'
-AFFCAT='/usr/bin/affcat'
-EWFEXPORT='/usr/bin/ewfexport'
+from fritutils.fritglobals import *
 
 def ddump(container,start,end,destination):
     """

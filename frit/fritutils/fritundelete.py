@@ -8,9 +8,7 @@ import os
 import os.path
 import re
 import fritutils.termout
-
-NTFSUNDELETE = '/sbin/ntfsundelete'
-TSKRECOVER = '/usr/bin/tsk_recover'
+from fritutils.fritglobals import *
 
 def NtfsUndelete(lodevice,destination):
     fritutils.termout.printMessage('\tNTFS Undeleting "%s" to "%s".' % (lodevice,destination))
