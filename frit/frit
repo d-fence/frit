@@ -81,57 +81,62 @@ def mainFrit():
     startLog(command,logger)
     if command == 'mount':
         fritcommands.mount.mountCommand(Evidences,args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'umount':
         fritcommands.mount.Umount(Evidences)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'status':
         fritcommands.status.status(Evidences,args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'store':
         fritcommands.store.store(Evidences,args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'extensions':
         fritcommands.extensions.factory(Evidences,args,options,fritConfig)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'undelete':
         fritcommands.undelete.factory(Evidences, args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'add':
         fritcommands.add.factory(fritConfig, args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'getmails':
         fritcommands.getmails.factory(Evidences, args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'hashes':
         fritcommands.hashes.factory(Evidences, args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'logs':
         fritcommands.logs.factory(Evidences, args,options)
-        stopLog(command,startTime,logger)
+        stopLog(command, startTime,logger)
         sys.exit(0)
 
     if command == 'sectors':
         fritcommands.sectors.factory(Evidences, args, options)
-        stopLog(command,startTime, logger)
+        stopLog(command, startTime, logger)
+        sys.exit(0)
+
+    if command == 'selfcheck':
+        fritcommands.selfcheck.selfcheck()
+        stopLog(command, startTime, logger)
         sys.exit(0)
 
     # Obviously, the given command was not found

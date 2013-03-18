@@ -9,3 +9,4 @@ import sectors
 import status
 import store
 import undelete
+import selfcheck

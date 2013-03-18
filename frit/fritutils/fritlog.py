@@ -28,6 +28,8 @@ loggers = {
         'extensionsLog': logging.getLogger('frit.extensions'),
         'storeLog' : logging.getLogger('frit.store'),
         'sectorsLog' : logging.getLogger('frit.sectors'),
+        'selfcheckLog' : logging.getLogger('frit.selfcheck'),
+        'globalsLog' : logging.getLogger('frit.fritglobals'),
         }
 
 # Configuring default level to INFO

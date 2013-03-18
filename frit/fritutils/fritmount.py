@@ -24,17 +24,7 @@ import re
 import fritutils.termout
 import fritutils.fritlog
 import fritutils.pyloop
-
-AFFMOUNT = '/usr/bin/affuse'
-FUSERMOUNT = '/bin/fusermount'
-NTFS3G = '/bin/ntfs-3g'
-FUSEISO = '/usr/bin/fuseiso'
-SUDO = '/usr/bin/sudo'
-MOUNT = '/bin/mount'
-UMOUNT = '/bin/umount'
-FUSEEXT2 = '/usr/bin/fuseext2'
-ROFS = '/usr/bin/rofs'
-XMOUNT = '/usr/bin/xmount'
+from fritutils.fritglobals import *
 
 logger = fritutils.fritlog.loggers['fritmountLog']
 
