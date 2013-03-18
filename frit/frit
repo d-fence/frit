@@ -8,10 +8,9 @@ import fritcommands
 import fritutils.fritlog
 from fritutils import fritobjects
 
-
 def startLog(command,logger):
     logger.info('Starting %s command' % command)
-    
+
 def stopLog(command,startTime,logger):
     diffTime = datetime.datetime.today() - startTime
     logger.info('%s command successfully ended in %s' % (command,diffTime))
@@ -26,7 +25,7 @@ def mainFrit():
     # check to see if the current working dir is allowed
     fritutils.noBadPath()
     logger = fritutils.fritlog.loggers['mainfritLog']
-    logger.info('Frit starting')    
+    logger.info('Frit starting')
     # Separate command and the command arguemnts
     (command,args,options) = fritutils.getCommand(sys.argv[1:])
     if options:
@@ -43,7 +42,7 @@ def mainFrit():
         else:
             fritutils.termout.printWarning("A .frit directory already exists.")
             sys.exit(1)
-    
+
     # The command is not init, so we should find a config file
     if os.path.exists('.frit/config'):
         try:
@@ -77,7 +76,7 @@ def mainFrit():
                 logger.info('Working on evidence %s specified on command line' % evi.configName)
         else:
             logger.info('Working on all evidences.')
-        
+
     # user isued a mount command
     startLog(command,logger)
     if command == 'mount':
@@ -89,42 +88,42 @@ def mainFrit():
         fritcommands.mount.Umount(Evidences)
         stopLog(command,startTime,logger)
         sys.exit(0)
-        
+
     if command == 'status':
         fritcommands.status.status(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
-    
+
     if command == 'store':
         fritcommands.store.store(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
-    
+
     if command == 'extensions':
         fritcommands.extensions.factory(Evidences,args,options,fritConfig)
         stopLog(command,startTime,logger)
         sys.exit(0)
-        
+
     if command == 'undelete':
         fritcommands.undelete.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
-        
+
     if command == 'add':
         fritcommands.add.factory(fritConfig, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
-    
+
     if command == 'getmails':
         fritcommands.getmails.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
-        
+
     if command == 'hashes':
         fritcommands.hashes.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
-    
+
     if command == 'logs':
         fritcommands.logs.factory(Evidences, args,options)
         stopLog(command,startTime,logger)
@@ -134,7 +133,7 @@ def mainFrit():
         fritcommands.sectors.factory(Evidences, args, options)
         stopLog(command,startTime, logger)
         sys.exit(0)
-        
+
     # Obviously, the given command was not found
     fritutils.termout.printWarning('The "%s" command was not found.' % command)
 if __name__ == '__main__':
