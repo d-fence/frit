@@ -27,26 +27,22 @@ def getSize(fullpath):
 def hashes(fullpath):
     """
     Return a tuple of hexdigests for:
-    md5, sha1, sha256, ssdeep
+    md5, sha1, sha256
     """
     size = getSize(fullpath)
     if size == 0:
-        return("Zero file size", "Zero file size", "Zero file size", "Zero file size")
+        return("Zero file size", "Zero file size", "Zero file size")
     
     if not os.access(fullpath,os.R_OK):
-        return("Unreadable file", "Unreadable file", "Unreadable file", "Unreadable file")
+        return("Unreadable file", "Unreadable file", "Unreadable file")
     
     try:
         fic = open(fullpath,"rb")
         data = fic.read()
     except (IOError,MemoryError):
-        return ("Problematic file", "Problematic file", "Problematic file", "Problematic file")
+        return ("Problematic file", "Problematic file", "Problematic file")
     else:
         md5 = hashlib.md5(data).hexdigest()
         sha1 = hashlib.sha1(data).hexdigest()
         sha256 = hashlib.sha256(data).hexdigest()
-        if size < 1073741824 :
-            ssdeep = getSsdeep(fullpath)
-        else:
-            ssdeep = "File too big"
-        return (md5,sha1,sha256,ssdeep)
+        return (md5,sha1,sha256)

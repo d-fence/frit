@@ -15,7 +15,7 @@ import ssdeep
 
 logger = fritutils.fritlog.loggers['hashesLog']
 
-def updateDb(dbFile,hmd5,hsha1,hsha256,hssdeep):
+def updateDb(dbFile,hmd5,hsha1,hsha256):
     fname = os.path.join(dbFile.fullpath.fullpath,dbFile.filename)
     if not dbFile.md5:
         nMd5 = fritModel.Md5.query.filter_by(md5=hmd5).first()
@@ -44,15 +44,6 @@ def updateDb(dbFile,hmd5,hsha1,hsha256,hssdeep):
         fritModel.elixir.session.commit()
     else:
         fritutils.termout.printWarning('Sha256 for "%s" is already in database.' % fname)
-    if not dbFile.ssdeep:
-        nSsdeep = fritModel.Ssdeep.query.filter_by(ssdeep=hssdeep).first()
-        if not nSsdeep:
-            nSsdeep = fritModel.Ssdeep()
-            nSsdeep.ssdeep = hssdeep
-        nSsdeep.files.append(dbFile)
-        fritModel.elixir.session.commit()
-    else:
-        fritutils.termout.printWarning('Ssdeep for "%s" is already in database.' % fname)
 
 def hashFile(EviDb,FsDb,realFile,dbFile):
     dname = fritutils.unicodify(os.path.dirname(dbFile))
@@ -68,7 +59,7 @@ def hashFile(EviDb,FsDb,realFile,dbFile):
         # on files. We double check the database inside updateDb()
         if not nFile.md5:
             hashes = fritutils.frithashes.hashes(realFile)
-            updateDb(nFile,unicode(hashes[0]),unicode(hashes[1]),unicode(hashes[2]),unicode(hashes[3]))
+            updateDb(nFile,unicode(hashes[0]),unicode(hashes[1]),unicode(hashes[2]))
         else:
             fritutils.termout.printWarning('Hashes for "%s" seems to be already in database.' % nFile.filename)
         
