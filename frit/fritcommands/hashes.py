@@ -62,7 +62,7 @@ def hashFile(EviDb,FsDb,realFile,dbFile):
             updateDb(nFile,unicode(hashes[0]),unicode(hashes[1]),unicode(hashes[2]))
         else:
             fritutils.termout.printWarning('Hashes for "%s" seems to be already in database.' % nFile.filename)
-        
+
 def update(Evidences):
     # First we check if the database exists
     if not os.path.exists(fritModel.DBFILE):
@@ -85,11 +85,16 @@ def update(Evidences):
                 break
             logger.info('Mounting filesystem "%s/%s" if needed' % (fs.evidence.configName, fs.configName))
             fs.mount('hashes', 'Hashing files')
+            # Counting files for showing progress
+            dbNbFiles = fs.dbCountFiles()['Normal']['Files']
             fritutils.termout.printNormal('Start inserting Hashes in database for regular files on "%s"\n' % fs.configName)
+            filenb = 0
             spos = len(fs.fsMountPoint)
             for f in fs.listFiles():
                 dbfile = f[spos:]
+                fritutils.termout.printNormal('    Hashing file %d / %d' % (filenb,dbNbFiles))
                 hashFile(EviDb,FsDb,f,dbfile)
+                filenb += 1
             logger.info('Unmounting "%s/%s" if needed' % (fs.evidence.configName, fs.configName))
             fs.umount('hashes')
                 
