@@ -81,22 +81,22 @@ def mainFrit():
     # user isued a mount command
     startLog(command,logger)
     if command == 'mount':
-        fritcommands.mountCommand(Evidences,args,options)
+        fritcommands.mount.mountCommand(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
 
     if command == 'umount':
-        fritcommands.Umount(Evidences)
+        fritcommands.mount.Umount(Evidences)
         stopLog(command,startTime,logger)
         sys.exit(0)
         
     if command == 'status':
-        fritcommands.status(Evidences,args,options)
+        fritcommands.status.status(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     
     if command == 'store':
-        fritcommands.store(Evidences,args,options)
+        fritcommands.store.store(Evidences,args,options)
         stopLog(command,startTime,logger)
         sys.exit(0)
     

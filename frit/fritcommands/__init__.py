@@ -1,11 +1,11 @@
-from add import *
-from extensions import *
-from getmails import *
-from hashes import *
-from init import *
-from logs import *
-from mount import *
-from sectors import *
-from status import *
-from store import *
-from undelete import *
+import add
+import extensions
+import getmails
+import hashes
+import init
+import logs
+import mount
+import sectors
+import status
+import store
+import undelete

@@ -4,7 +4,21 @@ import os
 import os.path
 import sys
 import re
-import fritutils.termout
+import containerprobe
+import fritconf
+import fritdb
+import fritddump
+import fritemails
+import frithashes
+import fritlog
+import fritmmls
+import fritmount
+import fritobjects
+import fritprobe
+import fritundelete
+import fsprobe
+import pyloop
+import termout
 
 def getCommand(args):
     command = args[0]
