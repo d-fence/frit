@@ -70,24 +70,31 @@ class testLoop(unittest.TestCase):
         self.assertTrue(testLoop.is_loop_used())
         self.assertEqual(testLoop.getBackingFile(),self.assocfile.name)
         self.assertTrue(testLoop.get_infos())
-        
+
         s = os.stat(self.assocfile.name)
         inode = s.st_ino
         dev = s.st_dev
-        
+
         self.assertTrue(testLoop.infos.DeviceNum,dev)
         self.assertTrue(testLoop.infos.Inode,inode)
-        
+
         with open(testLoop.devPath,'r') as ldfile:
             x = ldfile.read(512)
         self.assertEqual(x,self.bsector)
-        
+
         self.assertEqual(testLoop.infos.BackingFile,testLoop.sysBackingFile)
         self.assertEqual(testLoop.infos.Offset,512)
-        
+
         self.assertTrue(testLoop.unlink())
         self.assertFalse(testLoop.is_loop_used())
         self.assertFalse(testLoop.get_infos())
+
+        # now testing sizelimit
+        self.assertTrue(testLoop.link(self.assocfile.name,0,512))
+        with open(testLoop.devPath,'r') as ldfile:
+            x = ldfile.read()
+        self.assertEqual(x,self.asector)
+        self.assertTrue(testLoop.unlink())
 
     def test_Raise(self):
         self.assertRaises(LoopException,loopDevice,self.assocfile.name)
@@ -109,6 +116,7 @@ class loopInfos(object):
         self.infoStruct = '\0' * 232
         self.BackingFile = None
         self.Offset = 0
+        self.Sizelimit = 0
         self.unpack()
     
     def _listToObject(self):
@@ -120,10 +128,12 @@ class loopInfos(object):
         self.DeviceNum = self.infoList[0]
         self.Inode = self.infoList[1]
         self.Offset = self.infoList[3]
+        self.Sizelimit = self.infoList[4]
         self.BackingFile = self.infoList[9].strip('\0')
     
     def _objectToList(self):
         self.infoList[3] = self.Offset
+        self.infoList[4] = self.Sizelimit
         self.infoList[9] = self.BackingFile
     
     def unpack(self):
@@ -201,7 +211,7 @@ class loopDevice(object):
             return True
         return False
 
-    def link(self,BackingFile,Offset=0):
+    def link(self,BackingFile,Offset=0,Sizelimit=0):
         self.refresh()
         if not self.is_loop_used():
             with open(self.devPath,'w') as fd:
@@ -210,6 +220,7 @@ class loopDevice(object):
                 fdBackingFile.close()
                 self.infos.BackingFile = BackingFile
                 self.infos.Offset = Offset
+                self.infos.Sizelimit = Sizelimit
                 self.infos.pack()
                 self.infos.infoStruct = fcntl.ioctl(fd,LOOP_SET_STATUS64,self.infos.infoStruct)
                 self.infos.unpack()
