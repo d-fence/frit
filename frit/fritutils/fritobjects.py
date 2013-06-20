@@ -39,6 +39,7 @@ class FileSystem(object):
         self.loopLockFile = self.fsMountPoint + 'looplock'
         self.loopDevice = self.getLoopDevice()
         self.undeleteDestination = unicode(os.path.join('.frit/extractions/undeleted/',evidence.configName,self.configName))
+        self.sizelimit = sizelimit
 
     def getLoopDevice(self):
         if os.path.exists(self.loopLockFile):
@@ -61,7 +62,7 @@ class FileSystem(object):
 
     def acquireLoop(self):
         if self.loopDevice == '':
-            self.loopDevice = fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset)
+            self.loopDevice = fritutils.fritmount.attachLoopDevice(self.rawImage,self.offset, self.sizelimit)
             logger.info('Aquired a loop device: %s' % self.loopDevice)
             self.writeLoopLock()
 

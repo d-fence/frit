@@ -98,7 +98,7 @@ def hfsplusUnmount(mountpoint):
             logger.warning('Unable to unmount the HFS+ system mounted on %s (return code: %d)' % (mountpoint,hfsplusunmount.returncode))
             raise fritMountError('Unable to unmount "%s" (return code: %d)' % (mountpoint,hfsplusunmount.returncode))
 
-def attachLoopDevice(rawfile, offset):
+def attachLoopDevice(rawfile, offset,sizelimit):
     """
     Function to attach a loop device to a rawfile.
     Here, we count on the "verbose" mode of the losetup command to return a
@@ -109,7 +109,7 @@ def attachLoopDevice(rawfile, offset):
     logger.info('Attaching "%s" to a loop device' % rawfile)
     # finding a free loop device
     lodevice = fritutils.pyloop.findFreeLoop()
-    if not lodevice.link(rawfile,offset):
+    if not lodevice.link(rawfile,offset,sizelimit):
         logger.warning('Unable to attach loop "%s" device to "%s" with offset "%d".' % (lodevice.devPath,rawfile,offset))
         raise fritMountError('Unable to attach loop device "%s" to "%s" with offset "%d".' % (lodevice.devPath,rawfile,offset))
     else:
