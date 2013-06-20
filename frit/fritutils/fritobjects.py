@@ -29,7 +29,7 @@ class FileSystem(object):
     It have to be overriden for different file systems:
     NTFS, extx, xfs, ...
     """
-    def __init__(self,offset,fsConfigName,evidence):
+    def __init__(self,offset,fsConfigName,evidence,sizelimit="0"):
         self.rawImage = ''
         self.offset = offset
         self.evidenceConfigName = evidence.configName
@@ -855,37 +855,34 @@ def evidencesFromConfig(fritConf,verbose):
             fs = ''
             for subkey in fritConf[key].keys():
                 if FsRegex.search(subkey):
+                    off = fritutils.getOffset(fritConf[key][subkey].get('Offset', default="0"))
+                    slimit = fritutils.getOffset(fritConf[key][subkey].get('Sizelimit', default="0"))
                     if fritConf[key][subkey]['Format'] == 'NTFS':
-                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = NtfsFileSystem(offset=off,fsConfigName=subkey,evidence=ev)
+                        fs = NtfsFileSystem(offset=off,fsConfigName=subkey,evidence=ev,sizelimit=slimit)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t NTFS filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'FAT':
-                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = FatFileSystem(offset=off,fsConfigName=subkey,evidence=ev)
+                        fs = FatFileSystem(offset=off,fsConfigName=subkey,evidence=ev, sizelimit=slimit)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t FAT filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'HFSPLUS':
-                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = HfsPlusFileSystem(offset=off,fsConfigName=subkey,evidence=ev)
+                        fs = HfsPlusFileSystem(offset=off,fsConfigName=subkey,evidence=ev,sizelimit=slimit)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t HFS+ filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'ISO9660':
-                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = ISO9660FileSystem(offset=off,fsConfigName=subkey,evidence=ev)
+                        fs = ISO9660FileSystem(offset=off,fsConfigName=subkey,evidence=ev,sizelimit=slimit)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
                             fritutils.termout.printSuccess("\t\t ISO 9660 filesystem Found at offset %d." % fs.offset)
                     elif fritConf[key][subkey]['Format'] == 'EXT2/3':
-                        off = fritutils.getOffset(fritConf[key][subkey]['Offset'])
-                        fs = Ext2FileSystem(offset=off,fsConfigName=subkey,evidence=ev)
+                        fs = Ext2FileSystem(offset=off,fsConfigName=subkey,evidence=ev,sizelimit=slimit)
                         ev.fileSystems.append(fs)
                         ev.populateRawImage()
                         if verbose:
