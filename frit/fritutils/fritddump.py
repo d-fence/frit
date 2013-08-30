@@ -10,7 +10,7 @@ import fritutils.termout
 import fritutils.fritlog
 from fritutils.fritglobals import *
 
-logger = fritutils.fritlog.logger['sectorsLog']
+logger = fritutils.fritlog.loggers['sectorsLog']
 
 def ddump(container,start,end,destination):
     """
