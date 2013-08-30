@@ -44,4 +44,8 @@ def ewfexport(container,start,end,destination):
         offset = str(start * 512)
         ewfexport = subprocess.Popen([EWFEXPORT, '-u', '-q', '-B', nbytes, '-f','raw', '-o', offset, '-t', destination, container], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         ewfexport.wait()
+        # renaming destination because ewfexport automatically append a ".raw" extension to the file.
+        ewfname = destination + '.raw'
+        if os.path.exists(ewfname):
+            os.rename(ewfname,destination)
 
