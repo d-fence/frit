@@ -35,7 +35,7 @@ def affcat(container,start,end,destination):
         affcat.wait()
         outfile.close()
 
-def ewfconvert(container,start,end,destination):
+def ewfexport(container,start,end,destination):
     """
     This function is used by EWF evidences objects to dump specified sectors of a raw file.
     """
