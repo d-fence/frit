@@ -42,6 +42,6 @@ def ewfexport(container,start,end,destination):
     if os.path.exists(container):
         nbytes = str((end-start) * 512)
         offset = str(start * 512)
-        ewfexport = subprocess.Popen([EWFEXPORT, '-u', 'q', '-B', nbytes, '-f','raw', '-o', offset, '-t', destination, container], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ewfexport = subprocess.Popen([EWFEXPORT, '-u', '-q', '-B', nbytes, '-f','raw', '-o', offset, '-t', destination, container], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         ewfexport.wait()
 
