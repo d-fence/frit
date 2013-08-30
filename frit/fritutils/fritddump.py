@@ -7,7 +7,10 @@ import subprocess
 import os
 import os.path
 import fritutils.termout
+import fritutils.fritlog
 from fritutils.fritglobals import *
+
+logger = fritutils.fritlog.logger['sectorsLog']
 
 def ddump(container,start,end,destination):
     """
@@ -47,5 +50,8 @@ def ewfexport(container,start,end,destination):
         # renaming destination because ewfexport automatically append a ".raw" extension to the file.
         ewfname = destination + '.raw'
         if os.path.exists(ewfname):
+            logger.info('Renaming "%s" in "%s"' % (ewfname,destination))
             os.rename(ewfname,destination)
+        else:
+            logger.warning('File "%s" not found, cannot rename it' % ewfname)
 
