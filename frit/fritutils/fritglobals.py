@@ -106,3 +106,10 @@ toolbox.append(MMLS)
 
 TSKRECOVER = ExternalTool(ctools.get('TSKRECOVER', default='/usr/bin/tsk_recover'))
 toolbox.append(TSKRECOVER)
+
+VSHADOWINFO = ExternalTool(ctools.get('VSHADOWINFO', defulat='/usr/bin/vshadowinfo'))
+toolbox.append(VSHADOWINFO)
+
+VSHADOWMOUNT = ExternalTool(ctools.get('VSHADOWMOUNT', defulat='/usr/bin/vshadowmount'))
+toolbox.append(VSHADOWMOUNT)
+
