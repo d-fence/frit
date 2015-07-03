@@ -16,6 +16,6 @@ logger = fritutils.fritlog.loggers['carvingLog']
 
 def factory(Evidences, args, options):
     if not options:
-        fritutils.termout.printWarning"You have to choose the tool to use:")
+        fritutils.termout.printWarning("You have to choose the tool to use:")
         fritutils.termout.printWarning("    --photorec")
 
