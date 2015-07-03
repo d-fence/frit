@@ -17,7 +17,7 @@ def getUnalloc(Evidences):
                 fritutils.termout.printWarning('Unallocated space file "%s" already exists, not extracting.' % fs.unallocDestinationFile)
             else:
                 logger.info('Starting to extract unallocted space for "%s/%s".' % (evi.configName,fs.configName))
-                fs.blkls()
+                fs.getUnallocatedSpace()
         if evi.isLocked('getunalloc'):
             evi.umount('getunalloc')
 
@@ -29,7 +29,7 @@ def getSlack(Evidences):
                 fritutils.termout.printWarning('Slack space file "%s" already exists, not extracting.' % fs.slackDestinationFile)
             else:
                 logger.info('Starting to extract slack space for "%s/%s".' % (evi.configName,fs.configName))
-                fs.blkls(slack=True)
+                fs.getUnallocatedSpace(slack=True)
         if evi.isLocked('getunalloc'):
             evi.umount('getunalloc')
 
