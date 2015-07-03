@@ -106,3 +106,6 @@ toolbox.append(MMLS)
 
 TSKRECOVER = ExternalTool(ctools.get('TSKRECOVER', default='/usr/bin/tsk_recover'))
 toolbox.append(TSKRECOVER)
+
+PHOTOREC = ExternalTool(ctools.get('PHOTOREC', default='/usr/bin/photorec'))
+toolbox.append(PHOTOREC)
