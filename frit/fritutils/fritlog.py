@@ -12,7 +12,7 @@ def setLevels(level):
         l = logging.INFO
     for logger in loggers:
         loggers[logger].setLevel(l)
-        
+
 logFile = '.frit/logs/frit-' + str(os.getpid()) + '.log'
 logFormat = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 
