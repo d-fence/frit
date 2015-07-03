@@ -140,6 +140,7 @@ def mainFrit():
         sys.exit(0)
 
     if command == 'getunalloc':
+        fritcommands.getunalloc()
         stopLog(command, startTime, logger)
         sys.exit(0)
 
