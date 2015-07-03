@@ -22,7 +22,7 @@ def Blkls(lodevice,destination,slack):
             blkls = subprocess.Popen([BLKLS, '-s', lodevice ], stdout=outFile)
         else:
             blkls = subprocess.Popen([BLKLS, lodevice ], stdout=outFile)
-        blks.wait()
+        blkls.wait()
         if blkls.returncode > 0:
             fritutils.termout.printWarning("Error with blkls")
         fritutils.termout.printSuccess("Successfully extracted unallocated blocks")
