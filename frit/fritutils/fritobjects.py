@@ -424,7 +424,7 @@ class NtfsFileSystem(FileSystem):
             destination = self.slackDestinationFile
         else:
             destination = self.unallocDestinationFile
-        fritutils.fritblks.Blkls(self.loopDevice, destination, slack)
+        fritutils.fritblkls.Blkls(self.loopDevice, destination, slack)
         self.umount('getunalloc')
 
 class FatFileSystem(FileSystem):
@@ -462,7 +462,7 @@ class FatFileSystem(FileSystem):
             destination = self.slackDestinationFile
         else:
             destination = self.unallocDestinationFile
-        fritutils.fritblks.Blkls(self.loopDevice, destination, slack)
+        fritutils.fritblkls.Blkls(self.loopDevice, destination, slack)
         self.umount('getunalloc')
 
 class HfsPlusFileSystem(FileSystem):
