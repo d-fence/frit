@@ -30,6 +30,7 @@ loggers = {
         'sectorsLog' : logging.getLogger('frit.sectors'),
         'selfcheckLog' : logging.getLogger('frit.selfcheck'),
         'globalsLog' : logging.getLogger('frit.fritglobals'),
+        'getunallocLog' : logging.getLogger('frit.getunalloc'),
         'carvingLog': logging.getLogger('frit.carving'),
         }
 

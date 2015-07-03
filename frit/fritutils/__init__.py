@@ -16,6 +16,7 @@ import fritmount
 import fritobjects
 import fritprobe
 import fritundelete
+import fritblkls
 import fsprobe
 import pyloop
 import termout
