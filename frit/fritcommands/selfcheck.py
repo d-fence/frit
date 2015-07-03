@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """
-undelete
-This command is used to undelete files from filesystems when possible.
+selfcheck
+This command is used to check if external tools are present on the system.
 """
 import os
 import fritutils
