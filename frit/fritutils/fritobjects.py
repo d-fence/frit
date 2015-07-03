@@ -380,7 +380,7 @@ class FileSystem(object):
     def undelete(self):
         pass
 
-    def getUnallocatedSpace(self):
+    def getUnallocatedSpace(self, slack=False):
         pass
 
 class NtfsFileSystem(FileSystem):
