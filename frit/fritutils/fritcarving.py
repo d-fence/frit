@@ -70,7 +70,7 @@ def Photorec(target,destination,args):
     else:
         optionString = 'everything,disable'
         for f in formats:
-            optionString += ',' + f, ',enable'
+            optionString += ',' + f + ',enable'
 
     photorec = subprocess.Popen([PHOTOREC, '/d', destination, '/cmd', target, optionString ])
     photorec.wait()
