@@ -66,12 +66,13 @@ def Photorec(target,destination,args):
             if isPhotorecFormat(a):
                 formats.add(a)
     if not formats:
-        optionString = 'everything,enable'
+        optionString = 'fileopt,everything,enable'
     else:
-        optionString = 'everything,disable'
+        optionString = 'fileopt,everything,disable'
         for f in formats:
             optionString += ',' + f + ',enable'
 
+    optionString += ',search'
     photorec = subprocess.Popen([PHOTOREC, '/d', destination, '/cmd', target, optionString ])
     photorec.wait()
     if photorec.returncode > 0:
