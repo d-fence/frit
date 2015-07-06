@@ -40,7 +40,7 @@ class FileSystem(object):
         self.loopDevice = self.getLoopDevice()
         self.undeleteDestination = unicode(os.path.join('.frit/extractions/undeleted/',evidence.configName,self.configName))
         self.unallocDestinationDir = unicode(os.path.join('.frit/extractions/unallocated/', evidence.configName, self.configName))
-        self.unallocDestinationFile = unicode(os.path.join(self.unallocDestinationDir, self.configName + '-unallocted.dd'))
+        self.unallocDestinationFile = unicode(os.path.join(self.unallocDestinationDir, self.configName + '-unallocated.dd'))
         self.slackDestinationFile = unicode(os.path.join(self.unallocDestinationDir, self.configName + '-slack.dd'))
         self.sizelimit = sizelimit
 
