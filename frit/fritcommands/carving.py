@@ -29,7 +29,7 @@ def photorec(Evidences, args, options):
                     # Creation of the destination dir
                     destdir = os.path.join('.frit/extractions/carving/photorec/unallocated',evi.configName, fs.configName)
                     if not os.path.exists(destdir):
-                        os.makedirs(desdir)
+                        os.makedirs(destdir)
                     fritutils.fritcarving.Photorec(target,destdir)
     elif '--whole' in options:
         logger.info('Working on whole containers')
