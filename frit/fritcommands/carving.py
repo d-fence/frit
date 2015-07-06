@@ -27,7 +27,7 @@ def photorec(Evidences, args, options):
                 target = fs.unallocDestinationFile
                 if os.path.exists(target):
                     # Creation of the destination dir
-                    destdir = os.path.join('.frit/extractions/carving/photorec/unallocated',evi.configName, fs.configName)
+                    destdir = os.path.join('.frit/extractions/carving/photorec/unallocated',evi.configName, fs.configName,'carved')
                     if not os.path.exists(destdir):
                         os.makedirs(destdir)
                     fritutils.fritcarving.Photorec(target,destdir, args)
