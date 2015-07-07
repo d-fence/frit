@@ -39,6 +39,9 @@ class FileSystem(object):
         self.loopLockFile = self.fsMountPoint + 'looplock'
         self.loopDevice = self.getLoopDevice()
         self.undeleteDestination = unicode(os.path.join('.frit/extractions/undeleted/',evidence.configName,self.configName))
+        self.unallocDestinationDir = unicode(os.path.join('.frit/extractions/unallocated/', evidence.configName, self.configName))
+        self.unallocDestinationFile = unicode(os.path.join(self.unallocDestinationDir, self.configName + '-unallocated.dd'))
+        self.slackDestinationFile = unicode(os.path.join(self.unallocDestinationDir, self.configName + '-slack.dd'))
         self.sizelimit = sizelimit
 
     def getLoopDevice(self):
@@ -174,6 +177,10 @@ class FileSystem(object):
         if not os.path.exists(self.undeleteDestination):
             os.makedirs(self.undeleteDestination)
 
+    def makeUnallocDir(self):
+        if not os.path.exists(self.unallocDestinationDir):
+            os.makedirs(self.unallocDestinationDir)
+
     def isMounted(self):
         """
         Retrun true if this filesystem is mounted
@@ -185,7 +192,7 @@ class FileSystem(object):
         A function to be overriden by specific mount commands
         """
         pass
-    
+
     def umountCommand(self):
         """
         A function to be overriden by specific umount commands
@@ -207,7 +214,7 @@ class FileSystem(object):
             if not self.evidence.isLocked(locker):
                 logger.info('Evidence "%s" is mounted but mounting to acquire a lock from filesystem object.' % self.evidence.configName)
                 self.evidence.mount(locker,reason)
-            
+
         # We create needed dirs
         self.makeDirs()
         # if there is no loop device attached, we atatch one
@@ -270,7 +277,7 @@ class FileSystem(object):
                 if not isinstance(f,unicode):
                     f = f.decode('utf-8')
                 yield(os.path.join(dirpath,f))
-                
+
     def listEmails(self):
         """
         Return the extracted mails files (even metadata files.)
@@ -329,12 +336,12 @@ class FileSystem(object):
         for fstate in fritModel.FILESTATES:
             nbFiles = fritModel.elixir.session.query(fritModel.File).filter(fritModel.File.filesystem==fsDb)
             nbFiles = nbFiles.filter(fritModel.File.state.has(state=fstate))
-            
+
             nbMd5 = nbFiles.join(fritModel.Md5)
             nbSha1 = nbFiles.join(fritModel.Sha1)
             nbSha256 = nbFiles.join(fritModel.Sha256)
             nbSsdeep = nbFiles.join(fritModel.Ssdeep)
-            
+
             nbDict = {
                 'Files': nbFiles.count(),
                 'Md5': nbMd5.count(),
@@ -342,7 +349,7 @@ class FileSystem(object):
                 'Sha256': nbSha256.count(),
                 'Ssdeep': nbSsdeep.count()
             }
-            
+
             toReturn[fstate] = nbDict
         return toReturn
 
@@ -371,6 +378,9 @@ class FileSystem(object):
             yield toYield
 
     def undelete(self):
+        pass
+
+    def getUnallocatedSpace(self, slack=False):
         pass
 
 class NtfsFileSystem(FileSystem):
@@ -403,6 +413,20 @@ class NtfsFileSystem(FileSystem):
         self.makeUndelDir()
         self.umount('undelete')
 
+    def getUnallocatedSpace(self, slack=False):
+        """
+        A function to extract unallocated space on NTFS filesystem
+        using The Sleuthkit blkls command
+        """
+        self.makeUnallocDir()
+        self.mount('getunalloc', 'used by getunalloc')
+        if slack:
+            destination = self.slackDestinationFile
+        else:
+            destination = self.unallocDestinationFile
+        fritutils.fritblkls.Blkls(self.loopDevice, destination, slack)
+        self.umount('getunalloc')
+
 class FatFileSystem(FileSystem):
     """
     Class for the FAT file system.
@@ -426,6 +450,20 @@ class FatFileSystem(FileSystem):
         self.mount('undelete','Used by tsk_recover')
         fritutils.fritundelete.TskUndelete(self.loopDevice,self.undeleteDestination)
         self.umount('undelete')
+
+    def getUnallocatedSpace(self, slack=False):
+        """
+        A function to extract unallocated space on FAT filesystem
+        using The Sleuthkit blkls command
+        """
+        self.makeUnallocDir()
+        self.mount('getunalloc', 'used by getunalloc')
+        if slack:
+            destination = self.slackDestinationFile
+        else:
+            destination = self.unallocDestinationFile
+        fritutils.fritblkls.Blkls(self.loopDevice, destination, slack)
+        self.umount('getunalloc')
 
 class HfsPlusFileSystem(FileSystem):
     """

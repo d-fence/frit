@@ -12,7 +12,7 @@ def setLevels(level):
         l = logging.INFO
     for logger in loggers:
         loggers[logger].setLevel(l)
-        
+
 logFile = '.frit/logs/frit-' + str(os.getpid()) + '.log'
 logFormat = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -30,6 +30,8 @@ loggers = {
         'sectorsLog' : logging.getLogger('frit.sectors'),
         'selfcheckLog' : logging.getLogger('frit.selfcheck'),
         'globalsLog' : logging.getLogger('frit.fritglobals'),
+        'getunallocLog' : logging.getLogger('frit.getunalloc'),
+        'carvingLog': logging.getLogger('frit.carving'),
         }
 
 # Configuring default level to INFO

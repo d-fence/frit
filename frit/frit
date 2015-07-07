@@ -139,6 +139,16 @@ def mainFrit():
         stopLog(command, startTime, logger)
         sys.exit(0)
 
+    if command == 'getunalloc':
+        fritcommands.getunalloc.factory(Evidences, args, options)
+        stopLog(command, startTime, logger)
+        sys.exit(0)
+
+    if command == 'carving':
+        fritcommands.carving.factory(Evidences, args, options)
+        stopLog(command, startTime, logger)
+        sys.exit(0)
+
     # Obviously, the given command was not found
     fritutils.termout.printWarning('The "%s" command was not found.' % command)
 if __name__ == '__main__':
