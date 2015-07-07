@@ -12,3 +12,4 @@ import undelete
 import selfcheck
 import getunalloc
 import carving
+import registry

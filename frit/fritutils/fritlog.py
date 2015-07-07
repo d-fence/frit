@@ -32,6 +32,7 @@ loggers = {
         'globalsLog' : logging.getLogger('frit.fritglobals'),
         'getunallocLog' : logging.getLogger('frit.getunalloc'),
         'carvingLog': logging.getLogger('frit.carving'),
+        'registryLog': logging.getLogger('frit.registry'),
         }
 
 # Configuring default level to INFO
