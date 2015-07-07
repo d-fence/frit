@@ -383,6 +383,37 @@ class FileSystem(object):
     def getUnallocatedSpace(self, slack=False):
         pass
 
+    def getRegistryFiles(self):
+        """
+        A method that yield real path of MS Windows registry files
+        """
+        self.mount('registry', 'Used by registry')
+        for userpath in ('USERS', 'Users', 'users', 'Documents and Setting'):
+            ufullpath = os.path.join(self.fsMountPoint, userpath)
+            if os.path.exists(ufullpath) and os.path.isdir(ufullpath):
+                for uprofile in [os.path.join(ufullpath, d) for d in os.listdir(ufullpath)]:
+                    if os.path.isdir(uprofile):
+                        # NTUSER.DAT
+                        for ntuserFile in [os.path.join(uprofile, ntname) for ntname in ('NTUSER.DAT', 'ntuser.dat')]:
+                            if os.path.exists(ntuserFile):
+                                yield(ntuserFile)
+                        # USRCLASS.DAT
+                        for usrclassFile in [os.path.join(uprofile, 'AppData', 'Local', 'Microsoft', 'Windows', ucname) for ucname in ('USRCLASS.dat', 'UsrClass.dat', 'usrclass.dat')]:
+                            if os.path.exists(usrclassFile):
+                                yield(usrclassFile)
+        # System wide registry files
+        for winpath in [os.path.join(self.fsMountPoint, wpath) for wpath in ('Windows', 'windows', 'WINDOWS')]:
+            if os.path.exists(winpath) and os.path.isdir(winpath):
+                for winSysPath in [os.path.join(winpath, spath) for spath in ('System32', 'system32', 'SYSTEM32')]:
+                    if os.path.exists(winSysPath) and os.path.isdir(winSysPath):
+                        for winConfPath in [os.path.join(winSysPath, cpath) for cpath in ('Config', 'CONFIG', 'config')]:
+                            if os.path.exists(winConfPath) and os.path.isdir(winConfPath):
+                                for regPath in [os.path.join(winConfPath, rpath) for rpath in ('SAM', 'sam', 'system', 'SYSTEM', 'System', 'Security', 'SECURITY', 'security', 'Software','software', 'SOFTWARE')]:
+                                    if os.path.exists(regPath):
+                                        yield regPath
+        self.umount('registry')
+
+
 class NtfsFileSystem(FileSystem):
     """
     Class for the NTFS file system.

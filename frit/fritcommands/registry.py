@@ -12,13 +12,14 @@ import fritutils.fritlog
 logger = fritutils.fritlog.loggers['registryLog']
 
 def find(Evidences, args, options):
-   logger.info('Starting find subcommand.')
-
-
+    logger.info('Starting find subcommand.')
+    for evi in Evidences:
+        for fs in evi.fileSystems:
+            for regfilepath in  fs.getRegistryFiles():
+                if regfilepath :
+                    fritutils.termout.printNormal(regfilepath)
 
 def factory(Evidences, args, options):
-    if 'find' in args:
-        logger.info('Starting registry command.')
+    if args and 'find' in args:
         args.remove('find')
         find(Evidences, args, options)
-
