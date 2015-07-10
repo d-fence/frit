@@ -52,11 +52,11 @@ def affMount(affFile,mountpoint):
 
 def ewfMount(ewfFile,mountpoint):
     fritutils.termout.printMessage('\tMounting EWF file "%s" on "%s".' % (ewfFile,mountpoint))
-    ewfmount = subprocess.Popen([XMOUNT, '--in', 'ewf', '--out', 'dd', ewfFile, mountpoint])
+    ewfmount = subprocess.Popen([EWFMOUNT, ewfFile, mountpoint])
     ewfmount.wait()
     if ewfmount.returncode > 0:
-        logger.warning('xmount failed with file "%s" on mount point "%s" (return code: %d) ' % (ewfFile,mountpoint,ewfmount.returncode))
-        raise fritMountError('afmount failed with file "%s" on mount point "%s" (return code: %d) ' % (ewfFile,mountpoint,ewfmount.returncode))
+        logger.warning('ewfmount failed with file "%s" on mount point "%s" (return code: %d) ' % (ewfFile,mountpoint,ewfmount.returncode))
+        raise fritMountError('ewfmount failed with file "%s" on mount point "%s" (return code: %d) ' % (ewfFile,mountpoint,ewfmount.returncode))
 
 def fuserUnmount(mountpoint):
     fritutils.termout.printMessage('\tUnmounting "%s"' % mountpoint)

@@ -92,6 +92,9 @@ toolbox.append(AFFCAT)
 EWFEXPORT = ExternalTool(ctools.get('EWFEXPORT', default='/usr/bin/ewfexport'))
 toolbox.append(EWFEXPORT)
 
+EWFMOUNT = ExternalTool(ctools.get('EWFMOUNT', default='/usr/bin/ewfmount'))
+toolbox.append(EWFMOUNT)
+
 PFFEXPORT  = ExternalTool(ctools.get('PFFEXPORT', default= '/usr/bin/pffexport'))
 toolbox.append(PFFEXPORT)
 

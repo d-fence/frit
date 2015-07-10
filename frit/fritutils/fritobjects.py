@@ -841,9 +841,9 @@ class EwfEvidence(AffEvidence):
         """
         This function populate the raw image filename to all filesystems of the Evidence.
         Even if this file does not exists yet.
-        xmount removes the .E01 extension and replace it by .dd
+        ewfmount name the mounted filesystem as ewf1
         """
-        self.rawImage = os.path.join(self.containerMountPoint, os.path.splitext(os.path.basename(self.fileName))[0] + '.dd')
+        self.rawImage = os.path.join(self.containerMountPoint, 'ewf1')
         for fs in self.fileSystems:
             fs.rawImage = self.rawImage
 
