@@ -3,6 +3,7 @@
 registry
 This command is made to work on MS Windows registry files.
 the "find" command will list all the registry files found.
+Inspired by Harlan Carvey's RegRipper plugins.
 """
 
 import os
@@ -10,6 +11,7 @@ import fritutils
 import fritutils.fritlog
 import struct
 import uuid
+import datetime
 # Use of Will Ballenthin registry module
 # https://github.com/williballenthin/python-registry
 from Registry import Registry
@@ -83,6 +85,7 @@ class MountedDevice(object):
     def searchStorage(self):
         """
         Searching CurentControlSet/Enum/STORAGE/Volume
+        NOT WORKING RIGHT NOW
         """
         cset = getCurrentControlSet(self.regpath)
         kpath = "{}\\Enum\\Storage\\Volume".format(cset)
@@ -96,6 +99,35 @@ class MountedDevice(object):
             if str(sub.name()) == self.value:
                 print "MATCH"
 
+
+def getMSTime(lo, hi):
+    """
+    GetTime function from Harlan Carvey RegRipper
+    translated from perl to python
+    """
+    if lo == 0 and hi == 0:
+        t = 0
+    else:
+        lo -= 0xd53e8000
+        hi -= 0x019db1de
+        t = int(hi * 429.4967296 + lo/1e7)
+    if t < 0:
+        t = 0
+    return t
+
+
+def getKeyValueOrNone(Key, Name):
+    """
+    Get the value for the name entry in key Key
+    or return None
+    Name is a string
+    Key is a Registry.Registry opened key
+    """
+    try:
+        r = Key.value(Name).value()
+    except Registry.RegistryValueNotFoundException:
+        r= None
+    return r
 
 def getCurrentControlSet(sysRegPath):
     reg = Registry.Registry(sysRegPath)
@@ -117,6 +149,7 @@ def mountDevices(Evidences, args, options):
     logger.info('Starting mountdevices subcommand.')
     for evi in Evidences:
         for fs in evi.fileSystems:
+            fritutils.termout.printSuccess("Searching for registry files in {} {}".format(fs.evidenceConfigName, fs.configName))
             for regfilepath in fs.getRegistryFiles():
                 if regfilepath and os.path.basename(regfilepath).lower() == 'system':
                     reg = Registry.Registry(regfilepath)
@@ -140,11 +173,66 @@ def mountDevices(Evidences, args, options):
                             fritutils.termout.printNormal("            Offset (in 512 bytes sectors): {}".format(Device.offset))
 
 
+def winInfo(Evidences, args, options):
+    """
+    Show various Windows informations
+    Should be in an object to help presenting informations in a consistent way
+    Currently, informations are shown in file found order
+    """
+    logger.info('Starting wininfo subcommand.')
+    for evi in Evidences:
+        for fs in evi.fileSystems:
+            fritutils.termout.printSuccess("Searching for registry files in {} {}".format(fs.evidenceConfigName, fs.configName))
+            for regfilepath in fs.getRegistryFiles():
+                if regfilepath and os.path.basename(regfilepath).lower() == 'system':
+                    cur = getCurrentControlSet(regfilepath)
+                    computerNameKey = Registry.Registry(regfilepath).open(cur + "\\Control\\ComputerName\\ComputerName")
+                    fritutils.termout.printNormal("    Computer name entry found in '{}'".format(regfilepath))
+                    fritutils.termout.printNormal("        Key timestamp: {}".format(computerNameKey.timestamp()))
+                    fritutils.termout.printNormal("        Computer name: {}".format(getKeyValueOrNone(computerNameKey,'ComputerName')))
+                    windowsKey = Registry.Registry(regfilepath).open(cur + "\\Control\\Windows")
+                    fritutils.termout.printNormal("    Windows last shutdown time entry found in '{}'".format(regfilepath))
+                    fritutils.termout.printNormal("        Key timestamp: {}".format(windowsKey.timestamp()))
+                    shutimeRaw = getKeyValueOrNone(windowsKey,"ShutdownTime")
+                    if shutimeRaw:
+                        shutime = datetime.datetime.fromtimestamp(getMSTime(*struct.unpack('<LL',shutimeRaw))).isoformat()
+                    else:
+                        shutime = None
+                    fritutils.termout.printNormal("        Last shutdown time: {}".format(shutime))
+                if regfilepath and os.path.basename(regfilepath).lower() == 'software':
+                    # Winlogon entries
+                    winlogonKey = Registry.Registry(regfilepath).open("Microsoft\\Windows NT\\CurrentVersion\\Winlogon")
+                    fritutils.termout.printNormal("    Registry WINLOGON entries found in '{}'".format(regfilepath))
+                    fritutils.termout.printNormal("        Key timestamp: {}".format(winlogonKey.timestamp()))
+                    fritutils.termout.printNormal("        Default username: {}".format(getKeyValueOrNone(winlogonKey,'DefaultUserName')))
+                    fritutils.termout.printNormal("        Last used username: {}".format(getKeyValueOrNone(winlogonKey,'LastUsedUsername')))
+                    # Windows Version
+                    curverKey = Registry.Registry(regfilepath).open("Microsoft\\Windows NT\\CurrentVersion")
+                    fritutils.termout.printNormal("    Registry Windows Version entries found in '{}'".format(regfilepath))
+                    fritutils.termout.printNormal("        Key timestamp: {}".format(curverKey.timestamp()))
+                    fritutils.termout.printNormal("        Product Name: {}".format(getKeyValueOrNone(curverKey,'ProductName')))
+                    fritutils.termout.printNormal("        CSD Version: {}".format(getKeyValueOrNone(curverKey,'CSDVersion')))
+                    fritutils.termout.printNormal("        Product Id: {}".format(getKeyValueOrNone(curverKey,'ProductId')))
+                    fritutils.termout.printNormal("        Registered owner: {}".format(getKeyValueOrNone(curverKey,'RegisteredOwner')))
+                    fritutils.termout.printNormal("        System root: {}".format(getKeyValueOrNone(curverKey,'SystemRoot')))
+                    fritutils.termout.printNormal("        Path name: {}".format(getKeyValueOrNone(curverKey,'PathName')))
+                    installDateRaw = getKeyValueOrNone(curverKey,"InstallDate")
+                    if installDateRaw:
+                        installDate = datetime.datetime.fromtimestamp(installDateRaw).isoformat()
+                    else:
+                        installDate = None
+                    fritutils.termout.printNormal("        Install date: {}".format(installDate))
+
+
+
 def factory(Evidences, args, options):
     if args and 'find' in args:
         args.remove('find')
         find(Evidences, args, options)
     else:
-        if 'mountdevices'in  args:
+        if 'mountdevices'in args:
             args.remove('mountdevices')
             mountDevices(Evidences, args, options)
+        if 'wininfo' in args:
+            args.remove('wininfo')
+            winInfo(Evidences, args, options)
