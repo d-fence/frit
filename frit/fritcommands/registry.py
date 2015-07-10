@@ -171,6 +171,9 @@ def mountDevices(Evidences, args, options):
                             fritutils.termout.printNormal("            Friendly Name: {}".format(Device.friendlyName))
                         if Device.offset:
                             fritutils.termout.printNormal("            Offset (in 512 bytes sectors): {}".format(Device.offset))
+        # we have to remove the registry lock and umount its container
+        if evi.isLocked('registry'):
+            evi.umount('registry')
 
 
 def winInfo(Evidences, args, options):
@@ -222,7 +225,9 @@ def winInfo(Evidences, args, options):
                     else:
                         installDate = None
                     fritutils.termout.printNormal("        Install date: {}".format(installDate))
-
+        # we have to remove the registry lock and umount its container
+        if evi.isLocked('registry'):
+            evi.umount('registry')
 
 
 def factory(Evidences, args, options):
