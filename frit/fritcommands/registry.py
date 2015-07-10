@@ -129,12 +129,14 @@ def getKeyValueOrNone(Key, Name):
         r= None
     return r
 
+
 def getCurrentControlSet(sysRegPath):
     reg = Registry.Registry(sysRegPath)
     regRoot = reg.root()
     sccs = regRoot.subkey("Select")
     v = sccs.value("Current")
     return "ControlSet{:03}".format(v.value())
+
 
 def find(Evidences, args, options):
     logger.info('Starting find subcommand.')
@@ -143,6 +145,9 @@ def find(Evidences, args, options):
             for regfilepath in fs.getRegistryFiles():
                 if regfilepath:
                     fritutils.termout.printNormal(regfilepath)
+        # we have to remove the registry lock and umount its container
+        if evi.isLocked('registry'):
+            evi.umount('registry')
 
 
 def mountDevices(Evidences, args, options):
