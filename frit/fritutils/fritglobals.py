@@ -115,3 +115,6 @@ toolbox.append(BLKLS)
 
 PHOTOREC = ExternalTool(ctools.get('PHOTOREC', default='/usr/bin/photorec'))
 toolbox.append(PHOTOREC)
+
+VSHADOWMOUNT = ExternalTool(ctools.get('VSHADOWMOUNT', default='/usr/bin/vshadowmount'))
+toolbox.append(VSHADOWMOUNT)
