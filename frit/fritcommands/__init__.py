@@ -13,3 +13,4 @@ import selfcheck
 import getunalloc
 import carving
 import registry
+import vshadow
