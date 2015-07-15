@@ -21,21 +21,23 @@ FRIT is still using python 2.7
 
 Debian package name is between parentheses.
 
-elixir (python-elixir)
-sqlaclhemy (python-sqlalchemy)
-configobj (python-configobj)
-fuse iso (fuse-iso)
-libpff (not yet in debian repositories)
-ssdeep (ssdeep)
-afflib (afflib-tools)
-fuse-utils (fuse-utils)
-ntfs-3g (ntfs-3g)
-losetup, mount, umount (mount)
-sudo (sudo)
-fuseext2 (fuseext2)
-rofs (rofs)
-ntfsundelete (ntfsprogs)
-python-pyssdeep (No debian package yet - http://code.google.com/p/pyssdeep/)
+* elixir (python-elixir)
+* sqlaclhemy (python-sqlalchemy)
+* configobj (python-configobj)
+* fuse iso (fuse-iso)
+* libpff (pff-tools)
+* ssdeep (ssdeep)
+* afflib (afflib-tools)
+* fuse-utils (fuse-utils)
+* ntfs-3g (ntfs-3g)
+* losetup, mount, umount (mount)
+* sudo (sudo)
+* fuseext2 (fuseext2)
+* rofs (rofs)
+* ntfsundelete (ntfsprogs)
+* python-pyssdeep (No debian package yet - http://code.google.com/p/pyssdeep/)
+* ewf tools (ewf-tools)
+* pyvshadow + vshadowmount (https://github.com/libyal/libvshadow)
 
 ## Installation
 
