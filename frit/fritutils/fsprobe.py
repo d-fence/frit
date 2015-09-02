@@ -419,7 +419,11 @@ def detectGPT(fname):
         if lbaStart == 0 and lbaEnd == 0 and str(guidType) == '00000000-0000-0000-0000-000000000000':
             break
         nameEndPos = bufEntry[56:].find('\x00\x00') + 1
-        partName = bufEntry[56:56+nameEndPos].decode('utf-16le')
+        partNameUTF = bufEntry[56:56+nameEndPos]
+        if partNameUTF[0] == '\x00':
+            partName = ''
+        else:
+            partName = partNameUTF.decode('utf-16le')
         fritutils.termout.printSuccess("        GPT entry {}:".format(i))
         fritutils.termout.printSuccess("            GUID Type: {}".format(guidType))
         fritutils.termout.printSuccess("            Type name: {}".format(partTypeName))
