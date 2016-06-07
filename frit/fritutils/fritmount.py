@@ -208,7 +208,21 @@ def ext2Mount(loopDevice,mountpoint):
     if ext2mount.returncode > 0:
         logger.warning('Unable to mount the EXT2/3 partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ext2mount.returncode)))
         raise fritMountError('Unable to mount the EXT2/3 partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ext2mount.returncode)))
-        
+
+def fuse2fsMount(loopDevice,mountpoint):
+    """
+           /usr/sbin/fuse2fs -o ro,noexec,uid=1000,gid=1000,allow_other /dev/loop0 mnt 
+    """
+    fritutils.termout.printMessage('\tMounting "%s" with fuse2fs on "%s"' % (loopDevice,mountpoint))
+    uid = str(os.getuid())
+    gid = str(os.getgid())
+    options = 'ro,noatime,nodev,nosuid,noexec,allow_other,uid={},gid={}'.format(uid,gid)
+    fuse2fsmount = subprocess.Popen([FUSE2FS, '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    fuse2fsmount.wait()
+    if fuse2fsmount.returncode > 0:
+        logger.warning('Unable to mount the EXT2/3 partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ext2mount.returncode)))
+        raise fritMountError('Unable to mount the EXT2/3 partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(ext2mount.returncode)))
+
 def rofsMount(directory,mountpoint):
     fritutils.termout.printMessage('\tMounting "%s" with rofs on "%s"' % (directory,mountpoint))
     uid = str(os.getuid())

@@ -19,6 +19,7 @@ import fritutils.fritdb as fritModel
 import fritutils.fritlog
 import fritutils.fritmmls
 import fritutils.fritddump
+from fritglobals import *
 from sqlalchemy import func
 
 logger = fritutils.fritlog.loggers['fritobjectsLog']
@@ -532,7 +533,10 @@ class Ext2FileSystem(FileSystem):
         return "EXT2/3"
 
     def mountCommand(self):
-        fritutils.fritmount.ext2Mount(self.loopDevice,self.fsMountPoint)
+        if EXT2METHOD == 'fuse2fs':
+            fritutils.fritmount.fuse2fsMount(self.loopDevice, self.fsMountPoint)
+        elif EXT2METHOD == 'fuseext2': 
+            fritutils.fritmount.ext2Mount(self.loopDevice,self.fsMountPoint)
 
     def umountCommand(self):
         fritutils.fritmount.fuserUnmount(self.fsMountPoint)
