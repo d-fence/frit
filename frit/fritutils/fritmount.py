@@ -52,7 +52,7 @@ def affMount(affFile,mountpoint):
 
 def ewfMount(ewfFile,mountpoint):
     fritutils.termout.printMessage('\tMounting EWF file "%s" on "%s".' % (ewfFile,mountpoint))
-    ewfmount = subprocess.Popen([EWFMOUNT, ewfFile, mountpoint])
+    ewfmount = subprocess.Popen([EWFMOUNT, ewfFile, mountpoint, '-X', 'allow_other'])
     ewfmount.wait()
     if ewfmount.returncode > 0:
         logger.warning('ewfmount failed with file "%s" on mount point "%s" (return code: %d) ' % (ewfFile,mountpoint,ewfmount.returncode))
