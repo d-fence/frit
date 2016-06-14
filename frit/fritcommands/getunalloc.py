@@ -33,16 +33,14 @@ def getSlack(Evidences):
         if evi.isLocked('getunalloc'):
             evi.umount('getunalloc')
 
-def factory(Evidences, args, options):
-    if not options:
+def factory(args):
+    fritConfig = fritutils.getConfig()
+    Evidences = fritutils.getEvidencesFromArgs(args,fritConfig,logger=logger)
+
+    if args.cmd == 'getslack' or args.slack:
+        logger.info('Start getunalloc command with slack option.')
+        getSlack(Evidences)
+    else:
         # By default, we extract unallocted blocks.
         logger.info('Start getunalloc command.')
         getUnalloc(Evidences)
-    else:
-        # With the --slack option, we extract the slack space instead
-        if options and '--slack' in options:
-            logger.info('Start getunalloc command with slack option.')
-            getSlack(Evidences)
-        else:
-            logger.warning('getunalloc command started with unknow arguements.')
-            fritutils.termout.printWarning('No valid argument given for the getunalloc command.')

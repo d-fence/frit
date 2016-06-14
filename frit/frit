@@ -109,7 +109,25 @@ def mainFrit():
     undelete_parser.set_defaults(func=fritcommands.undelete.factory,
         cmd='undelete')
 
+    #getunalloc
+    getunalloc_parser = subparsers.add_parser(
+        'getunalloc',
+        help = 'Extract unallocated space from filesystems.')
+    getunalloc_parser.add_argument('-s','--slack', action='store_true',
+    help="Extract slack space instead of unallocated.")
+    getunalloc_parser.set_defaults(func=fritcommands.getunalloc.factory,
+        cmd='getunalloc')
+
+    #getslack
+    getslack_parser = subparsers.add_parser(
+        'getslack',
+        help = 'Extract slack space from filesystems (alias for getunalloc'
+        ' --slack)')
+    getslack_parser.set_defaults(func=fritcommands.getunalloc.factory,
+        cmd='getslack')
+
     args = parser.parse_args()
+
     if args.debug:
         fritutils.fritlog.setLevels('DEBUG')
     startTime = fritutils.startLog(args.cmd,logger)
