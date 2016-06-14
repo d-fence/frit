@@ -3,21 +3,23 @@ import sys
 import datetime
 import os.path
 import configobj
+import argparse
 import fritutils.termout
 import fritcommands
 import fritutils.fritlog
 from fritutils import fritobjects
 
-def startLog(command,logger):
-    logger.info('Starting %s command' % command)
 
-def stopLog(command,startTime,logger):
-    diffTime = datetime.datetime.today() - startTime
-    logger.info('%s command successfully ended in %s' % (command,diffTime))
+def checkInit(args):
+    # check to see if .frit already exists
+    if not fritutils.isCwdFrit():
+        fritcommands.init.initCommand()
+        sys.exit(0)
+    else:
+        fritutils.termout.printWarning("A .frit directory already exists.")
+        sys.exit(1)
 
 def mainFrit():
-    startTime = datetime.datetime.today()
-    verbose = False
     # Check to see if a command was given.
     if len(sys.argv) < 2:
         fritutils.termout.printWarning('No command was given')
@@ -26,140 +28,47 @@ def mainFrit():
     fritutils.noBadPath()
     logger = fritutils.fritlog.loggers['mainfritLog']
     logger.info('Frit starting')
-    # Separate command and the command arguemnts
-    (command,args,options) = fritutils.getCommand(sys.argv[1:])
-    if options:
-        if '-v' in options:
-            verbose = True
-        if '--debug' in options:
-            fritutils.fritlog.setLevels('DEBUG')
-    # If the command is init, just do it
-    if command == 'init':
-        # check to see if .frit already exists
-        if not fritutils.isCwdFrit():
-            fritcommands.init.initCommand()
-            sys.exit(0)
-        else:
-            fritutils.termout.printWarning("A .frit directory already exists.")
-            sys.exit(1)
+    parser = argparse.ArgumentParser(
+            prog="frit",
+            description='Forensic Robust Investigation Toolkit'
+        )
 
-    # The command is not init, so we should find a config file
-    if os.path.exists('.frit/config'):
-        try:
-            fritConfig = configobj.ConfigObj('.frit/config', indent_type='    ' )
-        except configobj.ParseError,e:
-            fritutils.termout.printWarning('The config file contains error: %s' % e)
-            sys.exit(1)
-        except configobj.ConfigObjError:
-            fritutils.termout.printWarning('The config file contains errors.')
-            sys.exit(1)
-    else:
-        fritutils.termout.printWarning('No ".frit/config" found. Run "frit init" first."')
-        sys.exit(1)
-    # Here we try to map evidences from config file to Evidence objects
-    Evidences = fritobjects.evidencesFromConfig(fritConfig, verbose=verbose)
-    # Here we check if one ore more evidence names or evidence file names are
-    # passed as an arguemnt, which means that the user only wants to work on
-    # them
-    if args:
-        specifiedEvidences = []
-        for evi in Evidences:
-            if evi.configName in args:
-                args.remove(evi.configName)
-                specifiedEvidences.append(evi)
-            elif evi.fileName in args:
-                args.remove(evi.fileName)
-                specifiedEvidences.append(evi)
-        if len(specifiedEvidences) > 0:
-            Evidences = specifiedEvidences
-            for evi in Evidences:
-                logger.info('Working on evidence %s specified on command line' % evi.configName)
-        else:
-            logger.info('Working on all evidences.')
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        help='Verbose output.',
+        default=False
+        )
 
-    # user isued a mount command
-    startLog(command,logger)
-    if command == 'mount':
-        fritcommands.mount.mountCommand(Evidences,args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
+    parser.add_argument(
+        '-d',
+        '--debug',
+        action='store_true',
+        help='Debug messages in log files.',
+        default=False
+        )
 
-    if command == 'umount':
-        fritcommands.mount.Umount(Evidences)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
+    subparsers = parser.add_subparsers()
 
-    if command == 'status':
-        fritcommands.status.status(Evidences,args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
+    init_parser = subparsers.add_parser(
+            'init',
+            help='Initialize frit before first usage.'
+        )
+    init_parser.set_defaults(func=checkInit,cmd='init')
 
-    if command == 'store':
-        fritcommands.store.store(Evidences,args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
+    add_parser = subparsers.add_parser('add')
+    add_parser.add_argument('files', nargs='+')
+    add_parser.set_defaults(func=fritcommands.add.factory,cmd='add')
 
-    if command == 'extensions':
-        fritcommands.extensions.factory(Evidences,args,options,fritConfig)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
+    args = parser.parse_args()
+    if args.debug:
+        fritutils.fritlog.setLevels('DEBUG')
+    startTime = fritutils.startLog(args.cmd,logger)
+    args.func(args)
 
-    if command == 'undelete':
-        fritcommands.undelete.factory(Evidences, args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
+    fritutils.stopLog(command, startTime, logger)
+    sys.exit(0)
 
-    if command == 'add':
-        fritcommands.add.factory(fritConfig, args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
-
-    if command == 'getmails':
-        fritcommands.getmails.factory(Evidences, args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
-
-    if command == 'hashes':
-        fritcommands.hashes.factory(Evidences, args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
-
-    if command == 'logs':
-        fritcommands.logs.factory(Evidences, args,options)
-        stopLog(command, startTime,logger)
-        sys.exit(0)
-
-    if command == 'sectors':
-        fritcommands.sectors.factory(Evidences, args, options)
-        stopLog(command, startTime, logger)
-        sys.exit(0)
-
-    if command == 'selfcheck':
-        fritcommands.selfcheck.selfcheck()
-        stopLog(command, startTime, logger)
-        sys.exit(0)
-
-    if command == 'getunalloc':
-        fritcommands.getunalloc.factory(Evidences, args, options)
-        stopLog(command, startTime, logger)
-        sys.exit(0)
-
-    if command == 'carving':
-        fritcommands.carving.factory(Evidences, args, options)
-        stopLog(command, startTime, logger)
-        sys.exit(0)
-
-    if command == 'registry':
-        fritcommands.registry.factory(Evidences, args, options)
-        stopLog(command, startTime, logger)
-        sys.exit(0)
-
-    if command == 'vshadow':
-        fritcommands.vshadow.factory(Evidences, args, options)
-        stopLog(command, startTime, logger)
-        sys.exit(0)
-
-    # Obviously, the given command was not found
-    fritutils.termout.printWarning('The "%s" command was not found.' % command)
 if __name__ == '__main__':
     mainFrit()
