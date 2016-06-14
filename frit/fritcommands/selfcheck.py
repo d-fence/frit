@@ -8,10 +8,10 @@ import fritutils
 
 logger = fritutils.fritlog.loggers['selfcheckLog']
 
-def selfcheck():
+def selfcheck(args):
     logger.info('Starting selfcheck')
     for tool in fritutils.fritglobals.toolbox:
         if tool.check():
             fritutils.termout.printNormal('Tool "%s" found' % tool)
         else:
-            fritutils.termount.printWarning('Tool "%s" NOT found' % tool)
+            fritutils.termout.printWarning('Tool "%s" NOT found' % tool)

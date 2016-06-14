@@ -93,6 +93,14 @@ def mainFrit():
     umount_parser.add_argument('evidences', nargs='*')
     umount_parser.set_defaults(func=fritcommands.mount.Umount, cmd='umount')
 
+    #selfcheck
+    selfcheck_parser = subparsers.add_parser(
+        'selfcheck',
+        help='Check if needed external tools are installed.'
+    )
+    selfcheck_parser.set_defaults(func=fritcommands.selfcheck.selfcheck,
+        cmd='selfcheck')
+
     args = parser.parse_args()
     if args.debug:
         fritutils.fritlog.setLevels('DEBUG')
