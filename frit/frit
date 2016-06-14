@@ -77,6 +77,22 @@ def mainFrit():
     status_parser.add_argument('evidences', nargs='*')
     status_parser.set_defaults(func=fritcommands.status.status, cmd='status')
 
+    # mount
+    mount_parser = subparsers.add_parser(
+        'mount',
+        help='Mount Evidences containers and filesystems.')
+    mount_parser.add_argument('-c', '--containers', action='store_true',
+        help='Mount only containers, not filesystems.')
+    mount_parser.add_argument('evidences', nargs='*')
+    mount_parser.set_defaults(func=fritcommands.mount.mountCommand, cmd='mount')
+
+    #umount
+    umount_parser = subparsers.add_parser(
+        'umount',
+        help='Umount evidences filesystems and containers.')
+    umount_parser.add_argument('evidences', nargs='*')
+    umount_parser.set_defaults(func=fritcommands.mount.Umount, cmd='umount')
+
     args = parser.parse_args()
     if args.debug:
         fritutils.fritlog.setLevels('DEBUG')

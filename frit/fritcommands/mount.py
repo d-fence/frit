@@ -3,8 +3,7 @@
 Mount command
 """
 
-import fritutils.termout
-import fritutils.fritlog
+import fritutils
 
 logger = fritutils.fritlog.loggers['mountLog']
 
@@ -37,12 +36,15 @@ def Mount(Evidences,fullMount=False):
                 fritutils.termout.printWarning('File "%s", not found ! not mounting.' % evi.fileName)
                 logger.warning('Evidence container file "%s" was not found on the system, unable to mount.' % evi.fileName)
 
-def Umount(Evidences):
+def Umount(args):
     """
     Unmount all evidences filesystems and then containers
     Only to be used by the "umount" command isued by the user.
     """
-    fritutils.termout.printMessage("Unmounting all evidences.")
+    logger.info('umount command started.')
+    fritConfig = fritutils.getConfig()
+    Evidences = fritutils.getEvidencesFromArgs(args,fritConfig,logger=logger)
+    fritutils.termout.printMessage("Unmounting evidences.")
     for evi in Evidences:
         if evi.isLocked("user"):
             fritutils.termout.printMessage("\tUnmounting " + evi.fileName + ". please wait.")
@@ -55,17 +57,16 @@ def Umount(Evidences):
                     fritutils.termout.printMessage("\tUnmounting " + fs.configName + ". please wait.")
                     fs.umount("user")
 
-def mountCommand(Evidences,args,options):
+def mountCommand(args):
     """
     Handles the mount command and if 'containers' is specified in args, it only mount containers.
     """
     logger.info('mount command started.')
-    if args:
-        if 'containers' in args:
-            logger.info('Only mounting containers as requested by the user.')
-            Mount(Evidences)
-        else:
-            fritutils.termout.printWarning('Unknown mount command parameters : "%s"' % args)
+    fritConfig = fritutils.getConfig()
+    Evidences = fritutils.getEvidencesFromArgs(args,fritConfig,logger=logger)
+    if args.containers:
+        logger.info('Only mounting containers as requested by the user.')
+        Mount(Evidences)
     else:
         logger.info('Mounting containers and filesystems.')
         Mount(Evidences,fullMount=True)
