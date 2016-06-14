@@ -4,6 +4,7 @@ import os
 import os.path
 import sys
 import re
+import configobj
 import containerprobe
 import fritconf
 import fritdb
@@ -124,3 +125,24 @@ def getBuffer(fname,pos,size):
     buf = fic.read(size)
     fic.close()
     return buf
+
+def getConfig():
+    """
+    Check for a config file and return a config object.
+    """
+    if os.path.exists('.frit/config'):
+        try:
+            fritConfig = configobj.ConfigObj(
+                '.frit/config',
+                 indent_type='    ' )
+        except configobj.ParseError,e:
+            fritutils.termout.printWarning(
+                'The config file contains error: {}'.format(e))
+            sys.exit(1)
+        except configobj.ConfigObjError:
+            fritutils.termout.printWarning('The config file contains errors.')
+            sys.exit(1)
+    else:
+        fritutils.termout.printWarning('No ".frit/config" found. Run "frit init" first."')
+        sys.exit(1)
+    return fritConfig
