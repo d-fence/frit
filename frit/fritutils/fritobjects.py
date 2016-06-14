@@ -105,7 +105,7 @@ class FileSystem(object):
         """
         lstring = ''
         for l in self.lockList():
-            lstring += l 
+            lstring += l
             p = ' '.join(self.getPids(l))
             lstring += ' (PIDS: ' + p + ') '
         return lstring
@@ -507,7 +507,7 @@ class HfsPlusFileSystem(FileSystem):
     def mountCommand(self):
         logger.info('HFSPLUS mounting "%s" on "%s"' % (self.loopDevice,self.fsMountPoint))
         fritutils.fritmount.hfsplusMount(self.loopDevice,self.fsMountPoint)
-    
+
     def umountCommand(self):
         logger.info('HFSPLUS unmounting "%s"' % self.fsMountPoint)
         fritutils.fritmount.hfsplusUnmount(self.fsMountPoint)
@@ -535,12 +535,12 @@ class Ext2FileSystem(FileSystem):
     def mountCommand(self):
         if EXT2METHOD == 'fuse2fs':
             fritutils.fritmount.fuse2fsMount(self.loopDevice, self.fsMountPoint)
-        elif EXT2METHOD == 'fuseext2': 
+        elif EXT2METHOD == 'fuseext2':
             fritutils.fritmount.ext2Mount(self.loopDevice,self.fsMountPoint)
 
     def umountCommand(self):
         fritutils.fritmount.fuserUnmount(self.fsMountPoint)
-       
+
 class RoDirFileSystem(FileSystem):
     """
     Class for Read Only directory file system.
@@ -556,7 +556,7 @@ class RoDirFileSystem(FileSystem):
         reason is the comment that will be inserted in the lock file.
         """
         # No need to mount the evidence
-            
+
         # We create needed dirs
         self.makeDirs()
         # if the file is not already mounted, we mount it
@@ -583,7 +583,7 @@ class RoDirFileSystem(FileSystem):
         fritutils.fritmount.rofsMount(self.rawImage,self.fsMountPoint)
 
     def umountCommand(self):
-        fritutils.fritmount.fuserUnmount(self.fsMountPoint)   
+        fritutils.fritmount.fuserUnmount(self.fsMountPoint)
 
 class Evidence(object):
     """
@@ -598,6 +598,9 @@ class Evidence(object):
         self.rawImage = ''
         self.containerMountPoint = os.path.join('.frit','containers',self.configName)
         self.sectorsExportDir = unicode(os.path.join('.frit/extractions/sectors/',self.configName))
+
+    def __repr__(self):
+        return '{} : {}'.format(self.configName, self.fileName)
 
     def exists(self):
         """
@@ -627,14 +630,14 @@ class Evidence(object):
         """
         lockSuffix = '_' + locker + '.lock'
         return self.containerMountPoint + lockSuffix
-        
+
     def lockList(self):
         llist = []
         lstart = len(self.containerMountPoint) + 1
         for flock in glob.glob(self.containerMountPoint + "_*.lock"):
            llist.append(flock[lstart:-5])
         return llist
-        
+
     def lockListString(self):
         """
         Return a locklist in form of a string
@@ -642,11 +645,11 @@ class Evidence(object):
         """
         lstring = ''
         for l in self.lockList():
-            lstring += l 
+            lstring += l
             p = ' '.join(self.getPids(l))
             lstring += ' (PIDS: ' + p + ') '
         return lstring
-        
+
     def writeLock(self,locker,reason):
         pidReason = "PID: %d -- %s" % (os.getpid(),reason)
         lockFile = self.getLockFile(locker)
@@ -703,7 +706,7 @@ class Evidence(object):
         A function to count a specified extension found on the Evidence
         """
         toReturn = {}
-       
+
         evio =  fritModel.elixir.session.query(fritModel.Evidence).filter_by(configName=fritutils.unicodify(self.configName)).first()
 
         fq = fritModel.File.query.filter(fritModel.File.evidence==evio)
@@ -740,7 +743,7 @@ class Evidence(object):
 class DdEvidence(Evidence):
     def getFormat(self):
         return 'dd'
-        
+
     def populateRawImage(self):
         """
         This function populate the raw image filename to all filesystems of the Evidence.
@@ -748,8 +751,8 @@ class DdEvidence(Evidence):
         """
         self.rawImage = self.fileName
         for fs in self.fileSystems:
-            fs.rawImage = self.rawImage 
-    
+            fs.rawImage = self.rawImage
+
     def isMounted(self):
         # as the file exists, it is like if it is always mounted
         return True
@@ -763,10 +766,10 @@ class DdEvidence(Evidence):
 class AffEvidence(Evidence):
     def getFormat(self):
         return 'aff'
-        
+
     def isMounted(self):
         return os.path.ismount(self.containerMountPoint)
-            
+
     def populateRawImage(self):
         """
         This function populate the raw image filename to all filesystems of the Evidence.
@@ -774,7 +777,7 @@ class AffEvidence(Evidence):
         """
         self.rawImage = os.path.join(self.containerMountPoint, os.path.basename(self.fileName) + '.raw')
         for fs in self.fileSystems:
-            fs.rawImage = self.rawImage    
+            fs.rawImage = self.rawImage
 
     def mount(self,locker,reason):
         """
@@ -789,7 +792,7 @@ class AffEvidence(Evidence):
                 fritutils.fritmount.affMount(self.fileName,self.containerMountPoint)
         # we create the lock to prevent other instances to unmount
         self.writeLock(locker,reason)
-        
+
     def umount(self,locker):
         """
         A function to unmount the container
@@ -890,8 +893,8 @@ class RofsEvidence(Evidence):
         """
         self.rawImage = self.fileName
         for fs in self.fileSystems:
-            fs.rawImage = self.rawImage 
-    
+            fs.rawImage = self.rawImage
+
     def isMounted(self):
         # as the directory exists, it is like if it is always mounted
         return True
