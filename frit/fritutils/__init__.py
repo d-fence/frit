@@ -165,7 +165,7 @@ def stopLog(command,startTime,logger):
     diffTime = datetime.datetime.today() - startTime
     logger.info('%s command successfully ended in %s' % (command,diffTime))
 
-def getEvidencesFromArgs(args,logger):
+def getEvidencesFromArgs(args,fritConfig,logger=None):
     """
     Try to map evidences given on the command line.
     Return a list of Evidence objects
@@ -178,7 +178,6 @@ def getEvidencesFromArgs(args,logger):
         specifiedEvidences = []
         for evi in Evidences:
             if evi.configName in args.evidences:
-                args.remove(evi.configName)
                 specifiedEvidences.append(evi)
             elif evi.fileName in args.evidences:
                 args.remove(evi.fileName)
@@ -186,7 +185,10 @@ def getEvidencesFromArgs(args,logger):
         if len(specifiedEvidences) > 0:
             Evidences = specifiedEvidences
             for evi in Evidences:
-                logger.info('Working on evidence %s specified on command line' % evi.configName)
+                if logger:
+                    logger.info(
+                        'Working on evidence %s specified on command line' % evi.configName)
         else:
-            logger.info('Working on all evidences.')
+            if logger:
+                logger.info('Working on all evidences.')
     return Evidences

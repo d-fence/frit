@@ -51,15 +51,31 @@ def mainFrit():
 
     subparsers = parser.add_subparsers()
 
+    # init
     init_parser = subparsers.add_parser(
             'init',
             help='Initialize frit before first usage.'
         )
     init_parser.set_defaults(func=checkInit,cmd='init')
 
-    add_parser = subparsers.add_parser('add')
+    # add
+    add_parser = subparsers.add_parser(
+        'add',
+        help='Add files or directories to Evidences.')
     add_parser.add_argument('files', nargs='+')
     add_parser.set_defaults(func=fritcommands.add.factory,cmd='add')
+
+    #status
+    status_parser = subparsers.add_parser(
+        'status',
+        help='Give status of Evidences.')
+    status_parser.add_argument('-c','--clean', action='store_true',
+        help='Try to unmount and detach Evidences that were left in an'
+        ' inconsistent state.')
+    status_parser.add_argument('-d','--database', action='store_true',
+        help='Give status of sqlite database.')
+    status_parser.add_argument('evidences', nargs='*')
+    status_parser.set_defaults(func=fritcommands.status.status, cmd='status')
 
     args = parser.parse_args()
     if args.debug:
@@ -67,7 +83,7 @@ def mainFrit():
     startTime = fritutils.startLog(args.cmd,logger)
     args.func(args)
 
-    fritutils.stopLog(command, startTime, logger)
+    fritutils.stopLog(args.cmd, startTime, logger)
     sys.exit(0)
 
 if __name__ == '__main__':
