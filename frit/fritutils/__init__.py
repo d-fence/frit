@@ -160,7 +160,7 @@ def startLog(command,logger):
 
 def stopLog(command,startTime,logger):
     """
-
+    Write a stop line in the log dfile with duration
     """
     diffTime = datetime.datetime.today() - startTime
     logger.info('%s command successfully ended in %s' % (command,diffTime))
