@@ -114,7 +114,7 @@ def mainFrit():
         'getunalloc',
         help = 'Extract unallocated space from filesystems.')
     getunalloc_parser.add_argument('-s','--slack', action='store_true',
-    help="Extract slack space instead of unallocated.")
+        help="Extract slack space instead of unallocated.")
     getunalloc_parser.set_defaults(func=fritcommands.getunalloc.factory,
         cmd='getunalloc')
 
@@ -125,6 +125,34 @@ def mainFrit():
         ' --slack)')
     getslack_parser.set_defaults(func=fritcommands.getunalloc.factory,
         cmd='getslack')
+
+    #store
+    store_parser = subparsers.add_parser(
+        'store',
+        help = 'Store files metadata in a sqlite database')
+    store_parser.add_argument('evidences', nargs='*')
+
+    store_subparsers = store_parser.add_subparsers()
+
+    store_subcommands = {
+        'create' : 'Create the initial database',
+        'update' : 'Update metadata in the database',
+        'dump' : 'Dump database to stdout',
+        'undeleted' : 'Store undeleted files metadata',
+        'clear' : 'Delete database',
+        'emails' : 'Store undeleted emails metadata'
+    }
+
+    for sname,shelp in store_subcommands.items():
+        store_sub_parser = store_subparsers.add_parser(sname, help=shelp)
+        store_sub_parser.set_defaults(func=fritcommands.store.store,
+            cmd=sname)
+
+    store_sub_parser = store_subparsers.add_parser('search',
+        help='Search for as filename in database')
+    store_sub_parser.set_defaults(func=fritcommands.store.store,
+            cmd='search')
+    store_sub_parser.add_argument('-t','--terms', nargs='+')
 
     args = parser.parse_args()
 

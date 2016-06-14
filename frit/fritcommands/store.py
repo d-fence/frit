@@ -34,16 +34,16 @@ def insertFile(File,prefix,state,eviDb,fsDb):
         dname = dname.replace(prefix,'')
         if dname == '':
             dname = u'/'
-        
+
     bname = fritutils.unicodify(os.path.basename(File))
-    
+
     Ext = fritModel.Extension.query.filter_by(extension=ext).first()
     if not Ext:
         Ext = fritModel.Extension(extension=ext)
     Fpath = fritModel.FullPath.query.filter_by(fullpath=dname).first()
     if not Fpath:
         Fpath = fritModel.FullPath(fullpath=dname)
-    
+
     nFile = fritModel.File.query.filter_by(evidence=eviDb,filesystem=fsDb,filename=bname,fullpath=Fpath).first()
     if not nFile:
         nFile = fritModel.File(evidence=eviDb,filesystem=fsDb)
@@ -52,10 +52,10 @@ def insertFile(File,prefix,state,eviDb,fsDb):
     nFile.filesize = fsize
     nFile.fullpath = Fpath
     nFile.extension = Ext
-                           
+
     fritModel.elixir.session.commit()
-    
-                            
+
+
 def update(Evidences):
     for evi in Evidences:
         # evidence creation in the database
@@ -84,10 +84,10 @@ def update(Evidences):
                         spos = len(fs.fsMountPoint)
                         nbFiles = 0
                         fritutils.termout.printNormal('Start inserting files metadata in database for "%s"\n' % fs.configName)
-                        for f in fs.listFiles():                                    
+                        for f in fs.listFiles():
                             insertFile(f,fs.fsMountPoint,u'Normal',EviDb,FsDb)
                             nbFiles += 1
-                            print "\t%s : %d\r" % (fs.configName,nbFiles),           
+                            print "\t%s : %d\r" % (fs.configName,nbFiles),
                     print "\n"
                     fs.umount("store")
             evi.umount("store")
@@ -111,9 +111,9 @@ def storeUndeleted(Evidences):
             nbFiles = 0
             fritutils.termout.printNormal('Start inserting undeleted files metadata in database for "%s"\n' % fs.configName)
             for f in fs.listUndeleted():
-                insertFile(f,'',u'Undeleted',EviDb,FsDb)                                    
+                insertFile(f,'',u'Undeleted',EviDb,FsDb)
                 nbFiles += 1
-                print "\t%s : %d\r" % (fs.configName,nbFiles),           
+                print "\t%s : %d\r" % (fs.configName,nbFiles),
         print "\n"
 
 def storeEmails(Evidences):
@@ -134,11 +134,11 @@ def storeEmails(Evidences):
             nbFiles = 0
             fritutils.termout.printNormal('Start inserting emails files metadata in database for "%s"\n' % fs.configName)
             for f in fs.listEmails():
-                insertFile(f,'',u'Contained',EviDb,FsDb)                                    
+                insertFile(f,'',u'Contained',EviDb,FsDb)
                 nbFiles += 1
-                print "\t%s : %d\r" % (fs.configName,nbFiles),           
+                print "\t%s : %d\r" % (fs.configName,nbFiles),
         print "\n"
-    
+
 def storeClear(Evidences):
     """
     A function to delete records for specified Evidences
@@ -146,7 +146,7 @@ def storeClear(Evidences):
     for evi in Evidences:
         eviNb = 0
         for fs in evi.fileSystems:
-            fso =  fs.getFsDb()          
+            fso =  fs.getFsDb()
             fq = fritModel.File.query.filter(fritModel.File.filesystem==fso)
             nb = fq.count()
             fritutils.termout.printNormal('Deleting %d records for %s / %s' % (nb,evi.configName,fs.configName))
@@ -160,52 +160,49 @@ def filenameSearch(Evidences,args):
     Filenames to search are the args
     """
     for evi in Evidences:
-        for searchTerm in args:
+        for searchTerm in args.terms:
             searchTerm = searchTerm.decode('utf-8')
             fritutils.termout.printNormal("Searching for %s in %s" % (searchTerm, evi.configName))
             for f in fritModel.fileNameSearch(evi,searchTerm):
                 fritutils.termout.printMessage("\t%s" % f.fullFileSpec())
 
-def store(Evidences, args, options):
+def store(args):
     """
     args are the store command arguments
     """
     logger.info('Starting store command.')
-    validArgs = ('create', 'update', 'dump', 'undeleted', 'clear', 'search', 'emails')
-    if not args or len(args) == 0:
-        fritutils.termout.printWarning('store command need at least an argument')
-        logger.warning('No argument given to the command.')
-        sys.exit(1)
-    elif args[0] not in validArgs:
-        fritutils.termout.printWarning('store command need a valid argument (%s)' % ', '.join(validArgs))
-        logger.warning('invalid argument %s' % args[0])
-        sys.exit(1)
-    else:
-        if args[0] == 'create':
-            logger.info('Starting create subcommand.')
-            if os.path.exists(fritutils.fritdb.DBFILE):
-                fritutils.termout.printWarning('Database already exists, cannot create it.')
-            else:
-                fritModel.createDb()
-                update(Evidences)
+    fritConfig = fritutils.getConfig()
+    Evidences = fritutils.getEvidencesFromArgs(args,fritConfig,logger=logger)
+
+    print(args)
+
+    if args.cmd == 'create':
+        logger.info('Starting create subcommand.')
+        if os.path.exists(fritutils.fritdb.DBFILE):
+            fritutils.termout.printWarning(
+                'Database already exists, cannot create it.')
         else:
-            if not os.path.exists(fritutils.fritdb.DBFILE):
-                fritutils.termout.printWarning('Database does not exists, use the "store create" command first.')
-                logger.warning('Database does not exists.')
-            else:
-                if args[0] == 'update':
-                    logger.info('Starting update subcommand.')
-                    update(Evidences)
-                if args[0] == 'undeleted':
-                    logger.info('Starting undeleted subcommand.')
-                    storeUndeleted(Evidences)
-                if args[0] == 'clear':
-                    logger.info('Starting clear subcommand.')
-                    storeClear(Evidences)
-                if args[0] == 'search':
-                    logger.info('Starting search subcommand.')
-                    args.remove("search")
-                    filenameSearch(Evidences, args)
-                if args[0] == 'emails':
-                    logger.info('Starting emails subcommand.')
-                    storeEmails(Evidences)
+            fritModel.createDb()
+            update(Evidences)
+    else:
+        if not os.path.exists(fritutils.fritdb.DBFILE):
+            fritutils.termout.printWarning(
+                'Database does not exists, use the "store create"'
+                ' command first.')
+            logger.warning('Database does not exists.')
+        else:
+            if args.cmd == 'update':
+                logger.info('Starting update subcommand.')
+                update(Evidences)
+            if args.cmd == 'undeleted':
+                logger.info('Starting undeleted subcommand.')
+                storeUndeleted(Evidences)
+            if args.cmd== 'clear':
+                logger.info('Starting clear subcommand.')
+                storeClear(Evidences)
+            if args.cmd == 'search':
+                logger.info('Starting search subcommand.')
+                filenameSearch(Evidences, args)
+            if args.cmd == 'emails':
+                logger.info('Starting emails subcommand.')
+                storeEmails(Evidences)
