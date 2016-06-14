@@ -5,6 +5,7 @@ import os.path
 import sys
 import re
 import configobj
+import datetime
 import containerprobe
 import fritconf
 import fritdb
@@ -19,6 +20,7 @@ import fritprobe
 import fritundelete
 import fritblkls
 import fritcarving
+import fritutils
 import fsprobe
 import pyloop
 import termout
@@ -146,3 +148,45 @@ def getConfig():
         fritutils.termout.printWarning('No ".frit/config" found. Run "frit init" first."')
         sys.exit(1)
     return fritConfig
+
+def startLog(command,logger):
+    """
+    Write a starting line in the log file
+    command is the command issued
+    return the start time of the command
+    """
+    logger.info('Starting %s command' % command)
+    return(datetime.datetime.today())
+
+def stopLog(command,startTime,logger):
+    """
+
+    """
+    diffTime = datetime.datetime.today() - startTime
+    logger.info('%s command successfully ended in %s' % (command,diffTime))
+
+def getEvidencesFromArgs(args,logger):
+    """
+    Try to map evidences given on the command line.
+    Return a list of Evidence objects
+    """
+    Evidences = fritobjects.evidencesFromConfig(fritConfig, verbose=args.verbose)
+    # Here we check if one ore more evidence names or evidence file names are
+    # passed as an arguemnt, which means that the user only wants to work on
+    # them
+    if hasattr(args,'evidences'):
+        specifiedEvidences = []
+        for evi in Evidences:
+            if evi.configName in args.evidences:
+                args.remove(evi.configName)
+                specifiedEvidences.append(evi)
+            elif evi.fileName in args.evidences:
+                args.remove(evi.fileName)
+                specifiedEvidences.append(evi)
+        if len(specifiedEvidences) > 0:
+            Evidences = specifiedEvidences
+            for evi in Evidences:
+                logger.info('Working on evidence %s specified on command line' % evi.configName)
+        else:
+            logger.info('Working on all evidences.')
+    return Evidences
