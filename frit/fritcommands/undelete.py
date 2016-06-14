@@ -35,17 +35,13 @@ def listUndeleted(Evidences):
         for fs in evi.fileSystems:
             for f in fs.listUndeleted():
                 fritutils.termout.printNormal(f)
-            
-def factory(Evidences, args, options):
-    if not options:
-        # There is no other argument to the undelete command.
-        # So we really undelete
+
+def factory(args):
+    fritConfig = fritutils.getConfig()
+    Evidences = fritutils.getEvidencesFromArgs(args,fritConfig,logger=logger)
+    if args.list:
+        logger.info('Listing undeleted files.')
+        listUndeleted(Evidences)
+    else:
         logger.info('Start undelete command.')
         undelete(Evidences)
-    else:
-        if options and '--list' in options:
-            logger.info('Listing undeleted files.')
-            listUndeleted(Evidences)
-        else:
-            logger.warning('Undelete command started with unknow arguements.')
-            fritutils.termout.printWarning('No valid argument given for the undelete command.')

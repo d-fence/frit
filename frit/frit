@@ -96,10 +96,18 @@ def mainFrit():
     #selfcheck
     selfcheck_parser = subparsers.add_parser(
         'selfcheck',
-        help='Check if needed external tools are installed.'
-    )
+        help='Check if needed external tools are installed.')
     selfcheck_parser.set_defaults(func=fritcommands.selfcheck.selfcheck,
         cmd='selfcheck')
+
+    #undelete
+    undelete_parser = subparsers.add_parser(
+        'undelete',
+        help = 'Undelete files from known filesystems.')
+    undelete_parser.add_argument('-l','--list', action='store_true',
+        help="List undeleted files.")
+    undelete_parser.set_defaults(func=fritcommands.undelete.factory,
+        cmd='undelete')
 
     args = parser.parse_args()
     if args.debug:
