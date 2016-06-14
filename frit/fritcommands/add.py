@@ -6,22 +6,21 @@ Frit then tries to recognize the container file and the contained file systems.
 """
 
 import os
-import fritutils.termout
-import fritutils.containerprobe
-import fritutils.fritconf
-import fritutils.fritobjects
-import fritutils.fsprobe
+import fritutils
 
-def factory(fritConfig, args, options):
+def factory(args):
     """
-    The factory receive the config object and the remaining args.
+    The factory receive the remaining args.
     Those args are files that the user wants to add in the config file.
     We should first do some sanity checks to be sure that those files are
     readable ...
     """
+
+    fritConfig = fritutils.getConfig()
+
     validContainersFormat = ('dd', 'aff', 'ewf','rofs')
     cfiles = fritutils.fritconf.configContainersFiles(fritConfig)
-    for fileName in args:
+    for fileName in args.files:
         argPath = fileName
         fileName = os.path.abspath(fileName)
         if not os.path.exists(fileName):
@@ -74,4 +73,3 @@ def factory(fritConfig, args, options):
                         evi.umount('add')
                     # and now we write the config file
                     fritutils.fritconf.addEvidence(fritConfig,evi)
-
