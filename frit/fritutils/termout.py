@@ -1,40 +1,20 @@
-#!/usr/bin/python
-
 """
-Various utilities for FRIT.
+Colorized output
 """
 
 import sys
+from colorama import init, Fore, Style
 
-COLORS = { 'red' : "\033[31m" , 'green' : "\033[32m", 'yellow' : "\033[33m" }
-
-def hasColor():
-    """
-    Verify if the terminal support colors and return True or False.
-    """
-    if hasattr(sys.stdout, 'isatty'):
-        if sys.stdout.isatty():
-            return True
-        else:
-            return False
-
-def smartprint(s,color):
-    s = s.replace('\t','    ')
-    if hasColor():
-        toPrint = "\033[95m" + COLORS[color] + s + "\033[0m"
-        print >> sys.stderr, toPrint
-    else:
-        print >> sys.stderr, s
+init()
 
 def printWarning(s):
-    smartprint(s,'red')
+    print(Fore.RED + s.replace('\t', '    '))
 
 def printSuccess(s):
-    smartprint(s,'green')
-    
+    print(Fore.GREEN + s.replace('\t', '    '))
+
 def printMessage(s):
-    smartprint(s,'yellow')
-    
+    print(Fore.YELLOW + s.replace('\t', '    '))
+
 def printNormal(s):
-    s = s.replace('\t','    ')
-    print s
+    print (s.replace('\t', '    '))
