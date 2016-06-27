@@ -154,6 +154,34 @@ def mainFrit():
             cmd='search')
     store_sub_parser.add_argument('-t','--terms', nargs='+')
 
+    #extensions
+    ext_parser = subparsers.add_parser(
+        'extensions',
+        help = 'Count, extract or list files based on their extension.'
+    )
+    ext_parser.add_argument('-e','--extensions', action='append',
+        required=True, help='Extensions to search for.')
+
+    ext_parser.add_argument('-s','--state', type=str,
+        choices=['normal', 'undeleted', 'contained', 'carved', 'all'],
+        help='Files state to search for.')
+
+    ext_parser.add_argument('evidences', nargs='*')
+
+    ext_subparsers = ext_parser.add_subparsers()
+
+    ext_subcommands = {
+        'count' : 'Count files with specified extension(s).',
+        'list' : 'List files with specified extension(s).',
+        'extract' : 'Extract files with specified extension(s).',
+    }
+
+    for sname,shelp in ext_subcommands.items():
+        ext_sub_parser = ext_subparsers.add_parser(sname, help=shelp)
+        ext_sub_parser.set_defaults(func=fritcommands.extensions.factory,
+            cmd=sname)
+
+    # Parsing arguments from the command line
     args = parser.parse_args()
 
     if args.debug:
