@@ -4,6 +4,7 @@ status command
 """
 
 import os.path
+import sys
 import fritutils.termout
 
 def dbStatus(Evidences):
@@ -30,8 +31,10 @@ def status(args):
 
     fritConfig = fritutils.getConfig()
     Evidences = fritutils.getEvidencesFromArgs(args, fritConfig)
+    if not Evidences:
+        sys.exit(0)
 
-    fritutils.termout.printMessage("Frit Status:")
+    fritutils.termout.printSuccess("Frit Status:")
     for evi in Evidences:
         fritutils.termout.printMessage('\t%s : %s' % (evi.configName,evi.fileName))
         if not evi.exists():
