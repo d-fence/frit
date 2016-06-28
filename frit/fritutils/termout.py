@@ -16,5 +16,8 @@ def printSuccess(s):
 def printMessage(s):
     print(Fore.YELLOW + s.replace('\t', '    ') + Style.RESET_ALL)
 
+def printInfo(s):
+    print(Fore.BLUE + s.replace('\t', '    ') + Style.RESET_ALL)
+
 def printNormal(s):
     print (Style.RESET_ALL + s.replace('\t', '    '))
