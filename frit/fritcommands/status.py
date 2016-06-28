@@ -5,7 +5,7 @@ status command
 
 import os.path
 import sys
-import fritutils.termout
+import fritutils
 
 def dbStatus(Evidences):
     fritutils.termout.printMessage("Frit Database Status:")
@@ -34,6 +34,8 @@ def status(args):
     if not Evidences:
         sys.exit(0)
 
+    total_container_sizes = 0
+
     fritutils.termout.printSuccess("Frit Status:")
     for evi in Evidences:
         fritutils.termout.printMessage('\t%s : %s' % (evi.configName,evi.fileName))
@@ -41,6 +43,7 @@ def status(args):
             fritutils.termout.printWarning('\t\tEvidence container "%s" not found !' % evi.fileName)
         if evi.isMounted() and evi.getFormat() != 'dd' and evi.getFormat() != 'rofs':
             fritutils.termout.printNormal('\tMounted on : %s' % evi.containerMountPoint)
+        total_container_sizes += evi.getContainerSize()
         locklist = evi.lockList()
         if len(locklist) > 0:
             fritutils.termout.printNormal('\t\tLocked by: %s' % evi.lockListString())
@@ -113,3 +116,5 @@ def status(args):
                             fritutils.termout.printNormal("\t\t\tUmounting")
                             fs.writeLock("clean","Cleaning inconsistencies")
                             fs.umount("clean")
+
+    fritutils.termout.printSuccess("Total containers sizes: {}".format(fritutils.humanize(total_container_sizes)))

@@ -740,6 +740,12 @@ class Evidence(object):
         """
         pass
 
+    def getContainerSize(self):
+        """
+        Return the size of the container in bytes
+        """
+        return os.path.getsize(self.fileName)
+
 class DdEvidence(Evidence):
     def getFormat(self):
         return 'dd'
@@ -898,6 +904,17 @@ class RofsEvidence(Evidence):
     def isMounted(self):
         # as the directory exists, it is like if it is always mounted
         return True
+
+    def getContainerSize(self):
+        """
+        Return the size of the container in bytes
+        The whole directory and subdirs have to be scanned
+        """
+        ts = 0
+        for dp, dn, fn in os.walk(self.fileName):
+            for f in fn:
+                ts += os.path.getsize(os.path.join(dp,f))
+        return ts
 
 def evidencesFromConfig(fritConf,verbose):
     """
