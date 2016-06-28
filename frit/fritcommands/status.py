@@ -38,12 +38,17 @@ def status(args):
 
     fritutils.termout.printSuccess("Frit Status:")
     for evi in Evidences:
-        fritutils.termout.printMessage('\t%s : %s' % (evi.configName,evi.fileName))
         if not evi.exists():
             fritutils.termout.printWarning('\t\tEvidence container "%s" not found !' % evi.fileName)
+            continue
+        container_size = evi.getContainerSize()
+        total_container_sizes += container_size
+        fritutils.termout.printMessage('\t{} :'.format(evi.configName))
+        fritutils.termout.printInfo('\t\t{} ({})'.format(
+            evi.fileName,
+            fritutils.humanize(container_size)))
         if evi.isMounted() and evi.getFormat() != 'dd' and evi.getFormat() != 'rofs':
             fritutils.termout.printNormal('\tMounted on : %s' % evi.containerMountPoint)
-        total_container_sizes += evi.getContainerSize()
         locklist = evi.lockList()
         if len(locklist) > 0:
             fritutils.termout.printNormal('\t\tLocked by: %s' % evi.lockListString())
