@@ -182,24 +182,24 @@ def mainFrit():
             cmd=sname)
 
     # registry
-    ext_parser = subparsers.add_parser(
+    registry_parser = subparsers.add_parser(
         'registry',
         help = 'Extract informations from MS registry files.'
     )
 
-    ext_parser.add_argument('evidences', nargs='*')
+    registry_parser.add_argument('evidences', nargs='*')
 
-    ext_subparsers = ext_parser.add_subparsers()
+    registry_subparsers = ext_parser.add_subparsers()
 
-    ext_subcommands = {
+    registry_subcommands = {
         'find' : 'Find MS windows registry files.',
         'mountdevices' : 'List traces of mounted devices in registries.',
         'winfo' : 'Display MS Windows informations from registries.',
     }
 
     for sname,shelp in ext_subcommands.items():
-        ext_sub_parser = ext_subparsers.add_parser(sname, help=shelp)
-        ext_sub_parser.set_defaults(func=fritcommands.extensions.factory,
+        registry_sub_parser = registry_subparsers.add_parser(sname, help=shelp)
+        registry_sub_parser.set_defaults(func=fritcommands.registry.factory,
             cmd=sname)
 
     # Parsing arguments from the command line
