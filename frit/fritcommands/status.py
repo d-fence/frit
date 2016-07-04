@@ -74,7 +74,7 @@ def status(args):
             # if the Evidence is mounted with no lockfile we have an inconsistency
             if evi.isMounted() and evi.getFormat() != 'dd' and evi.getFormat() != 'rofs':
                 fritutils.termout.printWarning('\t\tInconsistency: %s is mounted with no lockfile. Use the "status clean" command to unmount.' % evi.configName)
-                if arg.clean:
+                if args.clean:
                     fritutils.termout.printWarning('\t\tUnmounting')
                     evi.writeLock("clean","Cleaining inconsistencies")
                     evi.umount("clean")
