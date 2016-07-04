@@ -194,7 +194,7 @@ def mainFrit():
     registry_subcommands = {
         'find' : 'Find MS windows registry files.',
         'mountdevices' : 'List traces of mounted devices in registries.',
-        'winfo' : 'Display MS Windows informations from registries.',
+        'wininfo' : 'Display MS Windows informations from registries.',
     }
 
     for sname,shelp in registry_subcommands.items():

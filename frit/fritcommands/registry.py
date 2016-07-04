@@ -138,7 +138,7 @@ def getCurrentControlSet(sysRegPath):
     return "ControlSet{:03}".format(v.value())
 
 
-def find(Evidences, args, options):
+def find(Evidences, args):
     logger.info('Starting find subcommand.')
     for evi in Evidences:
         for fs in evi.fileSystems:
@@ -150,7 +150,7 @@ def find(Evidences, args, options):
             evi.umount('registry')
 
 
-def mountDevices(Evidences, args, options):
+def mountDevices(Evidences, args):
     logger.info('Starting mountdevices subcommand.')
     for evi in Evidences:
         for fs in evi.fileSystems:
@@ -181,7 +181,7 @@ def mountDevices(Evidences, args, options):
             evi.umount('registry')
 
 
-def winInfo(Evidences, args, options):
+def winInfo(Evidences, args):
     """
     Show various Windows informations
     Should be in an object to help presenting informations in a consistent way
@@ -236,13 +236,12 @@ def winInfo(Evidences, args, options):
 
 
 def factory(args):
-    if args and 'find' in args:
-        args.remove('find')
-        find(Evidences, args, options)
-    else:
-        if 'mountdevices'in args:
-            args.remove('mountdevices')
-            mountDevices(Evidences, args, options)
-        if 'wininfo' in args:
-            args.remove('wininfo')
-            winInfo(Evidences, args, options)
+    fritConfig = fritutils.getConfig()
+    Evidences = fritutils.getEvidencesFromArgs(args, fritConfig)
+
+    if args.cmd == 'find':
+        find(Evidences, args)
+    elif args.cmd == 'mountdevices':
+        mountDevices(Evidences, args)
+    elif args.cmd == 'wininfo':
+        winInfo(Evidences, args)
