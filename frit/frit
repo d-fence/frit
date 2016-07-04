@@ -189,7 +189,7 @@ def mainFrit():
 
     registry_parser.add_argument('evidences', nargs='*')
 
-    registry_subparsers = ext_parser.add_subparsers()
+    registry_subparsers = registry_parser.add_subparsers()
 
     registry_subcommands = {
         'find' : 'Find MS windows registry files.',
@@ -197,7 +197,7 @@ def mainFrit():
         'winfo' : 'Display MS Windows informations from registries.',
     }
 
-    for sname,shelp in ext_subcommands.items():
+    for sname,shelp in registry_subcommands.items():
         registry_sub_parser = registry_subparsers.add_parser(sname, help=shelp)
         registry_sub_parser.set_defaults(func=fritcommands.registry.factory,
             cmd=sname)
