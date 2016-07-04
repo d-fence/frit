@@ -235,7 +235,7 @@ def winInfo(Evidences, args, options):
             evi.umount('registry')
 
 
-def factory(Evidences, args, options):
+def factory(args):
     if args and 'find' in args:
         args.remove('find')
         find(Evidences, args, options)
