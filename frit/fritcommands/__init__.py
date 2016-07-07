@@ -14,3 +14,4 @@ import getunalloc
 import carving
 import registry
 import vshadow
+import browsers

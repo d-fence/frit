@@ -202,6 +202,25 @@ def mainFrit():
         registry_sub_parser.set_defaults(func=fritcommands.registry.factory,
             cmd=sname)
 
+    # browsers
+    browsers_parser = subparsers.add_parser(
+        'browsers',
+        help = 'Find and extract informations from different browsers.'
+    )
+
+    browsers_parser.add_argument('evidences', nargs='*')
+
+    browser_subparsers = browsers_parser.add_subparsers()
+
+    browsers_subcommands = {
+        'find' : 'Find Browsers profiles directories.',
+    }
+
+    for sname,shelp in browsers_subcommands.items():
+        browsers_sub_parser = browser_subparsers.add_parser(sname, help=shelp)
+        browsers_sub_parser.set_defaults(func=fritcommands.browsers.factory,
+        cmd=sname)
+
     # Parsing arguments from the command line
     args = parser.parse_args()
 
