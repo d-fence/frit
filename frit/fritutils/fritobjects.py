@@ -534,9 +534,15 @@ class Ext2FileSystem(FileSystem):
 
     def mountCommand(self):
         if EXT2METHOD == 'fuse2fs':
-            fritutils.fritmount.fuse2fsMount(self.loopDevice, self.fsMountPoint)
+            try:
+                fritutils.fritmount.fuse2fsMount(self.loopDevice, self.fsMountPoint)
+            except fritutils.fritmount.fritMountError:
+                logger.error('Unable to mount {} with fuse2fs'.format(self.loopDevice))
         elif EXT2METHOD == 'fuseext2':
-            fritutils.fritmount.ext2Mount(self.loopDevice,self.fsMountPoint)
+            try:
+                fritutils.fritmount.ext2Mount(self.loopDevice,self.fsMountPoint)
+            except fritutils.fritmount.fritMountError:
+                logger.error('Unable to mount {} with fuseext2'.format(self.loopDevice))
 
     def umountCommand(self):
         fritutils.fritmount.fuserUnmount(self.fsMountPoint)

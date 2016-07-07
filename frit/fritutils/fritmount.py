@@ -220,6 +220,7 @@ def fuse2fsMount(loopDevice,mountpoint):
     fuse2fsmount = subprocess.Popen([FUSE2FS, '-o', options, loopDevice, mountpoint], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     fuse2fsmount.wait()
     if fuse2fsmount.returncode > 0:
+        fritutils.termout.printWarning('fuse2fs exited with error code {}'.format(fuse2fsmount.returncode))
         logger.warning('Unable to mount the EXT2/3 partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(fuse2fsmount.returncode)))
         raise fritMountError('Unable to mount the EXT2/3 partition "%s" on "%s" (error %s)' % (mountpoint, loopDevice, str(fuse2fsmount.returncode)))
 
