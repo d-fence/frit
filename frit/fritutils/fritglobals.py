@@ -125,3 +125,7 @@ toolbox.append(VSHADOWMOUNT)
 # configuration of ext2/3/4 mount method
 # possible values at this moment: fuse2fs or fuseext2
 EXT2METHOD = globalConfig.get('EXT2METHOD', default='fuse2fs')
+
+# Possible base directories for home directories
+POSSIBLE_HOME_BASES = globalConfig.get('POSSIBLE_HOME_BASES',
+    default= ('home', 'USERS', 'Users', 'users', 'Documents and Setting',))

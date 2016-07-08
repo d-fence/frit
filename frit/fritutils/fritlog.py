@@ -34,6 +34,7 @@ loggers = {
         'carvingLog': logging.getLogger('frit.carving'),
         'registryLog': logging.getLogger('frit.registry'),
         'vshadowLog' : logging.getLogger('frit.vshadow'),
+        'browsersLog' : logging.getLogger('frit.browsers')
         }
 
 # Configuring default level to INFO
@@ -59,4 +60,3 @@ if os.path.exists('.frit'):
 else:
     for l in loggers:
         loggers[l].addHandler(consoleHandler)
-

@@ -384,6 +384,21 @@ class FileSystem(object):
     def getUnallocatedSpace(self, slack=False):
         pass
 
+    def getHomeDirs(self):
+        """
+        A method that yield home directories
+        #TODO should check /etc/passwd and MS win Registry to find them
+        """
+        self.mount('homedirs', 'Used by getHomeDirs')
+        for userpath in POSSIBLE_HOME_BASES:
+            ufullpath = os.path.join(self.fsMountPoint, userpath)
+            # Every dir in the home bases should be a user home dir
+            if os.path.isdir(ufullpath):
+                for uprofile in [os.path.join(ufullpath, d) for d in os.listdir(ufullpath)]:
+                    if os.path.isdir(uprofile):
+                        yield uprofile
+        self.umount('homedirs')
+
     def getRegistryFiles(self):
         """
         A method that yield real path of MS Windows registry files
