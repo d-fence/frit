@@ -66,4 +66,4 @@ def factory(args):
     if args.cmd == 'find':
         logger.info('Starting find subcommand.')
         for browser in find(Evidences, args):
-            print(browser)
+            fritutils.termout.printNormal(str(browser))
