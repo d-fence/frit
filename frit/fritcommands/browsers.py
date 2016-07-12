@@ -25,6 +25,12 @@ FIREFOX_PATHES = (
     'AppData/Roaming/Mozilla/Firefox/Profiles',
     )
 
+IE_PATHES = (
+    '/Local Settings/History/History.IE5',
+    '/AppData/Local/Microsoft/Windows/History/History.IE5',
+    '/AppData/Local/Microsoft/Windows/History/Low/History.IE5',
+    )
+
 logger = fritutils.fritlog.loggers['browsersLog']
 
 def isFirefoxProfile(profile_path):
@@ -70,6 +76,18 @@ class FirefoxBrowser(BrowserProfile):
     def __str__(self):
         return 'Firefox browser profile : {}'.format(self.profile_path)
 
+class IEBrowser(BrowserProfile):
+    """
+    Object representing an Internet Explorer browser profile
+    """
+
+    def __init__(self, profile_path):
+        # history path
+        super(IEBrowser, self).__init__(profile_path)
+
+    def __str__(self):
+        return 'IE browser profile : {}'.format(self.profile_path)
+
 def find(Evidences, args):
     """
     Search for browser profiles and return an appropriate object
@@ -96,6 +114,12 @@ def find(Evidences, args):
                         for f in os.listdir(ffp):
                             if isFirefoxProfile(f):
                                 yield FirefoxBrowser(f)
+                # Internet Explorer (basic history only)
+                for ie_path in IE_PATHES:
+                    iep = os.path.join(home_dir, ie_path)
+                    if os.path.isdir(iep):
+                        logger.info('Internet Explorer history dir found : {}'.format(iep))
+                        yield IEBrowser(iep)
 
 def factory(args):
     fritConfig = fritutils.getConfig()
