@@ -35,6 +35,7 @@ def status(args):
         sys.exit(0)
 
     total_container_sizes = 0
+    total_contained_size = 0
 
     fritutils.termout.printSuccess("Frit Status:")
     for evi in Evidences:
@@ -42,11 +43,14 @@ def status(args):
             fritutils.termout.printWarning('\t\tEvidence container "%s" not found !' % evi.fileName)
             continue
         container_size = evi.getContainerSize()
+        contained_size = evi.getMediaSize()
         total_container_sizes += container_size
+        total_contained_size += contained_size
         fritutils.termout.printMessage('\t{} :'.format(evi.configName))
-        fritutils.termout.printInfo('\t\t{} ({})'.format(
+        fritutils.termout.printInfo('\t\t{} ({}/{})'.format(
             evi.fileName,
-            fritutils.humanize(container_size)))
+            fritutils.humanize(container_size),
+            fritutils.humanize(contained_size)))
         if evi.isMounted() and evi.getFormat() != 'dd' and evi.getFormat() != 'rofs':
             fritutils.termout.printNormal('\tMounted on : %s' % evi.containerMountPoint)
         locklist = evi.lockList()
@@ -122,4 +126,6 @@ def status(args):
                             fs.writeLock("clean","Cleaning inconsistencies")
                             fs.umount("clean")
 
-    fritutils.termout.printSuccess("Total containers sizes: {}".format(fritutils.humanize(total_container_sizes)))
+    fritutils.termout.printSuccess("Total sizes: {} (containers : {})".format(
+        fritutils.humanize(total_contained_size),
+        fritutils.humanize(total_container_sizes)))

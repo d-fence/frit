@@ -21,6 +21,7 @@ import fritutils.fritmmls
 import fritutils.fritddump
 from fritglobals import *
 from sqlalchemy import func
+import pyewf
 
 logger = fritutils.fritlog.loggers['fritobjectsLog']
 
@@ -767,6 +768,12 @@ class Evidence(object):
         """
         return os.path.getsize(self.fileName)
 
+    def getMediaSize(self):
+        """
+        Return the real ssize of the conatined Evidence
+        """
+        return os.path.getsize(self.fileName)
+
 class DdEvidence(Evidence):
     def getFormat(self):
         return 'dd'
@@ -904,6 +911,12 @@ class EwfEvidence(AffEvidence):
     def ddump(self,start,end,exportfile):
         fritutils.fritddump.ewfexport(self.fileName,start,end,exportfile)
 
+    def getMediaSize(self):
+        filenames = pyewf.glob(self.fileName)
+        ewf_handle = pyewf.handle()
+        ewf_handle.open(filenames)
+        return ewf_handle.get_media_size()
+
 class RofsEvidence(Evidence):
     """
     A pseudo container for simple directories.
@@ -936,6 +949,9 @@ class RofsEvidence(Evidence):
             for f in fn:
                 ts += os.path.getsize(os.path.join(dp,f))
         return ts
+
+    def getMediaSize(self):
+        return self.getContainerSize()
 
 def evidencesFromConfig(fritConf,verbose):
     """
